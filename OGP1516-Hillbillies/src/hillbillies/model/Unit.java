@@ -16,6 +16,18 @@ import ogp.framework.util.ModelException;
  * @invar  The Name of each Unit must be a valid Name for any
  *         Unit.
  *       | isValidName(getName())
+ *
+ * @invar  The Strength of each Unit must be a valid Strength for any
+ *         Unit.
+ *       | isValidStrength(getStrength())
+ *
+ * @invar  The weight of each Unit must be a valid weight for any
+ *         Unit.
+ *       | isValidWeight(getWeight())
+ *       
+ * @invar  The Agility of each Unit must be a valid Agility for any
+ *         Unit.
+ *       | isValidAgility(getAgility())
  */
 
 public class Unit { 
@@ -56,7 +68,20 @@ public class Unit {
  *       | if (isValidWeight(weight))
  *       |   then new.getWeight() == weight
  *       |   else new.getWeight() == 100
- *       
+ * @post   If the given Strength is a valid Strength for any Unit,
+ *         the Strength of this new Unit is equal to the given
+ *         Strength. Otherwise, the Strength of this new Unit is equal
+ *         to 100.
+ *       | if (isValidStrength(strength))
+ *       |   then new.getStrength() == strength
+ *       |   else new.getStrength() == 100
+ * @post   If the given Agility is a valid Agility for any Unit,
+ *         the Agility of this new Unit is equal to the given
+ *         Agility. Otherwise, the Agility of this new Unit is equal
+ *         to 100.
+ *       | if (isValidAgility(agility))&&(25<=agility&&agility<=100)
+ *       |   then new.getAgility() == agility
+ *       |   else new.getAgility() == 100     
  */
 public Unit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness,
 		boolean enableDefaultBehavior)
@@ -65,6 +90,12 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 	if (!isValidWeight(weight,strength,agility))
 		weight = 100;
 	setWeight(weight);
+	if (!(25<=strength&&strength<=100))
+		strength = 100;
+	setStrength(strength);
+	if (!(25<=agility&&agility<=100))
+		agility = 100;
+	setAgility(agility);
 }
 
 
@@ -115,12 +146,6 @@ public void setName(String name)
  */
 private String name;
 
-/**
- * @invar  The weight of each Unit must be a valid weight for any
- *         Unit.
- *       | isValidWeight(getWeight())
- */
-
 
 /**
  * Return the weight of this Unit.
@@ -156,7 +181,7 @@ public static boolean isValidWeight(int weight,int strength, int agility) {
  */
 @Raw
 public void setWeight(int weight) {
-	if (isValidWeight(weight,this.getStrenght(),this.getAgility))
+	if (isValidWeight(weight,this.getStrength(),this.getAgility()))
 		this.weight = weight;
 }
 
@@ -165,30 +190,6 @@ public void setWeight(int weight) {
  */
 private int weight;
 
-/**
- * @invar  The Strength of each Unit must be a valid Strength for any
- *         Unit.
- *       | isValidStrength(getStrength())
- */
-
-/**
- * Initialize this new Unit with given Strength.
- * 
- * @param  strength
- *         The Strength for this new Unit.
- * @post   If the given Strength is a valid Strength for any Unit,
- *         the Strength of this new Unit is equal to the given
- *         Strength. Otherwise, the Strength of this new Unit is equal
- *         to 100.
- *       | if (isValidStrength(strength))
- *       |   then new.getStrength() == strength
- *       |   else new.getStrength() == 100
- */
-public Unit(int strength) {
-	if (! isValidStrength(strength))
-		strength = 100;
-	setStrength(strength);
-}
 
 /**
  * Return the Strength of this Unit.
@@ -233,6 +234,52 @@ public void setStrength(int strength) {
  * Variable registering the Strength of this Unit.
  */
 private int strength;
+
+
+/**
+ * Return the Agility of this Unit.
+ */
+@Basic @Raw
+public int getAgility() {
+	return this.agility;
+}
+
+/**
+ * Check whether the given Agility is a valid Agility for
+ * any Unit.
+ *  
+ * @param  agility
+ *         The Agility to check.
+ * @return 
+ *       | result == 
+*/
+public static boolean isValidAgility(int agility) {
+	
+	return (1<=agility&&agility<=200);
+}
+
+/**
+ * Set the Agility of this Unit to the given Agility.
+ * 
+ * @param  agility
+ *         The new Agility for this Unit.
+ * @post   If the given Agility is a valid Agility for any Unit,
+ *         the Agility of this new Unit is equal to the given
+ *         Agility.
+ *       | if (isValidAgility(agility))
+ *       |   then new.getAgility() == agility
+ */
+@Raw
+public void setAgility(int agility) {
+	if (isValidAgility(agility))
+		this.agility = agility;
+}
+
+/**
+ * Variable registering the Agility of this Unit.
+ */
+private int agility;
+
 
 
 
