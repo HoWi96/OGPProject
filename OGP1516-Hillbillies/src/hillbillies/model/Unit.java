@@ -28,6 +28,21 @@ import ogp.framework.util.ModelException;
  * @invar  The Agility of each Unit must be a valid Agility for any
  *         Unit.
  *       | isValidAgility(getAgility())
+ * @invar  The toughness of each Unit must be a valid toughness for any
+ *         Unit.
+ *       | isValidToughness(getToughness())
+ * 
+ * @invar  The hitpoints of each Unit must be a valid hitpoints for any
+ *         Unit.
+ *       | isValidHitpoints(getHitpoints())
+ * 
+ * @invar  The stamina of each Unit must be a valid stamina for any
+ *         Unit.
+ *       | isValidStamina(getStamina())
+ * 
+ * @invar  The orientation of each Unit must be a valid orientation for any
+ *         Unit.
+ *       | isValidOrientation(getOrientation())
  */
 
 public class Unit { 
@@ -51,6 +66,9 @@ public class Unit {
 	 * @param enableDefaultBehavior
 	 *            Whether the default behavior of the unit is enabled
 	 * 
+	 * @param  hitpoints
+	 *         The hitpoints for this new Unit.
+	 * 
 	 * @return The generated unit
 	 * 
 	 * @throws ModelException
@@ -59,8 +77,7 @@ public class Unit {
  * @effect The Name of this new Unit is set to
  *         the given Name.
  *       | this.setName(name)
- * Initialize this new Unit with given weight.
- * 
+ *
  * @post   If the given weight is a valid weight for any Unit,
  *         the weight of this new Unit is equal to the given
  *         weight. Otherwise, the weight of this new Unit is equal
@@ -68,6 +85,7 @@ public class Unit {
  *       | if (isValidWeight(weight))
  *       |   then new.getWeight() == weight
  *       |   else new.getWeight() == 100
+ * 
  * @post   If the given Strength is a valid Strength for any Unit,
  *         the Strength of this new Unit is equal to the given
  *         Strength. Otherwise, the Strength of this new Unit is equal
@@ -75,27 +93,75 @@ public class Unit {
  *       | if (isValidStrength(strength))
  *       |   then new.getStrength() == strength
  *       |   else new.getStrength() == 100
+ *
  * @post   If the given Agility is a valid Agility for any Unit,
  *         the Agility of this new Unit is equal to the given
  *         Agility. Otherwise, the Agility of this new Unit is equal
  *         to 100.
  *       | if (isValidAgility(agility))&&(25<=agility&&agility<=100)
  *       |   then new.getAgility() == agility
- *       |   else new.getAgility() == 100     
+ *       |   else new.getAgility() == 100
+ * 
+ * @pre    The given hitpoints must be a valid hitpoints for any Unit.
+ *       | isValidHitpoints(hitpoints)
+ * @post   The hitpoints of this new Unit is equal to the given
+ *         hitpoints.
+ *       | new.getHitpoints() == hitpoints
+ * 
+ * @param  toughness
+ *         The toughness for this new Unit.
+ * @post   If the given toughness is a valid toughness for any Unit,
+ *         the toughness of this new Unit is equal to the given
+ *         toughness. Otherwise, the toughness of this new Unit is equal
+ *         to getToughness.
+ *       | if (isValidToughness(toughness))
+ *       |   then new.getToughness() == toughness
+ *       |   else new.getToughness() == getToughness
+ * 
+ * @param  stamina
+ *         The stamina for this new Unit.
+ * @pre    The given stamina must be a valid stamina for any Unit.
+ *       | isValidStamina(stamina)
+ * @post   The stamina of this new Unit is equal to the given
+ *         stamina.
+ *       | new.getStamina() == stamina
+ * 
+ * @param  orientation
+ *         The orientation for this new Unit.
+ * @post   If the given orientation is a valid orientation for any Unit,
+ *         the orientation of this new Unit is equal to the given
+ *         orientation. Otherwise, the orientation of this new Unit is equal
+ *         to PI/2.
+ *       | if (isValidOrientation(orientation))
+ *       |   then new.getOrientation() == orientation
+ *       |   else new.getOrientation() == PI/2
  */
-public Unit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness,
+public Unit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness, int hitpoints,
+		int stamina,
 		boolean enableDefaultBehavior)
 		throws IllegalArgumentException {
+	
 	this.setName(name);
+	
 	if (!isValidWeight(weight,strength,agility))
 		weight = 100;
 	setWeight(weight);
+	
 	if (!(25<=strength&&strength<=100))
 		strength = 100;
 	setStrength(strength);
+	
 	if (!(25<=agility&&agility<=100))
 		agility = 100;
 	setAgility(agility);
+	
+	if (! isValidToughness(toughness))
+		toughness = getToughness;
+	setToughness(toughness);
+	
+	this.setHitpoints(hitpoints);
+	
+	this.setStamina(stamina);
 }
 
 
@@ -251,10 +317,9 @@ public int getAgility() {
  * @param  agility
  *         The Agility to check.
  * @return 
- *       | result == 
+ *       | result == (1<=agility && agility<=200)
 */
 public static boolean isValidAgility(int agility) {
-	
 	return (1<=agility&&agility<=200);
 }
 
@@ -279,6 +344,200 @@ public void setAgility(int agility) {
  * Variable registering the Agility of this Unit.
  */
 private int agility;
+
+
+/**
+ * Return the toughness of this Unit.
+ */
+@Basic @Raw
+public int getToughness() {
+	return this.toughness;
+}
+
+/**
+ * Check whether the given toughness is a valid toughness for
+ * any Unit.
+ *  
+ * @param  toughness
+ *         The toughness to check.
+ * @return 
+ *       | result == (1<=toughness && toughness <= 200)
+*/
+public static boolean isValidToughness(int toughness) {
+	return (1<=toughness && toughness<=200);
+}
+
+/**
+ * Set the toughness of this Unit to the given toughness.
+ * 
+ * @param  toughness
+ *         The new toughness for this Unit.
+ * @post   If the given toughness is a valid toughness for any Unit,
+ *         the toughness of this new Unit is equal to the given
+ *         toughness.
+ *       | if (isValidToughness(toughness))
+ *       |   then new.getToughness() == toughness
+ */
+@Raw
+public void setToughness(int toughness) {
+	if (isValidToughness(toughness))
+		this.toughness = toughness;
+}
+
+/**
+ * Variable registering the toughness of this Unit.
+ */
+private int toughness;
+
+
+/**
+ * Return the hitpoints of this Unit.
+ */
+@Basic @Raw
+public int getHitpoints() {
+	return this.hitpoints;
+}
+
+/**
+ * Check whether the given hitpoints is a valid hitpoints for
+ * any Unit.
+ *  
+ * @param  hitpoints
+ *         The hitpoints to check.
+ * @return 
+ *       | result == (0<=hitpoints && hitpoints <= (int) Math.ceil(200.0*weight/100*toughness/100)
+*/
+public static boolean isValidHitpoints(int hitpoints) {
+	return (0<=hitpoints && hitpoints <= (int) Math.ceil(200.0*weight/100*toughness/100));
+}
+
+/**
+ * Set the hitpoints of this Unit to the given hitpoints.
+ * 
+ * @param  hitpoints
+ *         The new hitpoints for this Unit.
+ * @pre    The given hitpoints must be a valid hitpoints for any
+ *         Unit.
+ *       | isValidHitpoints(hitpoints)
+ * @post   The hitpoints of this Unit is equal to the given
+ *         hitpoints.
+ *       | new.getHitpoints() == hitpoints
+ */
+@Raw
+public void setHitpoints(int hitpoints) {
+	assert isValidHitpoints(hitpoints);
+	this.hitpoints = hitpoints;
+}
+
+/**
+ * Variable registering the hitpoints of this Unit.
+ */
+private int hitpoints;
+
+
+/**
+ * Return the stamina of this Unit.
+ */
+@Basic @Raw
+public int getStamina() {
+	return this.stamina;
+}
+
+/**
+ * Check whether the given stamina is a valid stamina for
+ * any Unit.
+ *  
+ * @param  stamina
+ *         The stamina to check.
+ * @return 
+ *       | result == (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100))
+*/
+public static boolean isValidStamina(int stamina) {
+	return (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100));
+}
+
+/**
+ * Set the stamina of this Unit to the given stamina.
+ * 
+ * @param  stamina
+ *         The new stamina for this Unit.
+ * @pre    The given stamina must be a valid stamina for any
+ *         Unit.
+ *       | isValidStamina(stamina)
+ * @post   The stamina of this Unit is equal to the given
+ *         stamina.
+ *       | new.getStamina() == stamina
+ */
+@Raw
+public void setStamina(int stamina) {
+	assert isValidStamina(stamina);
+	this.stamina = stamina;
+}
+
+/**
+ * Variable registering the stamina of this Unit.
+ */
+private int stamina;
+
+
+/**
+ * Initialize this new Unit with given orientation.
+ * 
+ */
+public Unit(float orientation) {
+	if (! isValidOrientation(orientation))
+		orientation = PI/2;
+	setOrientation(orientation);
+}
+
+/**
+ * Return the orientation of this Unit.
+ */
+@Basic @Raw
+public float getOrientation() {
+	return this.orientation;
+}
+
+/**
+ * Check whether the given orientation is a valid orientation for
+ * any Unit.
+ *  
+ * @param  orientation
+ *         The orientation to check.
+ * @return 
+ *       | result == (0<=orientation && orientation<2*PI)
+*/
+public static boolean isValidOrientation(float orientation) {
+	return (0<=orientation && orientation<2*PI);
+}
+
+/**
+ * Set the orientation of this Unit to the given orientation.
+ * 
+ * @param  orientation
+ *         The new orientation for this Unit.
+ * @post   If the given orientation is a valid orientation for any Unit,
+ *         the orientation of this new Unit is equal to the given
+ *         orientation.
+ *       | if (isValidOrientation(orientation))
+ *       |   then new.getOrientation() == orientation
+ */
+@Raw
+public void setOrientation(float orientation) {
+	if (isValidOrientation(orientation))
+		this.orientation = orientation;
+}
+
+/**
+ * Variable registering the orientation of this Unit.
+ */
+private float orientation;
+
+public void advanceTime(time) {
+	// Mannetjes lopen en doen dingen, Moet aangevuld worden
+	// wanneer meer acties beschikbaar zijn.
+}
+
 
 
 
