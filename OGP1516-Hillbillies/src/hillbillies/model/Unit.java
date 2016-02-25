@@ -49,19 +49,10 @@ public String getName() {
  * @param  Name
  *         The Name to check.
  * @return 
- *       | result == 
+ *       | result == (name.length()>2)&&(Character.isUpperCase(name.charAt(0))&&(name.matches("[A-Za-z\"' ]+")))
 */
 public static boolean isValidName(String name) {
-	if(name.length()>2){
-		//testen
-		if(Character.isUpperCase(name.charAt(0))){
-			// testen
-			if(name.matches("[A-Za-z\"']+")){
-				return true;
-			}	
-		}
-	}
-	return false;
+	return (name.length()>2)&&(Character.isUpperCase(name.charAt(0))&&(name.matches("[A-Za-z\"' ]+")));
 }
 
 /**
@@ -89,4 +80,73 @@ public void setName(String name)
  * Variable registering the Name of this Unit.
  */
 private String name;
+
+/**
+ * @invar  The weight of each Unit must be a valid weight for any
+ *         Unit.
+ *       | isValidWeight(getWeight())
+ */
+
+/**
+ * Initialize this new Unit with given weight.
+ * 
+ * @param  weight
+ *         The weight for this new Unit.
+ * @post   If the given weight is a valid weight for any Unit,
+ *         the weight of this new Unit is equal to the given
+ *         weight. Otherwise, the weight of this new Unit is equal
+ *         to 100.
+ *       | if (isValidWeight(weight))
+ *       |   then new.getWeight() == weight
+ *       |   else new.getWeight() == 100
+ */
+public Unit(int weight) {
+	if (! isValidWeight(weight))
+		weight = 100;
+	setWeight(weight);
+}
+
+/**
+ * Return the weight of this Unit.
+ */
+@Basic @Raw
+public int getWeight() {
+	return this.weight;
+}
+
+/**
+ * Check whether the given weight is a valid weight for
+ * any Unit.
+ *  
+ * @param  weight
+ *         The weight to check.
+ * @return 
+ *       | result == 
+*/
+public static boolean isValidWeight(int weight) {
+	return false;
+}
+
+/**
+ * Set the weight of this Unit to the given weight.
+ * 
+ * @param  weight
+ *         The new weight for this Unit.
+ * @post   If the given weight is a valid weight for any Unit,
+ *         the weight of this new Unit is equal to the given
+ *         weight.
+ *       | if (isValidWeight(weight))
+ *       |   then new.getWeight() == weight
+ */
+@Raw
+public void setWeight(int weight) {
+	if (isValidWeight(weight))
+		this.weight = weight;
+}
+
+/**
+ * Variable registering the weight of this Unit.
+ */
+private int weight;
+
 }
