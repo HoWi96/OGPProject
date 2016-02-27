@@ -1,5 +1,7 @@
 package hillbillies.model;
 
+import java.util.Arrays;
+
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.ModelException;
 
@@ -16,6 +18,9 @@ import ogp.framework.util.ModelException;
  * @invar  The Name of each Unit must be a valid Name for any
  *         Unit.
  *       | isValidName(getName())
+ * @invar  The Position of each Unit must be a valid Position for any
+ *         Unit.
+ *       | isValidPosition(getPosition())
  *
  * @invar  The Strength of each Unit must be a valid Strength for any
  *         Unit.
@@ -67,11 +72,15 @@ public class Unit {
 	 *            The initial toughness of the unit
 	 * @param enableDefaultBehavior
 	 *            Whether the default behavior of the unit is enabled
+	 *            
+	 * Initialize this new Unit with default orientation.
 	 * 
 	 * @param  hitpoints
 	 *         The hitpoints for this new Unit.
 	 * 
 	 * @return The generated unit
+	 * 
+	 *  
 	 * 
 	 * @throws ModelException
 	 *             A precondition was violated or an exception was thrown
@@ -79,6 +88,9 @@ public class Unit {
  * @effect The Name of this new Unit is set to
  *         the given Name.
  *       | this.setName(name)
+ * @effect The Position of this new Unit is set to
+ *         the given Position.
+ *       | this.setPosition(position)
  *
  * @post   If the given weight is a valid weight for any Unit,
  *         the weight of this new Unit is equal to the given
@@ -139,15 +151,17 @@ public class Unit {
  *       |   else new.getOrientation() == PI/2
  */
 public Unit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness, int hitpoints,
-		int stamina,
-		boolean enableDefaultBehavior)
+		int stamina,boolean enableDefaultBehavior)
 		throws IllegalArgumentException {
 	
 	this.setName(name);
 	
+	this.setPosition(position);
+	
 	if (!isValidWeight(weight,strength,agility))
 		weight = 100;
 	setWeight(weight);
+	
 	
 	if (!(25<=strength&&strength<=100))
 		strength = 100;
@@ -164,8 +178,9 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 	this.setHitpoints(hitpoints);
 	
 	this.setStamina(stamina);
+	
+	this.setOrientation(PI/2);
 }
-
 
 /**
  * Return the Name of this Unit.
@@ -213,6 +228,86 @@ public void setName(String name)
  * Variable registering the Name of this Unit.
  */
 private String name;
+
+/**
+ * Return the Position of this Unit.
+ */
+@Basic @Raw
+public double[] getPosition() {
+	return this.position;
+}
+
+/**
+ * Check whether the given Position is a valid Position for
+ * any Unit.
+ *  
+ * @param  Position
+ *         The Position to check.
+ * @return The position has to be inside the game world
+ *       | result ==
+ *       | (0<=position[0]&&position[0]<=50)&&
+ *       | (0<=position[1]&&position[1]<=50)&&
+ *       | (0<=position[2]&&position[2]<=50)
+ *       
+*/
+public static boolean isValidPosition(double[] position) {
+	return (0<=position[0]&&position[0]<=50)&&
+	       (0<=position[1]&&position[1]<=50)&&
+	       (0<=position[2]&&position[2]<=50);
+}
+
+/**
+ * Set the Position of this Unit to the given Position.
+ * 
+ * @param  position
+ *         The new Position for this Unit.
+ * @post   The Position of this new Unit is equal to
+ *         the given Position.
+ *       | new.getPosition() == position
+ * @throws illegalArgumentException
+ *         The given Position is not a valid Position for any
+ *         Unit.
+ *       | ! isValidPosition(getPosition())
+ */
+//TODO maak het mogelijk om als initiele waarde een int in te geven
+@Raw
+public void setPosition(double[] position) 
+		throws IllegalArgumentException {
+	if (! isValidPosition(position))
+		throw new IllegalArgumentException();
+	this.position = position;
+}
+
+/**
+ * 
+ * @param position
+ *			The position of this Unit
+ * @return The position of the cube where the Unit is located
+ * 			| cubePosition[0] = (int) Math.floor(position[0]);
+ *			| cubePosition[1] = (int) Math.floor(position[1]);
+ *			| cubePosition[2] = (int) Math.floor(position[2]);
+ * @throws illegalArgumentException
+ *         The given Position is not a valid Position for any
+ *         Unit.
+ *       | ! isValidPosition(getPosition())
+ */
+public int[] getCubePosition(double[] position)
+		throws IllegalArgumentException{
+	if (! isValidPosition(position))
+		throw new IllegalArgumentException();
+	int[] cubePosition = new int[3];
+	cubePosition[0] = (int) Math.floor(position[0]);
+	cubePosition[1] = (int) Math.floor(position[1]);
+	cubePosition[2] = (int) Math.floor(position[2]);
+	return cubePosition;
+	}
+
+
+/**
+ * Variable registering the Position of this Unit.
+ * The length is set to 3 and can't be changed
+ */
+private double[] position = new double[3];
 
 
 /**
@@ -483,16 +578,6 @@ private int stamina;
 
 
 /**
- * Initialize this new Unit with given orientation.
- * 
- */
-public Unit(float orientation) {
-	if (! isValidOrientation(orientation))
-		orientation = PI/2;
-	setOrientation(orientation);
-}
-
-/**
  * Return the orientation of this Unit.
  */
 @Basic @Raw
@@ -523,11 +608,15 @@ public static boolean isValidOrientation(float orientation) {
  *         orientation.
  *       | if (isValidOrientation(orientation))
  *       |   then new.getOrientation() == orientation
+ *      	default orientation = PI/2
  */
 @Raw
 public void setOrientation(float orientation) {
 	if (isValidOrientation(orientation))
 		this.orientation = orientation;
+	else{
+		this.setOrientation(PI/2);
+	}
 }
 
 /**
