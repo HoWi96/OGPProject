@@ -6,9 +6,9 @@ import ogp.framework.util.ModelException;
 
 /**
  * This class is all about the units of the game.
- * @author Holger
+ * @author Holger Willems & Sebastiaan Van Overschee
  * @date 20/02/2016
- * 
+ * @Version 0.0
  * 
  */
 
@@ -46,6 +46,8 @@ import ogp.framework.util.ModelException;
  */
 
 public class Unit { 
+	
+	public final static float PI = (float) Math.PI;
 	
 /**
  * Create a new unit with the given attributes.
@@ -156,7 +158,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 	setAgility(agility);
 	
 	if (! isValidToughness(toughness))
-		toughness = getToughness;
+		toughness = getToughness();
 	setToughness(toughness);
 	
 	this.setHitpoints(hitpoints);
@@ -407,7 +409,7 @@ public int getHitpoints() {
  * @return 
  *       | result == (0<=hitpoints && hitpoints <= (int) Math.ceil(200.0*weight/100*toughness/100)
 */
-public static boolean isValidHitpoints(int hitpoints) {
+public static boolean isValidHitpoints(int hitpoints, int weight, int toughness) {
 	return (0<=hitpoints && hitpoints <= (int) Math.ceil(200.0*weight/100*toughness/100));
 }
 
@@ -425,7 +427,7 @@ public static boolean isValidHitpoints(int hitpoints) {
  */
 @Raw
 public void setHitpoints(int hitpoints) {
-	assert isValidHitpoints(hitpoints);
+	assert isValidHitpoints(hitpoints, this.getWeight(),this.getToughness());
 	this.hitpoints = hitpoints;
 }
 
@@ -452,7 +454,7 @@ public int getStamina() {
  * @return 
  *       | result == (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100))
 */
-public static boolean isValidStamina(int stamina) {
+public static boolean isValidStamina(int stamina, int weight, int toughness) {
 	return (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100));
 }
 
@@ -470,7 +472,7 @@ public static boolean isValidStamina(int stamina) {
  */
 @Raw
 public void setStamina(int stamina) {
-	assert isValidStamina(stamina);
+	assert isValidStamina(stamina, this.getWeight(), this.getToughness());
 	this.stamina = stamina;
 }
 
@@ -533,13 +535,10 @@ public void setOrientation(float orientation) {
  */
 private float orientation;
 
-public void advanceTime(time) {
+public void advanceTime() {
 	// Mannetjes lopen en doen dingen, Moet aangevuld worden
 	// wanneer meer acties beschikbaar zijn.
 }
 
-
-
-
-
 }
+
