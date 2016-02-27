@@ -1,7 +1,5 @@
 package hillbillies.model;
 
-import java.util.Arrays;
-
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.ModelException;
 
