@@ -682,6 +682,11 @@ public float getIntermediateOrientation(double[] velocityVector){
 	return orientation;
 }
 
+
+//Adaptibility: volgende opgaves zullen hindernissen bevatten
+//kan onderbroken worden door: need to rest, enemy interaction
+//na onderbreking --> vervolg pad
+//nieuwe actie moveTo kan wel nog uitgevoerd worden
 public void moveTo(Unit unit, int[] cube){
 	int[] position = unit.getCubePosition(unit.getPosition());
 	int[] step = new int[3];
@@ -699,8 +704,7 @@ public void moveTo(Unit unit, int[] cube){
 			this.moveToAdjacent(step[0],step[1],step[2]);
 		}
 	}
-			
-			
+				
 }
 
 
@@ -791,14 +795,11 @@ private String activity;
 public boolean isMoving(){
 	return this.isMoving;
 }
-// kan onderbroken worden door: nieuwe taak, vechten, nood aan rust
-public float work(int strength){
-	this.setCurrentActivity("working");
-	float gameTimeNeeded = 500/strength;
-	return gameTimeNeeded;
-}
 
 //ACTIVITIES
+
+
+// kan onderbroken worden door: nieuwe taak, vechten, nood aan rust
 
 public void setCurrentActivity(String activity){
 	this.activity = activity;
@@ -808,6 +809,12 @@ public String getCurrentActivity(){
 }
 
 
+public float work(int strength){
+	this.setCurrentActivity("working");
+	float gameTimeNeeded = 500/strength;
+	return gameTimeNeeded;
+}
+
 public float attack(){
 	this.setCurrentActivity("attack");
 	return 1;
@@ -816,10 +823,31 @@ public float attack(){
 public void defend(Unit attacker){
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
+	
 	if(Math.random()<probDodging){
-		//TODO beweeg naar aanliggend blok (x of y richting)
-		}
+		int step[] = {0,0,0};
+		while (step[0]==0 && step[1]==0){
+			step[0] = -1 + (int)(Math.random()*3);
+			step[1] = -1 + (int)(Math.random()*3);		
+		};
+		this.moveToAdjacent(step[0], step[1], step[2]);
+		return;
+	};
+	
+	//then blocking
+	double probBlocking = 0.25*(this.getStrength()+this.getAgility())/
+			(attacker.getStrength()+attacker.getAgility());
+	
+	if(Math.random()<probBlocking){
+		return;
+	};
+	
+	//then taking damage
+	int damage = (int) attacker.getStrength()/10;
+	int newHitpointss = this.getHitpoints()- damage;
+	this.setHitpoints(newHitpointss);
 	}
+	
 
 
 }
