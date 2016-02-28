@@ -624,12 +624,10 @@ public void setOrientation(float orientation) {
 private float orientation;
 
 
-public void advanceTime(double[] position, int weight, int agility, int strength,
-		int toughness, int hitpoints, int stamina, double dt) {
+public void advanceTime(Unit unit, double dt) {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
-	this.position = new double[] {0.0,0.0,0.0};
-	this.activity = "newactivity";
+
 	
 }
 
@@ -654,6 +652,36 @@ public void moveToAdjacent(double[] position, int dx, int dy, int dz) throws Mod
 	
 	this.setPosition(newPosition);
 }
+
+
+public double[] getVelocityVector(Unit unit, int dx, int dy, int dz){
+	double distance = Math.sqrt(dx^2+dy^2+dz^2);
+	double speed = unit.getSpeed();
+	double[] velocity = {
+			speed*dx/distance,
+			speed*dy/distance,
+			speed*dz/distance
+	};
+	return velocity;
+};
+
+public double[] getIntermediatePosition(Unit unit, int dx, int dy, int dz, float dt){
+	double[] position= unit.getPosition();
+	double[] velocityVector = unit.getVelocityVector(unit, dx, dy, dz);
+	double[] newPosition = {
+			position[0]+velocityVector[0]*dt,
+			position[1]+velocityVector[1]*dt,
+			position[2]+velocityVector[2]*dt	
+	};
+	return newPosition;
+}
+
+public float getIntermediateOrientation(double[] velocityVector){
+	//aandacht: functie atan2(y,x)!!
+	float orientation = (float) Math.atan2(velocityVector[1], velocityVector[0]);
+	return orientation;
+}
+
 
 
 public void setSpeed(int dz, int weight, int strength, int agility, boolean isMoving){
@@ -755,6 +783,7 @@ public void setCurrentActivity(String activity){
 public String getCurrentActivity(){
 	return this.activity;
 }
+
 
 public float attack(){
 	this.setCurrentActivity("attack");
