@@ -676,10 +676,10 @@ public double[] getIntermediatePosition(Unit unit, int dx, int dy, int dz, float
 	return newPosition;
 }
 
-public float getIntermediateOrientation(double[] velocityVector){
+public void updateMovingOrientation(Unit unit, double[] velocityVector){
 	//aandacht: functie atan2(y,x)!!
 	float orientation = (float) Math.atan2(velocityVector[1], velocityVector[0]);
-	return orientation;
+	unit.setOrientation(orientation);
 }
 
 
@@ -848,6 +848,13 @@ public void defend(Unit attacker){
 	this.setHitpoints(newHitpointss);
 	}
 	
-
+public void updateFightingOrientation(Unit attacker, Unit defender){
+	double[] aPosition = attacker.getPosition();
+	double[] dPosition = defender.getPosition();
+	float aOrientation = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1]);
+	float dOrientation = (float) Math.atan2(aPosition[1]-dPosition[1], aPosition[0]-dPosition[1]);
+	attacker.setOrientation(aOrientation);
+	defender.setOrientation(dOrientation);
+}
 
 }
