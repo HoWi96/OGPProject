@@ -631,16 +631,16 @@ public void advanceTime(Unit unit, double dt) {
 	
 }
 
-public void moveToAdjacent(double[] position, int dx, int dy, int dz) throws ModelException {
-	if (!isValidPosition(position))
-		throw new IllegalArgumentException();
+//MOVING
+
+public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentException {
 	
 	if ((Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1)||
 			((Math.abs(dx)==1||Math.abs(dy)==1)&&Math.abs(dz)==1)){
 		throw new IllegalArgumentException();
 	}
 	
-	int[] cubePosition = getCubePosition(position);
+	int[] cubePosition = this.getCubePosition(this.getPosition());
 	double[] newPosition = {
 			cubePosition[0]+dx+CUBELENGTH/2,
 			cubePosition[1]+dy+CUBELENGTH/2,
@@ -680,6 +680,27 @@ public float getIntermediateOrientation(double[] velocityVector){
 	//aandacht: functie atan2(y,x)!!
 	float orientation = (float) Math.atan2(velocityVector[1], velocityVector[0]);
 	return orientation;
+}
+
+public void moveTo(Unit unit, int[] cube){
+	int[] position = unit.getCubePosition(unit.getPosition());
+	int[] step = new int[3];
+	while ((position[0] != cube[0])&&
+			(position[1] != cube[1])&&
+			(position[2] != cube[2])){
+		for(int i = 0; i<3; i++){
+			if (position[i] == cube[i]){
+				step[i] = 0;
+			}else if(position[i] < cube[i]){
+				step[i] = 1;
+			}else{
+				step[i] = -1;
+			}
+			this.moveToAdjacent(step[0],step[1],step[2]);
+		}
+	}
+			
+			
 }
 
 
@@ -777,6 +798,8 @@ public float work(int strength){
 	return gameTimeNeeded;
 }
 
+//ACTIVITIES
+
 public void setCurrentActivity(String activity){
 	this.activity = activity;
 }
@@ -790,14 +813,13 @@ public float attack(){
 	return 1;
 }
 
-public float defend(Unit attacker){
+public void defend(Unit attacker){
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
 	if(Math.random()<probDodging){
 		//TODO beweeg naar aanliggend blok (x of y richting)
-		
+		}
 	}
-	return (float) 0.0;
-}
+
 
 }
