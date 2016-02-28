@@ -50,7 +50,8 @@ import ogp.framework.util.ModelException;
 
 public class Unit { 
 	
-	public final static float PI = (float) Math.PI;
+	private static final float PI = (float) Math.PI;
+	private static final int CUBELENGTH = 1;
 	
 /**
  * Create a new unit with the given attributes.
@@ -622,10 +623,56 @@ public void setOrientation(float orientation) {
  */
 private float orientation;
 
-public void advanceTime() {
-	// Mannetjes lopen en doen dingen, Moet aangevuld worden
-	// wanneer meer acties beschikbaar zijn.
+public void advanceTime(Unit unit, double dt ) {
+	if (!(0.0<=dt&&dt<=0.2))
+		throw new IllegalArgumentException();
+	//hier moet dus nog alles komen
 }
+
+public void moveToAdjacent(double[] position, int dx, int dy, int dz) throws ModelException {
+	if (!isValidPosition(position))
+		throw new IllegalArgumentException();
+	
+	if ((Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1)||
+			((Math.abs(dx)==1||Math.abs(dy)==1)&&Math.abs(dz)==1)){
+		throw new IllegalArgumentException();
+	}
+	
+	int[] cubePosition = getCubePosition(position);
+	double[] newPosition = {
+			cubePosition[0]+dx+CUBELENGTH/2,
+			cubePosition[1]+dy+CUBELENGTH/2,
+			cubePosition[2]+dz+CUBELENGTH/2
+	};
+	
+	if (!isValidPosition(newPosition))
+		throw new IllegalArgumentException();
+	
+	this.setPosition(newPosition);
+}
+
+
+public double getCurrentSpeed(int dz, int weight, int strength, int agility, boolean isSprinting){
+	
+	double baseSpeed = (double) 1.5*(strength+agility)/(200*weight/100);
+	double walkingSpeed;
+	if (dz == 1){
+		walkingSpeed = baseSpeed*0.5;
+		}
+	else if (dz == -1){
+		walkingSpeed = baseSpeed*1.2;
+		}
+	else{
+		walkingSpeed = baseSpeed;
+	}
+	
+	if (isSprinting){
+		return walkingSpeed*2;
+	}
+	return walkingSpeed;
+}
+
+
 
 }
 
