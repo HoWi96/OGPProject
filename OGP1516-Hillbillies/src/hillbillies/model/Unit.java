@@ -504,7 +504,12 @@ public int getHitpoints() {
  *       | result == (0<=hitpoints && hitpoints <= (int) Math.ceil(200.0*weight/100*toughness/100)
 */
 public static boolean isValidHitpoints(int hitpoints, int weight, int toughness) {
-	return (0<=hitpoints && hitpoints <= (int) Math.ceil(200.0*weight/100*toughness/100));
+	return (0<=hitpoints && hitpoints <= getMaxHitpoints(weight, toughness));
+}
+
+//TODO write documentation
+public static int getMaxHitpoints(int weight, int toughness){
+	return (int) Math.ceil(200.0*weight/100*toughness/100);
 }
 
 /**
@@ -549,7 +554,12 @@ public int getStamina() {
  *       | result == (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100))
 */
 public static boolean isValidStamina(int stamina, int weight, int toughness) {
-	return (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100));
+	return (0<=stamina && stamina<= getMaxStamina(weight, toughness));
+}
+
+//TODO write documentation
+public static int getMaxStamina(int weight, int toughness){
+	return (int) Math.ceil(200.0*weight/100*toughness/100);
 }
 
 /**
@@ -624,7 +634,7 @@ public void setOrientation(float orientation) {
 private float orientation;
 
 
-public void advanceTime(Unit unit, double dt) {
+public void advanceTime(double dt) {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
 
@@ -654,9 +664,9 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 }
 
 
-public double[] getVelocityVector(Unit unit, int dx, int dy, int dz){
+public double[] getVelocityVector(int dx, int dy, int dz){
 	double distance = Math.sqrt(dx^2+dy^2+dz^2);
-	double speed = unit.getSpeed();
+	double speed = this.getSpeed();
 	double[] velocity = {
 			speed*dx/distance,
 			speed*dy/distance,
@@ -665,9 +675,9 @@ public double[] getVelocityVector(Unit unit, int dx, int dy, int dz){
 	return velocity;
 };
 
-public double[] getIntermediatePosition(Unit unit, int dx, int dy, int dz, float dt){
-	double[] position= unit.getPosition();
-	double[] velocityVector = unit.getVelocityVector(unit, dx, dy, dz);
+public double[] getIntermediatePosition(int dx, int dy, int dz, float dt){
+	double[] position= this.getPosition();
+	double[] velocityVector = this.getVelocityVector(dx, dy, dz);
 	double[] newPosition = {
 			position[0]+velocityVector[0]*dt,
 			position[1]+velocityVector[1]*dt,
@@ -676,10 +686,10 @@ public double[] getIntermediatePosition(Unit unit, int dx, int dy, int dz, float
 	return newPosition;
 }
 
-public void updateMovingOrientation(Unit unit, double[] velocityVector){
+public void updateMovingOrientation(double[] velocityVector){
 	//aandacht: functie atan2(y,x)!!
 	float orientation = (float) Math.atan2(velocityVector[1], velocityVector[0]);
-	unit.setOrientation(orientation);
+	this.setOrientation(orientation);
 }
 
 
@@ -687,8 +697,8 @@ public void updateMovingOrientation(Unit unit, double[] velocityVector){
 //kan onderbroken worden door: need to rest, enemy interaction
 //na onderbreking --> vervolg pad
 //nieuwe actie moveTo kan wel nog uitgevoerd worden
-public void moveTo(Unit unit, int[] cube){
-	int[] position = unit.getCubePosition(unit.getPosition());
+public void moveTo(int[] cube){
+	int[] position = this.getCubePosition(this.getPosition());
 	int[] step = new int[3];
 	while ((position[0] != cube[0])&&
 			(position[1] != cube[1])&&
@@ -707,11 +717,10 @@ public void moveTo(Unit unit, int[] cube){
 				
 }
 
-
-
-public void setSpeed(int dz, int weight, int strength, int agility, boolean isMoving){
-	if(isMoving){
-		double baseSpeed = (double) 1.5*(strength+agility)/(200*weight/100);
+public void updateSpeed(int dz){
+	if(this.isMoving()){
+		double baseSpeed = (double) 1.5*(this.getStrength()+this.getAgility())
+				/(200*this.getWeight()/100);
 		double walkingSpeed;
 		if (dz == 1){
 			walkingSpeed = baseSpeed*0.5;
@@ -761,11 +770,8 @@ public boolean isSprinting() {
  *         Unit.
  *       | ! isValidIsSprinting(getIsSprinting())
  */
-
-//TODO we moeten dit denk ik in advance time steken,
-//zodat wanneer stamina == 0 Unit stopt met sprinten
-public void startSprinting(int stamina, boolean isMoving) {
-	if (stamina>0 && isMoving){
+public void startSprinting() {
+	if (this.getStamina()>0 && this.isMoving()){
 		if (!this.isSprinting){
 			this.isSprinting = true;
 			this.speed *=2;
@@ -789,17 +795,16 @@ private boolean isSprinting;
 /**
  * Variable registering the isMoving of this Unit.
  */
-private boolean isMoving;
+
 private String activity;
+private float activityTime;
 
 public boolean isMoving(){
-	return this.isMoving;
+	return (this.getCurrentActivity()=="moving");
 }
 
 //ACTIVITIES
 
-
-// kan onderbroken worden door: nieuwe taak, vechten, nood aan rust
 
 public void setCurrentActivity(String activity){
 	this.activity = activity;
@@ -808,19 +813,38 @@ public String getCurrentActivity(){
 	return this.activity;
 }
 
-
-public float work(int strength){
-	this.setCurrentActivity("working");
-	float gameTimeNeeded = 500/strength;
-	return gameTimeNeeded;
+public void setActivityTime(float time){
+	this.activityTime = time;
 }
 
-public float attack(){
+public float getActivityTime(){
+	return this.activityTime;
+}
+
+//WORKING
+
+public void work(){
+	this.setCurrentActivity("working");
+	float gameTimeNeeded = 500/this.getStrength();
+	this.setActivityTime(gameTimeNeeded);
+}
+
+public  boolean isWorking(){
+	return (this.getCurrentActivity()=="working");
+	
+}
+
+//FIGHTING
+
+//lasts for 1 second
+public void attack(){
 	this.setCurrentActivity("attack");
-	return 1;
+	this.setActivityTime(1);
 }
 
 public void defend(Unit attacker){
+	
+	this.setCurrentActivity("defend");
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
 	
@@ -856,5 +880,34 @@ public void updateFightingOrientation(Unit attacker, Unit defender){
 	attacker.setOrientation(aOrientation);
 	defender.setOrientation(dOrientation);
 }
+
+//RESTING
+
+public void rest(){
+	this.setCurrentActivity("rest");
+	int healingPoints = this.getToughness()/200;
+	int maxHitpoints = getMaxHitpoints(this.getWeight(), this.getToughness());
+	int newHitpoints = this.getHitpoints() + healingPoints;
+	if(newHitpoints>= maxHitpoints){
+		this.setHitpoints(maxHitpoints);
+		healingPoints = newHitpoints - maxHitpoints;
+		int maxStamina = getMaxStamina(this.getWeight(), this.getToughness());
+		int newStamina = this.getStamina()+ healingPoints;
+		
+		if (newStamina>=maxStamina){
+			this.setStamina(maxStamina);
+		}else{
+			this.setStamina(newStamina);
+		}
+	} else {
+		this.setHitpoints(this.getHitpoints()+ healingPoints);
+	}
+}
+
+public boolean isResting(){
+	return (this.getCurrentActivity()=="resting");
+}
+
+
 
 }
