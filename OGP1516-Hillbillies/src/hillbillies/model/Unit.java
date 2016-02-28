@@ -623,10 +623,14 @@ public void setOrientation(float orientation) {
  */
 private float orientation;
 
-public void advanceTime(Unit unit, double dt ) {
+
+public void advanceTime(double[] position, int weight, int agility, int strength,
+		int toughness, int hitpoints, int stamina, double dt) {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
-	//hier moet dus nog alles komen
+	this.position = new double[] {0.0,0.0,0.0};
+	this.activity = "newactivity";
+	
 }
 
 public void moveToAdjacent(double[] position, int dx, int dy, int dz) throws ModelException {
@@ -652,27 +656,119 @@ public void moveToAdjacent(double[] position, int dx, int dy, int dz) throws Mod
 }
 
 
-public double getCurrentSpeed(int dz, int weight, int strength, int agility, boolean isSprinting){
-	
-	double baseSpeed = (double) 1.5*(strength+agility)/(200*weight/100);
-	double walkingSpeed;
-	if (dz == 1){
-		walkingSpeed = baseSpeed*0.5;
+public void setSpeed(int dz, int weight, int strength, int agility, boolean isMoving){
+	if(isMoving){
+		double baseSpeed = (double) 1.5*(strength+agility)/(200*weight/100);
+		double walkingSpeed;
+		if (dz == 1){
+			walkingSpeed = baseSpeed*0.5;
+			}
+		else if (dz == -1){
+			walkingSpeed = baseSpeed*1.2;
+			}
+		else{
+			walkingSpeed = baseSpeed;
 		}
-	else if (dz == -1){
-		walkingSpeed = baseSpeed*1.2;
-		}
-	else{
-		walkingSpeed = baseSpeed;
-	}
-	
-	if (isSprinting){
-		return walkingSpeed*2;
-	}
-	return walkingSpeed;
+		this.speed = walkingSpeed;
+	};
+	this.speed = 0.0;
 }
 
-
-
+/**
+ * Return the speed of this Unit.
+ */
+@Basic @Raw
+public double getSpeed(){
+	return this.speed;
 }
 
+/**
+ * Variable registering the speed of this Unit.
+ */
+private double speed;
+
+/**
+ * Return the isSprinting of this Unit.
+ */
+@Basic @Raw
+public boolean isSprinting() {
+	return this.isSprinting;
+}
+
+/**
+ * Set the isSprinting of this Unit to the given isSprinting.
+ * 
+ * @param  isSprinting
+ *         The new isSprinting for this Unit.
+ * @post   The isSprinting of this new Unit is equal to
+ *         the given isSprinting.
+ *       | new.getIsSprinting() == isSprinting
+ * @throws ExceptionName_Java
+ *         The given isSprinting is not a valid isSprinting for any
+ *         Unit.
+ *       | ! isValidIsSprinting(getIsSprinting())
+ */
+
+//TODO we moeten dit denk ik in advance time steken,
+//zodat wanneer stamina == 0 Unit stopt met sprinten
+public void startSprinting(int stamina, boolean isMoving) {
+	if (stamina>0 && isMoving){
+		if (!this.isSprinting){
+			this.isSprinting = true;
+			this.speed *=2;
+		}
+	}
+	
+}
+
+public void stopSprinting() {
+	if (this.isSprinting){
+		this.isSprinting = false;
+		this.speed /=2;
+	}
+}
+
+/**
+ * Variable registering the isSprinting of this Unit.
+ */
+private boolean isSprinting;
+
+/**
+ * Variable registering the isMoving of this Unit.
+ */
+private boolean isMoving;
+private String activity;
+
+public boolean isMoving(){
+	return this.isMoving;
+}
+// kan onderbroken worden door: nieuwe taak, vechten, nood aan rust
+public float work(int strength){
+	this.setCurrentActivity("working");
+	float gameTimeNeeded = 500/strength;
+	return gameTimeNeeded;
+}
+
+public void setCurrentActivity(String activity){
+	this.activity = activity;
+}
+public String getCurrentActivity(){
+	return this.activity;
+}
+
+public float attack(){
+	this.setCurrentActivity("attack");
+	return 1;
+}
+
+public float defend(Unit attacker){
+	//first Dodging
+	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
+	if(Math.random()<probDodging){
+		//TODO beweeg naar aanliggend blok (x of y richting)
+		
+	}
+	return (float) 0.0;
+}
+
+}
