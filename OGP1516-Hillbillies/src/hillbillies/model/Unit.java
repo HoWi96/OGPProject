@@ -637,11 +637,59 @@ private float orientation;
 public void advanceTime(double dt) {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
-
 	
+	private String activity;
+	activity = this.getCurrentActivity();
+	
+	if (activity == "moving") {
+		int[] cubePosition = this.getCubePosition(this.getPosition());
+		int[] targetPosition = (int) this.getTargetPosition();
+		int[] dCube = {targetPosition[0] - cubePosition[0],
+					   targetPosition[1] - cubePosition[1],
+					   targetPosition[2] - cubeposition[2]
+		};
+		this.updateMovingOrientation(this.getVelocityVector(dCube[0], dCube[1], dCube[2]));
+		double[] nextPosition = this.getIntermediatePosition(dCube[0], dCube[1], dCube[2], dt);
+		int[] dNext = {targetPosition[0] - nextPosition[0],
+				       targetPosition[1] - nextPosition[1],
+				       targetPosition[2] - nextposition[2]
+		};
+		
+		if ((dCube[0]*dNext[0]<=0) && (dCube[1]*dNext[1]<=0) && (dCube[2]*dNext[2]<=0)) {
+			this.setCurrentActivity("default");
+			this.setPosition(targetPosition);
+		}
+	}
+	
+	if (activity == "working") {
+		this.setActivityTime(this.getActivityTime-dt);
+		if (this.getActivityTime <= 0) {
+			this.setCurrentActivity("default");
+		}
+	}
+	if (activity == "attack"){
+		this.setActivityTime(this.getActivityTime-dt);
+		if (this.getActivityTime <= 0) {
+			this.setCurrentActivity("default");
+		}
+	}
+	if (activity == "rest") {
+		// Moet nog aan gewerkt worden.
+		this.rest();
+	}
 }
 
 //MOVING
+
+private double[] targetPosition;
+
+public void setTargetPosition(double position) {
+	this.targetPosition = position;
+}
+
+public double getTargetPosition() {
+	return this.targetPosition;
+}
 
 public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentException {
 	
@@ -650,6 +698,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		throw new IllegalArgumentException();
 	}
 	
+	this.setCurrentActivity("moving");
 	int[] cubePosition = this.getCubePosition(this.getPosition());
 	double[] newPosition = {
 			cubePosition[0]+dx+CUBELENGTH/2,
@@ -660,8 +709,9 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 	if (!isValidPosition(newPosition))
 		throw new IllegalArgumentException();
 	
-	this.setPosition(newPosition);
+	this.setTargetPosition(newPosition);
 }
+
 
 
 public double[] getVelocityVector(int dx, int dy, int dz){
@@ -676,7 +726,7 @@ public double[] getVelocityVector(int dx, int dy, int dz){
 };
 
 public double[] getIntermediatePosition(int dx, int dy, int dz, float dt){
-	double[] position= this.getPosition();
+	double[] position = this.getPosition();
 	double[] velocityVector = this.getVelocityVector(dx, dy, dz);
 	double[] newPosition = {
 			position[0]+velocityVector[0]*dt,
@@ -733,7 +783,8 @@ public void updateSpeed(int dz){
 		}
 		this.speed = walkingSpeed;
 	};
-	this.speed = 0.0;
+	else
+		this.speed = 0.0;
 }
 
 /**
@@ -757,6 +808,8 @@ public boolean isSprinting() {
 	return this.isSprinting;
 }
 
+
+// Ik heb het gevoel dat deze documentatie niet bij deze methode hoort.
 /**
  * Set the isSprinting of this Unit to the given isSprinting.
  * 
@@ -850,9 +903,14 @@ public void defend(Unit attacker){
 	
 	if(Math.random()<probDodging){
 		int step[] = {0,0,0};
-		while (step[0]==0 && step[1]==0){
+		int[] currentPosition = this.getPosition();
+		int[] nextPosition = currentPosition;
+		while ((step[0]==0 && step[1]==0)||(!isValidPostion(nextPosition)){
 			step[0] = -1 + (int)(Math.random()*3);
-			step[1] = -1 + (int)(Math.random()*3);		
+			step[1] = -1 + (int)(Math.random()*3);
+			nextPosition = {currentPosition[0] + step[0],
+							currentPosition[1] + step[1],
+							currentPosition[2]};
 		};
 		this.moveToAdjacent(step[0], step[1], step[2]);
 		return;
@@ -872,7 +930,7 @@ public void defend(Unit attacker){
 	this.setHitpoints(newHitpointss);
 	}
 	
-public void updateFightingOrientation(Unit attacker, Unit defender){
+public void updateFightingOrientation(Unit attacker, Unit defender){ // Kan je deze methode ook statisch maken?
 	double[] aPosition = attacker.getPosition();
 	double[] dPosition = defender.getPosition();
 	float aOrientation = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1]);
@@ -896,6 +954,7 @@ public void rest(){
 		
 		if (newStamina>=maxStamina){
 			this.setStamina(maxStamina);
+			this.setCurrentActivity("default");
 		}else{
 			this.setStamina(newStamina);
 		}
