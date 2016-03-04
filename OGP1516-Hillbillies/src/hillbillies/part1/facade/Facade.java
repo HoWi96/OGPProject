@@ -13,6 +13,7 @@ public class Facade implements IFacade{
 		System.out.println(initialPosition[0]);
 		return unit;
 	}
+	
 
 	@Override
 	public double[] getPosition(Unit unit) throws ModelException {

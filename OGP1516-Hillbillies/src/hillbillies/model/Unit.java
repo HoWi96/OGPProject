@@ -674,6 +674,7 @@ public void advanceTime(double dt) {
 		
 		if ((dCube[0]*dNext[0]<=0) && (dCube[1]*dNext[1]<=0) && (dCube[2]*dNext[2]<=0)) {
 			this.setCurrentActivity("default");
+			
 			this.setPosition(target);
 		}
 		// Ai ik ben vergeten de positie ook echt aan te passen, komt er aan.
