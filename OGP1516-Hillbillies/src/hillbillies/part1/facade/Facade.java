@@ -9,205 +9,231 @@ public class Facade implements IFacade{
 	public Unit createUnit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness,
 			boolean enableDefaultBehavior) throws ModelException {
 		// TODO Auto-generated method stub
-		return null;
+		Unit unit = new Unit(name, initialPosition, weight, agility, strength, toughness, enableDefaultBehavior);
+		return unit;
 	}
 
 	@Override
 	public double[] getPosition(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return null;
+		double[] position = unit.getPosition();
+		return position;
 	}
 
 	@Override
 	public int[] getCubeCoordinate(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return null;
+		int[] cubeCoordinate = unit.getCubePosition(unit.getPosition());
+		return cubeCoordinate;
 	}
 
 	@Override
 	public String getName(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return null;
+		String name = unit.getName();
+		return name;
 	}
 
 	@Override
 	public void setName(Unit unit, String newName) throws ModelException {
 		// TODO Auto-generated method stub
+		unit.setName(newName);
 		
 	}
 
 	@Override
 	public int getWeight(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return 0;
+		int weight = unit.getWeight();
+		return weight;
 	}
 
 	@Override
 	public void setWeight(Unit unit, int newValue) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.setWeight(newValue);
 	}
 
 	@Override
 	public int getStrength(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return 0;
+		int strength = unit.getStrength();
+		return strength;
 	}
 
 	@Override
 	public void setStrength(Unit unit, int newValue) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.setStrength(newValue);
 	}
 
 	@Override
 	public int getAgility(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return 0;
+		int agility = unit.getAgility();
+		return agility;
 	}
 
 	@Override
 	public void setAgility(Unit unit, int newValue) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.setAgility(newValue);
 	}
 
 	@Override
 	public int getToughness(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return 0;
+		int toughness = unit.getToughness();
+		return toughness;
 	}
 
 	@Override
 	public void setToughness(Unit unit, int newValue) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.setToughness(newValue);
 	}
 
 	@Override
 	public int getMaxHitPoints(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return 0;
+		int maxHitPoints = Unit.getMaxHitpoints(unit.getWeight(), unit.getToughness());
+		return maxHitPoints;
 	}
 
 	@Override
 	public int getCurrentHitPoints(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return 0;
+		int hitPoints = unit.getHitpoints();
+		return hitPoints;
 	}
 
 	@Override
 	public int getMaxStaminaPoints(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return 0;
+		int maxStamina = Unit.getMaxStamina(unit.getWeight(), unit.getToughness());
+		return maxStamina;
 	}
 
 	@Override
 	public int getCurrentStaminaPoints(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return 0;
+		int stamina = unit.getStamina();
+		return stamina;
 	}
 
 	@Override
 	public void advanceTime(Unit unit, double dt) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.advanceTime(dt);
 	}
 
 	@Override
 	public void moveToAdjacent(Unit unit, int dx, int dy, int dz) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.moveToAdjacent(dx, dy, dz);
 	}
 
 	@Override
 	public double getCurrentSpeed(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return 0;
+		double speed = unit.getSpeed();
+		return speed;
 	}
 
 	@Override
 	public boolean isMoving(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return false;
+		boolean moving = unit.isMoving();
+		return moving;
 	}
 
 	@Override
 	public void startSprinting(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.startSprinting();
 	}
 
 	@Override
 	public void stopSprinting(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.stopSprinting();
 	}
 
 	@Override
 	public boolean isSprinting(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return false;
+		boolean sprinting = unit.isSprinting();
+		return sprinting;
 	}
 
 	@Override
 	public double getOrientation(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return 0;
+		double orientation = unit.getOrientation();
+		return orientation;
 	}
 
 	@Override
 	public void moveTo(Unit unit, int[] cube) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.moveTo(cube);
 	}
 
 	@Override
 	public void work(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.work();
 	}
 
 	@Override
 	public boolean isWorking(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return false;
+		boolean working = unit.isWorking();
+		return working;
 	}
 
 	@Override
 	public void fight(Unit attacker, Unit defender) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		attacker.attack();
+		defender.defend(attacker);
 	}
 
 	@Override
 	public boolean isAttacking(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return false;
+		boolean attacking = (unit.getCurrentActivity()=="attack");
+		return attacking;
 	}
 
 	@Override
 	public void rest(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		unit.startResting();
 	}
 
 	@Override
 	public boolean isResting(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return false;
+		boolean resting = unit.isResting();
+		return resting;
 	}
 
 	@Override
 	public void setDefaultBehaviorEnabled(Unit unit, boolean value) throws ModelException {
 		// TODO Auto-generated method stub
-		
+		if (value) {
+			unit.startDefaultBehaviour();
+		}
+		else
+			unit.stopDefaultBehaviour();
 	}
 
 	@Override
 	public boolean isDefaultBehaviorEnabled(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub
-		return false;
+		boolean defaultBehaviour = (unit.getCurrentActivity()=="default");
+		return defaultBehaviour;
 	}
 
 }

@@ -149,9 +149,10 @@ public class Unit {
  *       |   then new.getOrientation() == orientation
  *       |   else new.getOrientation() == PI/2
  */
-public Unit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness, int hitpoints,
-		int stamina,boolean enableDefaultBehavior)
-		throws IllegalArgumentException {
+public Unit(String name, int[] initialPosition, int weight, int agility,
+			int strength, int toughness,// int hitpoints, int stamina,
+			boolean enableDefaultBehavior)
+			throws IllegalArgumentException {
 	
 	this.setName(name);
 	
@@ -638,14 +639,15 @@ public void advanceTime(double dt) {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
 	
-	private String activity;
+	String activity;
 	activity = this.getCurrentActivity();
 	
 	if (activity == "default") {
 		int randomActivity = (int) (Math.random()*3);
 		if (randomActivity == 0) {
 			activity = "moving";
-			this.setTargetPosition({Math.random()*50, Math.random()*50, Math.random()*50});
+			double[] target = {Math.random()*50, Math.random()*50, Math.random()*50};
+			this.setTargetPosition(target);
 		}
 		if (randomActivity == 1) {
 			activity = "working";
@@ -657,33 +659,34 @@ public void advanceTime(double dt) {
 	
 	if (activity == "moving") {
 		int[] cubePosition = this.getCubePosition(this.getPosition());
-		int[] targetPosition = (int) this.getTargetPosition();
+		double[] target = this.getTargetPosition();
+		int[] targetPosition = {(int)target[0], (int)target[1], (int)target[2]};
 		int[] dCube = {targetPosition[0] - cubePosition[0],
 					   targetPosition[1] - cubePosition[1],
-					   targetPosition[2] - cubeposition[2]
+					   targetPosition[2] - cubePosition[2]
 		};
 		this.updateMovingOrientation(this.getVelocityVector(dCube[0], dCube[1], dCube[2]));
 		double[] nextPosition = this.getIntermediatePosition(dCube[0], dCube[1], dCube[2], dt);
-		int[] dNext = {targetPosition[0] - nextPosition[0],
-				       targetPosition[1] - nextPosition[1],
-				       targetPosition[2] - nextposition[2]
+		int[] dNext = {targetPosition[0] - (int)nextPosition[0],
+				       targetPosition[1] - (int)nextPosition[1],
+				       targetPosition[2] - (int)nextPosition[2]
 		};
 		
 		if ((dCube[0]*dNext[0]<=0) && (dCube[1]*dNext[1]<=0) && (dCube[2]*dNext[2]<=0)) {
 			this.setCurrentActivity("default");
-			this.setPosition(targetPosition);
+			this.setPosition(target);
 		}
 	}
 	
 	if (activity == "working") {
-		this.setActivityTime(this.getActivityTime-dt);
-		if (this.getActivityTime <= 0) {
+		this.setActivityTime(this.getActivityTime()-dt);
+		if (this.getActivityTime() <= 0) {
 			this.setCurrentActivity("default");
 		}
 	}
 	if (activity == "attack"){
-		this.setActivityTime(this.getActivityTime-dt);
-		if (this.getActivityTime <= 0) {
+		this.setActivityTime(this.getActivityTime()-dt);
+		if (this.getActivityTime() <= 0) {
 			this.setCurrentActivity("default");
 		}
 	}
@@ -698,11 +701,11 @@ public void advanceTime(double dt) {
 
 private double[] targetPosition;
 
-public void setTargetPosition(double position) {
+public void setTargetPosition(double[] position) {
 	this.targetPosition = position;
 }
 
-public double getTargetPosition() {
+public double[] getTargetPosition() {
 	return this.targetPosition;
 }
 
@@ -740,7 +743,7 @@ public double[] getVelocityVector(int dx, int dy, int dz){
 	return velocity;
 };
 
-public double[] getIntermediatePosition(int dx, int dy, int dz, float dt){
+public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	double[] position = this.getPosition();
 	double[] velocityVector = this.getVelocityVector(dx, dy, dz);
 	double[] newPosition = {
@@ -887,11 +890,11 @@ public String getCurrentActivity(){
 	return this.activity;
 }
 
-public void setActivityTime(float time){
+public void setActivityTime(double time){
 	this.activityTime = time;
 }
 
-public float getActivityTime(){
+public double getActivityTime(){
 	return this.activityTime;
 }
 
