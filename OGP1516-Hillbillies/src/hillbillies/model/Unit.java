@@ -409,28 +409,16 @@ public int getWeight() {
 }
 
 /**
- * Check whether the given weight is a valid weight for
- * any Unit.
- *  
- * @param  weight
- *         The weight to check.
- * @return 
- *       | result == (1<=weight&&weight<=200)&&(weight>(strength+agility)/2)
-*/
-public static boolean isValidWeight(int weight,int strength, int agility) {
-	return (1<=weight&&weight<=200)&&(weight>(strength+agility)/2) ;
-}
-
-/**
  * Set the weight of this Unit to the given weight.
  * 
  * @param  weight
  *         The new weight for this Unit.
  * @post   If the given weight is a valid weight for any Unit,
  *         the weight of this new Unit is equal to the given
- *         weight.
+ *         weight else we don't change anything.
  *       | if (isValidWeight(weight))
  *       |   then new.getWeight() == weight
+ *       
  */
 @Raw
 public void setWeight(int weight) {
@@ -438,7 +426,37 @@ public void setWeight(int weight) {
 		this.weight = weight;
 }
 
+/**
+ * Check whether the given weight is a valid weight for
+ * any Unit.
+ *  
+ * @param  weight
+ *         The weight to check.
+ * @return true if and only if the weight is between 0 and 200 inclusively and
+ * 			the weight must be at least the minimum weight.
+ *       | result == (1<=weight&&weight<=200)&&(weight>getMinWeight(strength,agility))
+*/
+public static boolean isValidWeight(int weight,int strength, int agility) {
+	return 	(1<=weight)&&(weight<=200)&&
+			(weight>getMinWeight(strength, agility)) ;
+}
 
+/**
+ * The minimum weight
+ * 
+ * @param strength
+ * 			the strength of the unit
+ * @param agility
+ * 			the agility of the unit
+ * @return the minimum weight of this unit
+ * 		|result ==  (strength+agility)/2
+ */
+private static int getMinWeight(int strength, int agility ){
+	return (strength + agility)/2;
+}
+
+
+//STRENGTH
 
 
 /**
@@ -448,6 +466,24 @@ public void setWeight(int weight) {
 public int getStrength() {
 	return this.strength;
 }
+
+/**
+ * Set the Strength of this Unit to the given Strength.
+ * 
+ * @param  strength
+ *         The new Strength for this Unit.
+ * @post   If the given Strength is a valid Strength for any Unit,
+ *         the Strength of this new Unit is equal to the given
+ *         Strength else we don't change anything.
+ *       | if (isValidStrength(strength))
+ *       |   then new.getStrength() == strength
+ */
+@Raw
+public void setStrength(int strength) {
+	if (isValidStrength(strength))
+		this.strength = strength;
+}
+
 
 /**
  * Check whether the given Strength is a valid Strength for
@@ -463,25 +499,8 @@ public static boolean isValidStrength(int strength) {
 	
 }
 
-/**
- * Set the Strength of this Unit to the given Strength.
- * 
- * @param  strength
- *         The new Strength for this Unit.
- * @post   If the given Strength is a valid Strength for any Unit,
- *         the Strength of this new Unit is equal to the given
- *         Strength.
- *       | if (isValidStrength(strength))
- *       |   then new.getStrength() == strength
- */
-@Raw
-public void setStrength(int strength) {
-	if (isValidStrength(strength))
-		this.strength = strength;
-}
 
-
-
+//AGILITY
 
 /**
  * Return the Agility of this Unit.
@@ -492,26 +511,13 @@ public int getAgility() {
 }
 
 /**
- * Check whether the given Agility is a valid Agility for
- * any Unit.
- *  
- * @param  agility
- *         The Agility to check.
- * @return 
- *       | result == (1<=agility && agility<=200)
-*/
-public static boolean isValidAgility(int agility) {
-	return (1<=agility&&agility<=200);
-}
-
-/**
  * Set the Agility of this Unit to the given Agility.
  * 
  * @param  agility
  *         The new Agility for this Unit.
  * @post   If the given Agility is a valid Agility for any Unit,
  *         the Agility of this new Unit is equal to the given
- *         Agility.
+ *         Agility else we don't change anything.
  *       | if (isValidAgility(agility))
  *       |   then new.getAgility() == agility
  */
@@ -521,7 +527,22 @@ public void setAgility(int agility) {
 		this.agility = agility;
 }
 
+/**
+ * Check whether the given Agility is a valid Agility for
+ * any Unit.
+ *  
+ * @param  agility
+ *         The Agility to check.
+ * @return  true if and only if the agility lays between 1 and 200
+ *       | result == (1<=agility && agility<=200)
+*/
+public static boolean isValidAgility(int agility) {
+	return (1<=agility&&agility<=200);
+}
 
+
+
+//TOUGHNESS
 
 /**
  * Return the toughness of this Unit.
@@ -529,19 +550,6 @@ public void setAgility(int agility) {
 @Basic @Raw
 public int getToughness() {
 	return this.toughness;
-}
-
-/**
- * Check whether the given toughness is a valid toughness for
- * any Unit.
- *  
- * @param  toughness
- *         The toughness to check.
- * @return 
- *       | result == (1<=toughness && toughness <= 200)
-*/
-public static boolean isValidToughness(int toughness) {
-	return (1<=toughness && toughness<=200);
 }
 
 /**
@@ -561,6 +569,20 @@ public void setToughness(int toughness) {
 		this.toughness = toughness;
 }
 
+/**
+ * Check whether the given toughness is a valid toughness for
+ * any Unit.
+ *  
+ * @param  toughness
+ *         The toughness to check.
+ * @return 
+ *       | result == (1<=toughness && toughness <= 200)
+*/
+public static boolean isValidToughness(int toughness) {
+	return (1<=toughness && toughness<=200);
+}
+
+//HITPOINTS
 
 /**
  * Return the hitpoints of this Unit.
@@ -568,24 +590,6 @@ public void setToughness(int toughness) {
 @Basic @Raw
 public int getHitpoints() {
 	return this.hitpoints;
-}
-
-/**
- * Check whether the given hitpoints is a valid hitpoints for
- * any Unit.
- *  
- * @param  hitpoints
- *         The hitpoints to check.
- * @return 
- *       | result == (0<=hitpoints && hitpoints <= (int) Math.ceil(200.0*weight/100*toughness/100)
-*/
-public static boolean isValidHitpoints(int hitpoints, int weight, int toughness) {
-	return (0<=hitpoints && hitpoints <= getMaxHitpoints(weight, toughness));
-}
-
-//TODO write documentation
-public static int getMaxHitpoints(int weight, int toughness){
-	return (int) Math.ceil(200.0*weight/100*toughness/100);
 }
 
 /**
@@ -606,8 +610,38 @@ public void setHitpoints(int hitpoints) {
 	this.hitpoints = hitpoints;
 }
 
+/**
+ * Check whether the given hitpoints is a valid hitpoints for
+ * any Unit.
+ *  
+ * @param  hitpoints
+ *         The hitpoints to check.
+ * @param weight
+ * @param toughness
+ * 
+ * @return true if and only if the hitpoints are between 0 and getMaxHitpoints(weight, toughness)
+ *       | result == (0<=hitpoints && hitpoints <= getMaxHitpoints(weight, toughness)
+*/
+public static boolean isValidHitpoints(int hitpoints, int weight, int toughness) {
+	return (0<=hitpoints && hitpoints <= getMaxHitpoints(weight, toughness));
+}
+
+/**
+ * The maximum amount of hitpoints a unit can have
+ * 
+ * @param weight
+ * @param toughness
+ * 
+ * @return The maximum HP a unit can have is the closest integer
+ * 			 to 200 * weight/100 * toughness/100
+ * 		| result == Math.ceil(200 * weight/100 * toughness/100)
+ */
+public static int getMaxHitpoints(int weight, int toughness){
+	return (int) Math.ceil(200.0*weight/100*toughness/100);
+}
 
 
+//STAMINA
 
 /**
  * Return the stamina of this Unit.
@@ -615,24 +649,6 @@ public void setHitpoints(int hitpoints) {
 @Basic @Raw
 public int getStamina() {
 	return this.stamina;
-}
-
-/**
- * Check whether the given stamina is a valid stamina for
- * any Unit.
- *  
- * @param  stamina
- *         The stamina to check.
- * @return 
- *       | result == (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100))
-*/
-public static boolean isValidStamina(int stamina, int weight, int toughness) {
-	return (0<=stamina && stamina<= getMaxStamina(weight, toughness));
-}
-
-
-public static int getMaxStamina(int weight, int toughness){
-	return (int) Math.ceil(200.0*weight/100*toughness/100);
 }
 
 /**
@@ -653,7 +669,32 @@ public void setStamina(int stamina) {
 	this.stamina = stamina;
 }
 
+/**
+ * Check whether the given stamina is a valid stamina for
+ * any Unit.
+ *  
+ * @param  stamina
+ *         The stamina to check.
+ * @return 
+ *       | result == (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100))
+*/
+public static boolean isValidStamina(int stamina, int weight, int toughness) {
+	return (0<=stamina && stamina<= getMaxStamina(weight, toughness));
+}
 
+
+/**
+ * The maximum amount of stamina a unit can have
+ * 
+ * @return The maximum Stamina a unit can have is the closest integer
+ * 			 to 2 * weight * toughness / 100
+ * 		| result == Math.ceil(2 * weight * toughness / 100)
+ */
+public static int getMaxStamina(int weight, int toughness){
+	return (int) Math.ceil(2*weight*toughness/100);
+}
+
+//ORIENTATION
 
 /**
  * Return the orientation of this Unit.
@@ -661,6 +702,29 @@ public void setStamina(int stamina) {
 @Basic @Raw
 public float getOrientation() {
 	return this.orientation;
+}
+
+/**
+ * Set the orientation of this Unit to the given orientation.
+ * 
+ * @param  orientation
+ *         The new orientation for this Unit.
+ * @post   If the given orientation is a valid orientation for any Unit,
+ *         the orientation of this new Unit is equal to the given
+ *         orientation.
+ *       | if (isValidOrientation(orientation))
+ *       |   then new.getOrientation() == orientation
+ * @post If the  given orientation is a valid orientation for any Unit,
+ *         the orientation of this new Unit is equal to the given
+ *         orientation.
+ */
+@Raw
+public void setOrientation(float orientation) {
+	if (isValidOrientation(orientation))
+		this.orientation = orientation;
+	else{
+		this.setOrientation(PI/2);
+	}
 }
 
 /**
@@ -676,27 +740,9 @@ public static boolean isValidOrientation(float orientation) {
 	return (0<=orientation && orientation<2*PI);
 }
 
-/**
- * Set the orientation of this Unit to the given orientation.
- * 
- * @param  orientation
- *         The new orientation for this Unit.
- * @post   If the given orientation is a valid orientation for any Unit,
- *         the orientation of this new Unit is equal to the given
- *         orientation.
- *       | if (isValidOrientation(orientation))
- *       |   then new.getOrientation() == orientation
- *      	default orientation = PI/2
- */
-@Raw
-public void setOrientation(float orientation) {
-	if (isValidOrientation(orientation))
-		this.orientation = orientation;
-	else{
-		this.setOrientation(PI/2);
-	}
-}
 
+
+//ADVANCE TIME
 
 
 public void advanceTime(double dt) {
