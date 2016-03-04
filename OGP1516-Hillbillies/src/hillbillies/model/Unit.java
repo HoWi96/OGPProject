@@ -641,6 +641,20 @@ public void advanceTime(double dt) {
 	private String activity;
 	activity = this.getCurrentActivity();
 	
+	if (activity == "default") {
+		int randomActivity = (int) (Math.random()*3);
+		if (randomActivity == 0) {
+			activity = "moving";
+			this.setTargetPosition({Math.random()*50, Math.random()*50, Math.random()*50});
+		}
+		if (randomActivity == 1) {
+			activity = "working";
+		}
+		if (randomActivity == 2) {
+			activity = "rest";
+		}
+	}
+	
 	if (activity == "moving") {
 		int[] cubePosition = this.getCubePosition(this.getPosition());
 		int[] targetPosition = (int) this.getTargetPosition();
@@ -676,6 +690,7 @@ public void advanceTime(double dt) {
 	if (activity == "rest") {
 		// Moet nog aan gewerkt worden.
 		this.rest();
+		this.restingTime += dt;
 	}
 }
 
@@ -851,6 +866,7 @@ private boolean isSprinting;
 
 private String activity;
 private float activityTime;
+private double restingTime;
 
 public boolean isMoving(){
 	return (this.getCurrentActivity()=="moving");
@@ -860,6 +876,11 @@ public boolean isMoving(){
 
 
 public void setCurrentActivity(String activity){
+	if (this.getCurrentActivity() == "rest") {
+		if (this.restingTime < 0.2) {
+			return;
+		}
+	}
 	this.activity = activity;
 }
 public String getCurrentActivity(){
@@ -942,7 +963,7 @@ public void updateFightingOrientation(Unit attacker, Unit defender){ // Kan je d
 //RESTING
 
 public void rest(){
-	this.setCurrentActivity("rest");
+	// this.setCurrentActivity("rest");
 	int healingPoints = this.getToughness()/200;
 	int maxHitpoints = getMaxHitpoints(this.getWeight(), this.getToughness());
 	int newHitpoints = this.getHitpoints() + healingPoints;
@@ -954,7 +975,7 @@ public void rest(){
 		
 		if (newStamina>=maxStamina){
 			this.setStamina(maxStamina);
-			this.setCurrentActivity("default");
+			this.startDefaultBehaviour();
 		}else{
 			this.setStamina(newStamina);
 		}
@@ -963,10 +984,20 @@ public void rest(){
 	}
 }
 
+public void startResting() {
+	this.setCurrentActivity("rest");
+	this.restingTime = 0;
+}
+
 public boolean isResting(){
 	return (this.getCurrentActivity()=="resting");
 }
 
-
+public void startDefaultBehaviour() {
+	this.setCurrentActivity("default");
+}
+public void stopDefaultBehaviour() {
+	this.setCurrentActivity(null);
+}
 
 }
