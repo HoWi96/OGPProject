@@ -208,6 +208,12 @@ private int stamina;
 */
 private float orientation;
 
+/**
+ * Variable registering the speed of this Unit.
+ */
+private double speed;
+
+
 
 
 
@@ -805,9 +811,12 @@ public void advanceTime(double dt) {
 		}
 	}
 	if (activity == "rest") {
-		// Moet nog aan gewerkt worden.
-		this.rest();
-		this.restingTime += dt;
+		float minimalRestTime = this.getMinimalRestTime();
+		float timeLeft = (float) dt;
+		while (timeLeft >minimalRestTime){
+			timeLeft-=minimalRestTime;
+			this.rest();
+		}
 	}
 }
 
@@ -957,10 +966,6 @@ public double getSpeed(){
 	return this.speed;
 }
 
-/**
- * Variable registering the speed of this Unit.
- */
-private double speed;
 
 /**
  * Return the isSprinting of this Unit.
@@ -1007,10 +1012,6 @@ public void stopSprinting() {
  */
 private boolean isSprinting;
 
-/**
- * Variable registering the isMoving of this Unit.
- */
-
 private String activity;
 private double activityTime;
 private double restingTime;
@@ -1046,8 +1047,7 @@ public double getActivityTime(){
 
 public void work(){
 	this.setCurrentActivity("working");
-	float gameTimeNeeded = 500/this.getStrength();
-	this.setActivityTime(gameTimeNeeded);
+	this.setActivityTime(this.getWorkingTime());
 }
 
 public  boolean isWorking(){
@@ -1057,10 +1057,9 @@ public  boolean isWorking(){
 
 //FIGHTING
 
-//lasts for 1 second
 public void attack(){
 	this.setCurrentActivity("attack");
-	this.setActivityTime(1);
+	this.setActivityTime(this.getFightingTime());
 }
 
 public void defend(Unit attacker){
@@ -1109,26 +1108,19 @@ public void updateFightingOrientation(Unit attacker, Unit defender){
 
 //RESTING
 
+/**
+ * Let the unit rest
+ * 
+ * Each time this function is hit, the unit will or gain one hitpoint or gain one stamina.
+ * The time for healing one point is getMinimalRestTime()
+ */
 public void rest(){
-	// this.setCurrentActivity("rest");
-	int healingPoints = this.getToughness()/200;
-	int maxHitpoints = getMaxHitpoints(this.getWeight(), this.getToughness());
-	int newHitpoints = this.getHitpoints() + healingPoints;
-	if(newHitpoints>= maxHitpoints){
-		this.setHitpoints(maxHitpoints);
-		healingPoints = newHitpoints - maxHitpoints;
-		int maxStamina = getMaxStamina(this.getWeight(), this.getToughness());
-		int newStamina = this.getStamina()+ healingPoints;
-		
-		if (newStamina>=maxStamina){
-			this.setStamina(maxStamina);
-			this.startDefaultBehaviour();
-		}else{
-			this.setStamina(newStamina);
-		}
-	} else {
-		this.setHitpoints(this.getHitpoints()+ healingPoints);
+	if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
+		this.setHitpoints(this.getHitpoints()+1);
+	}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
+		this.setStamina(this.getStamina()+1);
 	}
+			
 }
 
 public void startResting() {
@@ -1140,11 +1132,66 @@ public boolean isResting(){
 	return (this.getCurrentActivity()=="resting");
 }
 
+//DEFAULTBEHAVIOUR
+
+/**
+ * Change state of Unit to default behaviour
+ * 
+ * @post the activity of the unit is switched to default behaviour
+ * 		 | new.getCurrentAcivity() == "default"
+ */
 public void startDefaultBehaviour() {
 	this.setCurrentActivity("default");
 }
+
+/**
+ * Stop default behaviour of Unit
+ * 
+ * @post the activity of the unit is switched off nothing
+ * 		 | new.getCurrentAcivity() == "nothing"
+ */
 public void stopDefaultBehaviour() {
-	this.setCurrentActivity(null);
+	this.setCurrentActivity("nothing");
 }
+
+//HELPER METHODS
+
+//TIME
+
+/**
+ * Gives the minimal rest time.
+ * The time it takes for a unit to restore one hitpoint or stamina
+ * 
+ * @return  the minimal rest tim
+ * 			|result == this.getToughness()/1000
+ */ 
+private float getMinimalRestTime(){
+	return this.getToughness()/1000;
+}
+
+/**
+ * Gives the time it takes for a unit to carry out some work.
+ * 
+ * @return The time it takes for this unit to carry out some work, 
+ * 			more specific 500/this.getStrength()
+ * 		| result == 500/this.getStrength()
+ */
+private float getWorkingTime(){
+	return 500/this.getStrength();
+}
+
+/**
+ * Gives the time it takes for a unit to attack
+ * 
+ * @return The time it takes for a unit to attack
+ * 		| result == 1
+ */
+@Immutable
+private final float getFightingTime(){
+	return 1;
+}
+
+
+
 
 }
