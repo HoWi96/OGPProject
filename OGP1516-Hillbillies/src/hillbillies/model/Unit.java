@@ -387,8 +387,7 @@ public static boolean isValidPosition(double[] position) {
  *         Unit.
  *       | ! isValidPosition(getPosition())
  */
-public int[] getCubePosition(double[] position)
-		throws IllegalArgumentException{
+public static int[] getCubePosition(double[] position) throws IllegalArgumentException{
 	if (! isValidPosition(position))
 		throw new IllegalArgumentException();
 	int[] cubePosition = new int[3];
@@ -397,6 +396,8 @@ public int[] getCubePosition(double[] position)
 	cubePosition[2] = (int) Math.floor(position[2]);
 	return cubePosition;
 	}
+
+
 
 //WEIGHT
 
@@ -768,7 +769,7 @@ public void advanceTime(double dt) {
 	}
 	
 	if (activity == "moving") {
-		int[] cubePosition = this.getCubePosition(this.getPosition());
+		int[] cubePosition = getCubePosition(this.getPosition());
 		double[] target = this.getTargetPosition();
 		int[] targetPosition = {(int)target[0], (int)target[1], (int)target[2]};
 		int[] dCube = {targetPosition[0] - cubePosition[0],
@@ -825,14 +826,41 @@ public double[] getTargetPosition() {
 	return this.targetPosition;
 }
 
-public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentException {
+/**
+ * 
+ * @param dx
+ * 		The difference in cubes to go in x direction
+ * @param dy
+ * 		The difference in cubes to go in y direction 
+ * @param dz
+ * 		The difference in cubes to go in z direction
+ * 
+ * @post The unit will get to the new position,
+ * 		this is the center of a neighboring cube
+ * 			| 	double[] newPosition = {
+ *			| cubePosition[0]+dx+CUBELENGTH/2,
+ *			| cubePosition[1]+dy+CUBELENGTH/2,
+ *			| cubePosition[2]+dz+CUBELENGTH/2};
+ *			| new.position == setTargetPosition(newPosition)
+ *
+ * @throws IllegalArgumentException
+ * 		If at least one of the parameters is not -1, 0, or 1
+ * 		| ((Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1)||
+			((Math.abs(dx)==1||Math.abs(dy)==1)&&Math.abs(dz)==1))
+ * @throws IllegalStateException
+ * 		If the calculated destination is out of bounds
+ * 		| !isValidPosition(newPosition)
+ */
+public void moveToAdjacent(int dx, int dy, int dz) 
+		throws IllegalArgumentException, IllegalStateException {
 	
 	if ((Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1)||
 			((Math.abs(dx)==1||Math.abs(dy)==1)&&Math.abs(dz)==1)){
 		throw new IllegalArgumentException();
 	}
 	
-	int[] cubePosition = this.getCubePosition(this.getPosition());
+	int[] cubePosition = getCubePosition(this.getPosition());
+	
 	double[] newPosition = {
 			cubePosition[0]+dx+CUBELENGTH/2,
 			cubePosition[1]+dy+CUBELENGTH/2,
@@ -840,7 +868,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 	};
 	
 	if (!isValidPosition(newPosition))
-		throw new IllegalArgumentException();
+		throw new IllegalStateException();
 	
 	this.setCurrentActivity("moving");
 	this.setTargetPosition(newPosition);
@@ -882,7 +910,7 @@ public void updateMovingOrientation(double[] velocityVector){
 //na onderbreking --> vervolg pad
 //nieuwe actie moveTo kan wel nog uitgevoerd worden
 public void moveTo(int[] cube){
-	int[] position = this.getCubePosition(this.getPosition());
+	int[] position = getCubePosition(this.getPosition());
 	int[] step = new int[3];
 	while ((position[0] != cube[0])&&
 			(position[1] != cube[1])&&
@@ -1069,7 +1097,8 @@ public void defend(Unit attacker){
 	this.setHitpoints(newHitpointss);
 	}
 	
-public void updateFightingOrientation(Unit attacker, Unit defender){ // Kan je deze methode ook statisch maken?
+//lukt niet statisch --> update orientatie attacker en defender
+public void updateFightingOrientation(Unit attacker, Unit defender){ 
 	double[] aPosition = attacker.getPosition();
 	double[] dPosition = defender.getPosition();
 	float aOrientation = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1]);
