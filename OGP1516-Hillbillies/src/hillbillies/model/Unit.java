@@ -1,7 +1,6 @@
 package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
-import ogp.framework.util.ModelException;
 
 
 /**
@@ -46,64 +45,61 @@ import ogp.framework.util.ModelException;
  * @invar  The orientation of each Unit must be a valid orientation for any
  *         Unit.
  *       | isValidOrientation(getOrientation())
+ *       
+ * @invar  The state of each unit must be a valid state for any
+ *         unit.
+ *       | isValidState(getState())
  */
 
 public class Unit { 
 	
+	//CONSTANTS
+	
 	private static final float PI = (float) Math.PI;
 	private static final int CUBELENGTH = 1;
+	private static final int MAXCOORDINATE = 50;
+	private static final int MINCOORDINATE = 0;
 	
+	//CONSTRUCTOR
 /**
  * Create a new unit with the given attributes.
-	 * 
-	 * @param name
-	 *            The name of the unit.
-	 * @param initialPosition
-	 *            The initial position of the unit, as an array with 3 elements
-	 *            {x, y, z}.
-	 * @param weight
-	 *            The initial weight of the unit
-	 * @param agility
-	 *            The initial agility of the unit
-	 * @param strength
-	 *            The initial strength of the unit
-	 * @param toughness
-	 *            The initial toughness of the unit
-	 * @param enableDefaultBehavior
-	 *            Whether the default behavior of the unit is enabled
-	 *            
-	 * Initialize this new Unit with default orientation.
-	 * 
-	 * @param  hitpoints
-	 *         The hitpoints for this new Unit.
-	 * 
-	 * @return The generated unit
-	 * 
-	 *  
-	 * 
-	 * @throws ModelException
-	 *             A precondition was violated or an exception was thrown
-
+ * 
+ * PARAMETERS
+ * @param name
+ *            The name of the unit.
+ * @param initialPosition
+ *            The initial position of the unit, as an array with 3 elements
+ *            {x, y, z}.
+ * @param weight
+ *            The initial weight of the unit
+ * @param agility
+ *            The initial agility of the unit
+ * @param strength
+ *            The initial strength of the unit
+ * @param toughness
+ *            The initial toughness of the unit
+ * @param enableDefaultBehavior
+ *            Whether the default behavior of the unit is enabled
+ *            
+ * Initialize this new Unit with default orientation PI/2.
+ * Initialize this new Unit with the maximum amount of hitpoints.
+ * Initialize this new Unit with the maximum amount of stamina.
+ * 
+ * ____________________________________________________________
+ * 
  * @effect The Name of this new Unit is set to
  *         the given Name.
  *       | this.setName(name)
+ *       
  * @effect The Position of this new Unit is set to
  *         the given Position.
  *       | this.setPosition(position)
- *
- * @post   If the given weight is a valid weight for any Unit,
- *         the weight of this new Unit is equal to the given
- *         weight. Otherwise, the weight of this new Unit is equal
- *         to 100.
- *       | if (isValidWeight(weight))
- *       |   then new.getWeight() == weight
- *       |   else new.getWeight() == 100
  * 
  * @post   If the given Strength is a valid Strength for any Unit,
  *         the Strength of this new Unit is equal to the given
  *         Strength. Otherwise, the Strength of this new Unit is equal
  *         to 100.
- *       | if (isValidStrength(strength))
+ *       | if (isValidInitialStrength(strength))
  *       |   then new.getStrength() == strength
  *       |   else new.getStrength() == 100
  *
@@ -111,76 +107,172 @@ public class Unit {
  *         the Agility of this new Unit is equal to the given
  *         Agility. Otherwise, the Agility of this new Unit is equal
  *         to 100.
- *       | if (isValidAgility(agility))&&(25<=agility&&agility<=100)
+ *       | if (isValidInitialAgility(agility))
  *       |   then new.getAgility() == agility
  *       |   else new.getAgility() == 100
- * 
- * @pre    The given hitpoints must be a valid hitpoints for any Unit.
- *       | isValidHitpoints(hitpoints)
- * @post   The hitpoints of this new Unit is equal to the given
- *         hitpoints.
- *       | new.getHitpoints() == hitpoints
- * 
- * @param  toughness
- *         The toughness for this new Unit.
+ *
  * @post   If the given toughness is a valid toughness for any Unit,
  *         the toughness of this new Unit is equal to the given
  *         toughness. Otherwise, the toughness of this new Unit is equal
  *         to getToughness.
- *       | if (isValidToughness(toughness))
+ *       | if (isValidInitialToughness(toughness))
  *       |   then new.getToughness() == toughness
- *       |   else new.getToughness() == getToughness
- * 
- * @param  stamina
- *         The stamina for this new Unit.
- * @pre    The given stamina must be a valid stamina for any Unit.
- *       | isValidStamina(stamina)
- * @post   The stamina of this new Unit is equal to the given
- *         stamina.
- *       | new.getStamina() == stamina
- * 
- * @param  orientation
- *         The orientation for this new Unit.
- * @post   If the given orientation is a valid orientation for any Unit,
- *         the orientation of this new Unit is equal to the given
- *         orientation. Otherwise, the orientation of this new Unit is equal
- *         to PI/2.
- *       | if (isValidOrientation(orientation))
- *       |   then new.getOrientation() == orientation
- *       |   else new.getOrientation() == PI/2
+ *       |   else new.getToughness() == 100
+ *
+ * @post   If the given weight is a valid weight for any Unit,
+ *         the weight of this new Unit is equal to the given
+ *         weight. Otherwise, the weight of this new Unit is equal
+ *         to 100.
+ *       | if (isValidInitialWeight(weight) && isValidWeight(weight))
+ *       |   then new.getWeight() == weight
+ *       |   else new.getWeight() == 100
+ *
  */
-public Unit(String name, int[] initialPosition, int weight, int agility,
-			int strength, int toughness,// int hitpoints, int stamina,
-			boolean enableDefaultBehavior)
+public Unit(String name, double[] initialPosition, int weight, int agility,
+			int strength, int toughness, boolean enableDefaultBehavior)
 			throws IllegalArgumentException {
 	
 	this.setName(name);
 	
-	this.setPosition(position);
+	this.setPosition(initialPosition);
 	
-	if (!isValidWeight(weight,strength,agility))
-		weight = 100;
-	setWeight(weight);
-	
-	
-	if (!(25<=strength&&strength<=100))
+	if (!isValidInitialStrength(strength))
 		strength = 100;
 	setStrength(strength);
 	
-	if (!(25<=agility&&agility<=100))
+	if (!isValidInitialAgility(agility))
 		agility = 100;
 	setAgility(agility);
 	
-	if (! isValidToughness(toughness))
-		toughness = getToughness();
+	if (!isValidInitialToughness(toughness))
+		toughness = 100;
 	setToughness(toughness);
 	
-	this.setHitpoints(hitpoints);
+	if (!isValidInitialWeight(weight)&& !isValidWeight(weight,strength,agility))
+		weight = 100;
+	setWeight(weight);
 	
-	this.setStamina(stamina);
+	this.setHitpoints(getMaxHitpoints(weight, toughness));
+	
+	this.setStamina(getMaxStamina(weight, toughness));
 	
 	this.setOrientation(PI/2);
 }
+
+
+//ALL PARAMETERS
+
+/**
+* Variable registering the Name of this Unit.
+*/
+private String name;
+
+/**
+* Variable registering the Position of this Unit.
+* The length is set to 3 and will not change.
+*/
+private double[] position = new double[3];
+
+/**
+* Variable registering the weight of this Unit.
+*/
+private int weight;
+
+/**
+* Variable registering the Strength of this Unit.
+*/
+private int strength;
+
+/**
+* Variable registering the toughness of this Unit.
+*/
+private int toughness;
+
+/**
+* Variable registering the Agility of this Unit.
+*/
+private int agility;
+
+/**
+* Variable registering the hitpoints of this Unit.
+*/
+private int hitpoints;
+
+/**
+* Variable registering the stamina of this Unit.
+*/
+private int stamina;
+
+/**
+* Variable registering the orientation of this Unit.
+*/
+private float orientation;
+
+
+
+
+//INITIAL CHECKERS FOR UNIT
+
+/**
+ * Checks whether the given value is a valid initial value for toughness.
+ * 
+ * @param  toughness
+ *         The initial toughness to check.
+ *         
+ * @return true if and only if the given toughness is not larger than 100 or smaller than 25
+ * 		| result == (toughness <= 100 && toughness >= 25)
+ */
+private boolean isValidInitialToughness(int toughness ){
+	return (toughness <= 100 && toughness >= 25);
+}
+
+/**
+ * Checks whether the given value is a valid initial value for strength.
+ * 
+ * @param  strength
+ *         The initial strength to check.
+ *         
+ * @return true if and only if the given strength is not larger then 100 or smaller then 25
+ * 		| result (strength <= 100 && strength >= 25)
+ */
+private boolean isValidInitialStrength(int strength ){
+	return (strength <= 100 && strength >= 25);
+}
+
+/**
+ * 
+ *  Checks whether the given value is a valid initial value for agility.
+ *  
+ *	@param  agility
+ *         The initial agility to check.
+ *         
+ * @return true if and only if the given agility is not larger then 100 or smaller then 25
+ * 		| result == (agility <= 100 && agility >= 25)
+ */
+private boolean isValidInitialAgility(int agility ){
+	return (agility <= 100 && agility >= 25);
+}
+
+/**
+ *
+ * Checks whether the given value is a valid initial value for weight.
+ * 
+ *  @param weight
+ *         The initial weight to check.
+ *         
+ * @return true if and only if the given weight is not larger then 100 or smaller then 25
+ * 		| result == (weight <= 100 && weight >= 25)
+ */
+private boolean isValidInitialWeight(int weight){
+	return (weight <= 100 && weight >= 25);
+}
+
+/*___________________________________________________________________*/
+// METHODS
+
+
+
+// NAME
 
 /**
  * Return the Name of this Unit.
@@ -188,19 +280,6 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 @Basic @Raw
 public String getName() {
 	return this.name;
-}
-
-/**
- * Check whether the given Name is a valid Name for
- * any Unit.
- *  
- * @param  Name
- *         The Name to check.
- * @return 
- *       | result == (name.length()>2)&&(Character.isUpperCase(name.charAt(0))&&(name.matches("[A-Za-z\"' ]+")))
-*/
-public static boolean isValidName(String name) {
-	return (name.length()>2)&&(Character.isUpperCase(name.charAt(0))&&(name.matches("[A-Za-z\"' ]+")));
 }
 
 /**
@@ -217,17 +296,34 @@ public static boolean isValidName(String name) {
  *       | ! isValidName(getName())
  */
 @Raw
-public void setName(String name) 
-		throws IllegalArgumentException {
+public void setName(String name) throws IllegalArgumentException {
 	if (! isValidName(name))
 		throw new IllegalArgumentException();
 	this.name = name;
 }
 
 /**
- * Variable registering the Name of this Unit.
- */
-private String name;
+ * Check whether the given Name is a valid Name for
+ * any Unit.
+ *  
+ * @param  Name
+ *         The Name to check.
+ * @return true if and only if the name is longer then 2 and
+ * 			the first character is an upper case letter and
+ * 			the name exists of only letters, numbers, spaces and quotes.
+ *       | result == (name.length()>2)&&
+ *       (Character.isUpperCase(name.charAt(0))&&
+ *       (name.matches("[A-Za-z\"' ]+")))
+*/
+public static boolean isValidName(String name) {
+	return (name.length()>2)&&
+			(Character.isUpperCase(name.charAt(0))&&
+			(name.matches("[A-Za-z\"' ]+")));
+}
+
+
+
+//POSITION
 
 /**
  * Return the Position of this Unit.
@@ -235,25 +331,6 @@ private String name;
 @Basic @Raw
 public double[] getPosition() {
 	return this.position;
-}
-
-/**
- * Check whether the given Position is a valid Position for
- * any Unit.
- *  
- * @param  Position
- *         The Position to check.
- * @return The position has to be inside the game world
- *       | result ==
- *       | (0<=position[0]&&position[0]<=50)&&
- *       | (0<=position[1]&&position[1]<=50)&&
- *       | (0<=position[2]&&position[2]<=50)
- *       
-*/
-public static boolean isValidPosition(double[] position) {
-	return (0<=position[0]&&position[0]<=50)&&
-	       (0<=position[1]&&position[1]<=50)&&
-	       (0<=position[2]&&position[2]<=50);
 }
 
 /**
@@ -268,14 +345,33 @@ public static boolean isValidPosition(double[] position) {
  *         The given Position is not a valid Position for any
  *         Unit.
  *       | ! isValidPosition(getPosition())
- */
-//TODO maak het mogelijk om als initiele waarde een int in te geven
+ */	
 @Raw
-public void setPosition(double[] position) 
-		throws IllegalArgumentException {
+public void setPosition(double[] position) throws IllegalArgumentException {
+	
 	if (! isValidPosition(position))
 		throw new IllegalArgumentException();
-	this.position = position;
+	
+	this.position = position;	
+}
+
+/**
+ * Check whether the given Position is a valid Position for
+ * any Unit.
+ *  
+ * @param  Position
+ *         The Position to check.
+ * @return The position has to be inside the game world
+ *       | result ==
+ *       | (MINCOORDINATE<=position[0]&&position[0]<=MAXCOORDINATE)&&
+ *       | (MINCOORDINATE<=position[1]&&position[1]<=MAXCOORDINATE)&&
+ *       | (MINCOORDINATE<=position[2]&&position[2]<=MAXCOORDINATE)
+ *       
+*/
+public static boolean isValidPosition(double[] position) {
+	return (MINCOORDINATE<=position[0]&&position[0]<=MAXCOORDINATE)&&
+	       (MINCOORDINATE<=position[1]&&position[1]<=MAXCOORDINATE)&&
+	       (MINCOORDINATE<=position[2]&&position[2]<=MAXCOORDINATE);
 }
 
 /**
@@ -302,13 +398,7 @@ public int[] getCubePosition(double[] position)
 	return cubePosition;
 	}
 
-
-/**
- * Variable registering the Position of this Unit.
- * The length is set to 3 and can't be changed
- */
-private double[] position = new double[3];
-
+//WEIGHT
 
 /**
  * Return the weight of this Unit.
@@ -348,10 +438,7 @@ public void setWeight(int weight) {
 		this.weight = weight;
 }
 
-/**
- * Variable registering the weight of this Unit.
- */
-private int weight;
+
 
 
 /**
@@ -393,10 +480,7 @@ public void setStrength(int strength) {
 		this.strength = strength;
 }
 
-/**
- * Variable registering the Strength of this Unit.
- */
-private int strength;
+
 
 
 /**
@@ -437,10 +521,6 @@ public void setAgility(int agility) {
 		this.agility = agility;
 }
 
-/**
- * Variable registering the Agility of this Unit.
- */
-private int agility;
 
 
 /**
@@ -480,11 +560,6 @@ public void setToughness(int toughness) {
 	if (isValidToughness(toughness))
 		this.toughness = toughness;
 }
-
-/**
- * Variable registering the toughness of this Unit.
- */
-private int toughness;
 
 
 /**
@@ -531,10 +606,7 @@ public void setHitpoints(int hitpoints) {
 	this.hitpoints = hitpoints;
 }
 
-/**
- * Variable registering the hitpoints of this Unit.
- */
-private int hitpoints;
+
 
 
 /**
@@ -558,7 +630,7 @@ public static boolean isValidStamina(int stamina, int weight, int toughness) {
 	return (0<=stamina && stamina<= getMaxStamina(weight, toughness));
 }
 
-//TODO write documentation
+
 public static int getMaxStamina(int weight, int toughness){
 	return (int) Math.ceil(200.0*weight/100*toughness/100);
 }
@@ -581,10 +653,6 @@ public void setStamina(int stamina) {
 	this.stamina = stamina;
 }
 
-/**
- * Variable registering the stamina of this Unit.
- */
-private int stamina;
 
 
 /**
@@ -629,10 +697,6 @@ public void setOrientation(float orientation) {
 	}
 }
 
-/**
- * Variable registering the orientation of this Unit.
- */
-private float orientation;
 
 
 public void advanceTime(double dt) {
