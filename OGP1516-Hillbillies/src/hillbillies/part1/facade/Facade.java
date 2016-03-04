@@ -10,6 +10,7 @@ public class Facade implements IFacade{
 			boolean enableDefaultBehavior) throws ModelException {
 		// TODO Auto-generated method stub
 		Unit unit = new Unit(name, initialPosition, weight, agility, strength, toughness, enableDefaultBehavior);
+		System.out.println(initialPosition[0]);
 		return unit;
 	}
 

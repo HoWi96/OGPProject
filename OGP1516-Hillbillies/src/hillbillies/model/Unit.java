@@ -676,6 +676,8 @@ public void advanceTime(double dt) {
 			this.setCurrentActivity("default");
 			this.setPosition(target);
 		}
+		// Ai ik ben vergeten de positie ook echt aan te passen, komt er aan.
+		System.out.println(nextPosition[0]);
 	}
 	
 	if (activity == "working") {
@@ -706,6 +708,9 @@ public void setTargetPosition(double[] position) {
 }
 
 public double[] getTargetPosition() {
+	if (this.targetPosition == null) {
+		System.out.println("null");
+	}
 	return this.targetPosition;
 }
 
@@ -716,7 +721,6 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		throw new IllegalArgumentException();
 	}
 	
-	this.setCurrentActivity("moving");
 	int[] cubePosition = this.getCubePosition(this.getPosition());
 	double[] newPosition = {
 			cubePosition[0]+dx+CUBELENGTH/2,
@@ -727,6 +731,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 	if (!isValidPosition(newPosition))
 		throw new IllegalArgumentException();
 	
+	this.setCurrentActivity("moving");
 	this.setTargetPosition(newPosition);
 }
 
@@ -800,7 +805,7 @@ public void updateSpeed(int dz){
 			walkingSpeed = baseSpeed;
 		}
 		this.speed = walkingSpeed;
-	};
+	}
 	else
 		this.speed = 0.0;
 }
@@ -868,7 +873,7 @@ private boolean isSprinting;
  */
 
 private String activity;
-private float activityTime;
+private double activityTime;
 private double restingTime;
 
 public boolean isMoving(){
@@ -927,14 +932,13 @@ public void defend(Unit attacker){
 	
 	if(Math.random()<probDodging){
 		int step[] = {0,0,0};
-		int[] currentPosition = this.getPosition();
-		int[] nextPosition = currentPosition;
-		while ((step[0]==0 && step[1]==0)||(!isValidPostion(nextPosition)){
+		double[] currentPosition = this.getPosition();
+		double[] nextPosition = currentPosition;
+		while ((step[0]==0 && step[1]==0)||(!isValidPosition(nextPosition))){
 			step[0] = -1 + (int)(Math.random()*3);
 			step[1] = -1 + (int)(Math.random()*3);
-			nextPosition = {currentPosition[0] + step[0],
-							currentPosition[1] + step[1],
-							currentPosition[2]};
+			nextPosition[0] = currentPosition[0] + step[0];
+			nextPosition[1] = currentPosition[1] + step[1];
 		};
 		this.moveToAdjacent(step[0], step[1], step[2]);
 		return;
