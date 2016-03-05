@@ -128,13 +128,13 @@ public class Unit {
  *       |   else new.getWeight() == 100
  *
  */
-public Unit(String name, double[] initialPosition, int weight, int agility,
+public Unit(String name, int[] initialPosition, int weight, int agility,
 			int strength, int toughness, boolean enableDefaultBehavior)
 			throws IllegalArgumentException {
 	
 	this.setName(name);
 	
-	this.setPosition(initialPosition);
+	this.setPosition(getCubeCenter(initialPosition));
 	
 	if (!isValidInitialStrength(strength))
 		strength = 100;
@@ -213,6 +213,16 @@ private float orientation;
  */
 private double speed;
 
+/**
+ * The position where the unit is heading to
+ */
+private double[] targetPosition;
+
+/**
+ * Variable registering if the unit is sprinting
+ */
+private boolean isSprinting;
+
 
 
 
@@ -273,8 +283,11 @@ private boolean isValidInitialWeight(int weight){
 	return (weight <= 100 && weight >= 25);
 }
 
-/*___________________________________________________________________*/
-// METHODS
+/*___________________________________________________________________
+ * __________________________________________________________________
+ * -----------------------METHODS------------------------------------
+ *___________________________________________________________________
+ *____________________________________________________________________*/
 
 
 
@@ -381,27 +394,45 @@ public static boolean isValidPosition(double[] position) {
 }
 
 /**
+ * Gives back the position of the cube
  * 
  * @param position
  *			The position of this Unit
+ *
  * @return The position of the cube where the Unit is located
  * 			| cubePosition[0] = (int) Math.floor(position[0]);
  *			| cubePosition[1] = (int) Math.floor(position[1]);
  *			| cubePosition[2] = (int) Math.floor(position[2]);
- * @throws illegalArgumentException
- *         The given Position is not a valid Position for any
- *         Unit.
- *       | ! isValidPosition(getPosition())
  */
-public static int[] getCubePosition(double[] position) throws IllegalArgumentException{
-	if (! isValidPosition(position))
-		throw new IllegalArgumentException();
+public static int[] getCubePosition(double[] position){
 	int[] cubePosition = new int[3];
 	cubePosition[0] = (int) Math.floor(position[0]);
 	cubePosition[1] = (int) Math.floor(position[1]);
 	cubePosition[2] = (int) Math.floor(position[2]);
 	return cubePosition;
 	}
+
+
+/**
+ * Gives back the position of the center of the cube with the given position
+ * 
+ * @param cubePosition
+ * 			the position of the cube
+ * 
+ * @return
+ * 		The position of the center of the cube with given coordinates
+ * 		| result == new double[] {
+ * 		| 	(double)coordinates[0]+0.5,
+ * 		|	(double)coordinates[1]+0.5,
+ * 		| 	(double)coordinates[2]+0.5
+ * 		| }
+ */
+@Model
+private static double[] getCubeCenter(int[] cubePosition) {
+	return new double[] {(double)cubePosition[0]+CUBELENGTH/2,
+						 (double)cubePosition[1]+CUBELENGTH/2,
+						 (double)cubePosition[2]+CUBELENGTH/2};
+}
 
 
 
@@ -458,6 +489,7 @@ public static boolean isValidWeight(int weight,int strength, int agility) {
  * @return the minimum weight of this unit
  * 		|result ==  (strength+agility)/2
  */
+@Model
 private static int getMinWeight(int strength, int agility ){
 	return (strength + agility)/2;
 }
@@ -782,7 +814,7 @@ public void advanceTime(double dt) {
 					   targetPosition[1] - cubePosition[1],
 					   targetPosition[2] - cubePosition[2]
 		};
-		this.updateMovingOrientation(this.getVelocityVector(dCube[0], dCube[1], dCube[2]));
+		this.setOrientation(getMovingOrientation(getVelocityVector(dCube[0], dCube[1], dCube[2],this.getSpeed())));
 		double[] nextPosition = this.getIntermediatePosition(dCube[0], dCube[1], dCube[2], dt);
 		int[] dNext = {targetPosition[0] - (int)nextPosition[0],
 				       targetPosition[1] - (int)nextPosition[1],
@@ -822,8 +854,6 @@ public void advanceTime(double dt) {
 
 //MOVING
 
-private double[] targetPosition;
-
 public void setTargetPosition(double[] position) {
 	this.targetPosition = position;
 }
@@ -854,8 +884,7 @@ public double[] getTargetPosition() {
  *
  * @throws IllegalArgumentException
  * 		If at least one of the parameters is not -1, 0, or 1
- * 		| ((Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1)||
-			((Math.abs(dx)==1||Math.abs(dy)==1)&&Math.abs(dz)==1))
+ * 		| (Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1)
  * @throws IllegalStateException
  * 		If the calculated destination is out of bounds
  * 		| !isValidPosition(newPosition)
@@ -863,17 +892,16 @@ public double[] getTargetPosition() {
 public void moveToAdjacent(int dx, int dy, int dz) 
 		throws IllegalArgumentException, IllegalStateException {
 	
-	if ((Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1)||
-			((Math.abs(dx)==1||Math.abs(dy)==1)&&Math.abs(dz)==1)){
+	if (Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1){
 		throw new IllegalArgumentException();
 	}
 	
-	int[] cubePosition = getCubePosition(this.getPosition());
+	double[] cubeCenter = getCubeCenter(getCubePosition(this.getPosition()));
 	
 	double[] newPosition = {
-			cubePosition[0]+dx+CUBELENGTH/2,
-			cubePosition[1]+dy+CUBELENGTH/2,
-			cubePosition[2]+dz+CUBELENGTH/2
+			cubeCenter[0]+dx,
+			cubeCenter[1]+dy,
+			cubeCenter[2]+dz
 	};
 	
 	if (!isValidPosition(newPosition))
@@ -884,10 +912,19 @@ public void moveToAdjacent(int dx, int dy, int dz)
 }
 
 
-
-public double[] getVelocityVector(int dx, int dy, int dz){
+/**
+ * @param dx
+ * @param dy
+ * @param dz
+ * @param speed
+ * 		The speed of the given unit
+ * @return the velocity in all directions of the unit
+ * 			|result == {speed*dx/distance,speed*dy/distance,speed*dz/distance}
+ * 				
+ */
+@Model
+private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 	double distance = Math.sqrt(dx^2+dy^2+dz^2);
-	double speed = this.getSpeed();
 	double[] velocity = {
 			speed*dx/distance,
 			speed*dy/distance,
@@ -895,10 +932,22 @@ public double[] getVelocityVector(int dx, int dy, int dz){
 	};
 	return velocity;
 };
-
+/**
+ * 
+ * @param dx
+ * @param dy
+ * @param dz
+ * @param dt
+ * @return the intermediate position of unit who is walking
+ * 			 from his original position to his new position
+ * 			| result == {this.position[0]+this.getVelocityVector[0]*dt,
+ * 						this.position[1]+this.getVelocityVector[1]*dt,
+ * 						this.position[2]+this.getVelocityVector[2]*dt}
+ * 						
+ */
 public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	double[] position = this.getPosition();
-	double[] velocityVector = this.getVelocityVector(dx, dy, dz);
+	double[] velocityVector = getVelocityVector(dx, dy, dz, this.getSpeed());
 	double[] newPosition = {
 			position[0]+velocityVector[0]*dt,
 			position[1]+velocityVector[1]*dt,
@@ -906,11 +955,15 @@ public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	};
 	return newPosition;
 }
-
-public void updateMovingOrientation(double[] velocityVector){
-	//aandacht: functie atan2(y,x)!!
+/**
+ * returns the moving orientation of the unit
+ * 
+ * @param velocityVector
+ */
+@Model
+private static float getMovingOrientation(double[] velocityVector){
 	float orientation = (float) Math.atan2(velocityVector[1], velocityVector[0]);
-	this.setOrientation(orientation);
+	return orientation;
 }
 
 
@@ -937,12 +990,20 @@ public void moveTo(int[] cube){
 	}
 				
 }
-
+/**
+ * Update the speed of the unit with the information we have about that unit
+ * 
+ * @param dz
+ * 		the difference in z coordinates
+ * @post the new speed of the unit is the speed of the unit
+ * 		 according the conditions of this unit
+ */
 public void updateSpeed(int dz){
+	double realSpeed;
 	if(this.isMoving()){
-		double baseSpeed = (double) 1.5*(this.getStrength()+this.getAgility())
-				/(200*this.getWeight()/100);
+		double baseSpeed = (double) 0.75*(this.getStrength()+this.getAgility())/(this.getWeight());
 		double walkingSpeed;
+		
 		if (dz == 1){
 			walkingSpeed = baseSpeed*0.5;
 			}
@@ -952,10 +1013,15 @@ public void updateSpeed(int dz){
 		else{
 			walkingSpeed = baseSpeed;
 		}
-		this.speed = walkingSpeed;
+		realSpeed = walkingSpeed;
+		
+		if (this.isSprinting())
+			realSpeed = walkingSpeed*2;
+	}else{
+		realSpeed = 0.0;
 	}
-	else
-		this.speed = 0.0;
+	
+	this.speed = realSpeed;
 }
 
 /**
@@ -966,51 +1032,43 @@ public double getSpeed(){
 	return this.speed;
 }
 
-
 /**
- * Return the isSprinting of this Unit.
+ * Return true if the unit is sprinting
  */
 @Basic @Raw
 public boolean isSprinting() {
 	return this.isSprinting;
 }
 
-
-// Ik heb het gevoel dat deze documentatie niet bij deze methode hoort.
 /**
- * Set the isSprinting of this Unit to the given isSprinting.
+ * The Unit starts to sprint
  * 
- * @param  isSprinting
- *         The new isSprinting for this Unit.
- * @post   The isSprinting of this new Unit is equal to
- *         the given isSprinting.
- *       | new.getIsSprinting() == isSprinting
+ * @post  The unit will go in sprinting mode
+ *       | new.isSprinting() == true
  * @throws ExceptionName_Java
  *         The given isSprinting is not a valid isSprinting for any
  *         Unit.
  *       | ! isValidIsSprinting(getIsSprinting())
  */
-public void startSprinting() {
-	if (this.getStamina()>0 && this.isMoving()){
-		if (!this.isSprinting){
+public void startSprinting() throws IllegalStateException{
+	if (!(this.getStamina()>0 && this.isMoving()))
+		throw new IllegalStateException("The unit is not moving or is out of stamina");
+	if(!this.isSprinting()){
 			this.isSprinting = true;
-			this.speed *=2;
-		}
-	}
-	
-}
-
-public void stopSprinting() {
-	if (this.isSprinting){
-		this.isSprinting = false;
-		this.speed /=2;
 	}
 }
 
 /**
- * Variable registering the isSprinting of this Unit.
+ * The unit will stop sprinting
+ * 
+ * @post  The unit will stop sprinting
+ *       | new.isSprinting() == false
  */
-private boolean isSprinting;
+public void stopSprinting() {
+	if (this.isSprinting){
+		this.isSprinting = false;
+	}
+}
 
 private String activity;
 private double activityTime;

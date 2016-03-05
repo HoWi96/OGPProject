@@ -9,123 +9,106 @@ public class Facade implements IFacade{
 	public Unit createUnit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness,
 			boolean enableDefaultBehavior) throws ModelException {
 		
-		double[] initialPosition2 = {
-				initialPosition[0],
-				initialPosition[1],
-				initialPosition[2]
-				
-		};
-		
-		Unit unit = new Unit(name, initialPosition2, weight, agility, strength, toughness, enableDefaultBehavior);
-		System.out.println(initialPosition[0]);
-		return unit;
+		try {
+			Unit unit = new Unit(name, initialPosition, weight, agility, strength, toughness, enableDefaultBehavior);
+			return unit;
+		} catch (IllegalArgumentException e) {
+			throw new ModelException();
+		}
 	}
 	
 
 	@Override
 	public double[] getPosition(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		double[] position = unit.getPosition();
 		return position;
 	}
 
 	@Override
 	public int[] getCubeCoordinate(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		int[] cubeCoordinate = unit.getCubePosition(unit.getPosition());
+		int[] cubeCoordinate = Unit.getCubePosition(unit.getPosition());
 		return cubeCoordinate;
 	}
 
 	@Override
 	public String getName(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		String name = unit.getName();
 		return name;
 	}
 
 	@Override
 	public void setName(Unit unit, String newName) throws ModelException {
-		// TODO Auto-generated method stub
-		unit.setName(newName);
-		
+		try {
+			unit.setName(newName);
+		} catch (IllegalArgumentException e) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
 	public int getWeight(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		int weight = unit.getWeight();
 		return weight;
 	}
 
 	@Override
 	public void setWeight(Unit unit, int newValue) throws ModelException {
-		// TODO Auto-generated method stub
-		unit.setWeight(newValue);
+			unit.setWeight(newValue);
 	}
 
 	@Override
 	public int getStrength(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		int strength = unit.getStrength();
 		return strength;
 	}
 
 	@Override
 	public void setStrength(Unit unit, int newValue) throws ModelException {
-		// TODO Auto-generated method stub
 		unit.setStrength(newValue);
 	}
 
 	@Override
 	public int getAgility(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		int agility = unit.getAgility();
 		return agility;
 	}
 
 	@Override
 	public void setAgility(Unit unit, int newValue) throws ModelException {
-		// TODO Auto-generated method stub
 		unit.setAgility(newValue);
 	}
 
 	@Override
 	public int getToughness(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		int toughness = unit.getToughness();
 		return toughness;
 	}
 
 	@Override
 	public void setToughness(Unit unit, int newValue) throws ModelException {
-		// TODO Auto-generated method stub
 		unit.setToughness(newValue);
 	}
 
 	@Override
 	public int getMaxHitPoints(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		int maxHitPoints = Unit.getMaxHitpoints(unit.getWeight(), unit.getToughness());
 		return maxHitPoints;
 	}
 
 	@Override
 	public int getCurrentHitPoints(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		int hitPoints = unit.getHitpoints();
 		return hitPoints;
 	}
 
 	@Override
 	public int getMaxStaminaPoints(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		int maxStamina = Unit.getMaxStamina(unit.getWeight(), unit.getToughness());
 		return maxStamina;
 	}
 
 	@Override
 	public int getCurrentStaminaPoints(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		int stamina = unit.getStamina();
 		return stamina;
 	}
