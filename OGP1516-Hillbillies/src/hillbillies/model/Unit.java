@@ -920,6 +920,7 @@ public void updateSpeed(int dz){
  *___________________________________________________________________
  *___________________________________________________________________*/
 
+//TODO fix advance time :(
 
 public void advanceTime(double dt) throws IllegalArgumentException {
 	if (!(0.0<=dt&&dt<=0.2))
@@ -929,22 +930,15 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 //	if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
 //		rest();	}
 	
-	if (this.hasDefaultBehavior()) {
-		int randomActivity = (int) (Math.random()*3);
-		if (randomActivity == 0) {
+	
+	// continue moving after doing you are again able to move
+	if((!equals(this.getPosition(),this.getTargetPosition()))){
+		if (this.isAbleToMove())
 			this.setCurrentActivity("moving");
-			double[] target = {Math.random()*50, Math.random()*50, Math.random()*50};
-			this.setTargetPosition(target);
-		}
-		if (randomActivity == 1) {
-			this.setCurrentActivity("working");
-		}
-		if (randomActivity == 2) {
-			this.setCurrentActivity("resting");
-		}
 	}
+			
+			
 	if (activity == "moving") {
-		
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
 					this.setStamina((int)(this.getStamina()-10*dt));
@@ -954,21 +948,22 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				}
 			}
 			
-			double[] cPosition = this.getPosition();
-			double[] nPosition = this.getNextPosition();
-			double[] targetPosition = this.getTargetPosition();
+			
 			int[] step = new int[3];
 			
+			double[] cPosition = this.getPosition();
+			double[] nPosition = this.getNextPosition();
+			double[] tPosition = this.getTargetPosition();
 			
 			if(equals(cPosition,nPosition)){
-				if(equals(cPosition, targetPosition)){
+				if(equals(cPosition, tPosition)){
 					this.setCurrentActivity("none");
 				}else{
 					//pathfinding algorithm
 					for(int i = 0; i<3; i++){
-						if (cPosition[i] == targetPosition[i]){
+						if (cPosition[i] == tPosition[i]){
 							step[i] = 0;
-						}else if(cPosition[i] < targetPosition[i]){
+						}else if(cPosition[i] < tPosition[i]){
 							step[i] = 1;
 						}else{
 							step[i] = -1;
@@ -982,8 +977,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 					this.setPosition(iPosition);
 					else
 						this.setPosition(nPosition);
-				}
-				
+				}	
 		}
 	}
 	
@@ -1256,6 +1250,9 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 /*
  * -----------------GETTERS-----------------
  */
+
+//TODO write documentation
+
 @Model
 private String getCurrentActivity(){
 	return this.activity;
@@ -1335,6 +1332,9 @@ public boolean hasDefaultBehavior() {
 
 /**
 * Returns true if the unit is sprinting
+* @return
+*  		true if the unit is currently in default behavior.
+* 		| result == this.isSprinting
 */
 @Basic @Raw
 public boolean isSprinting() {
@@ -1344,6 +1344,9 @@ public boolean isSprinting() {
 /*
  * ---------------ACTIVITY INITIALISERS----------------------
  */
+
+
+//TODO write documentation
 
 //WORKING
 
@@ -1413,15 +1416,30 @@ public void rest() throws IllegalStateException{
 
 //DEFAULTBEHAVIOUR
 
-
 /**
  * Change state of Unit to default behavior
  * 
  * @post the activity of the unit is switched to default behavior
- * 		 | new.getCurrentAcivity() == "default"
+ * 		 | new.hasDefaultBehavior() == true
  */
 public void startDefaultBehavior() {
-	this.hasDefaultBehavior = true;
+	this.hasDefaultBehavior = true; {
+		int randomActivity = (int) (Math.random()*3);
+		if (randomActivity == 0) {
+
+			double[] target = {Math.random()*50, Math.random()*50, Math.random()*50};
+			this.setTargetPosition(target);
+				
+		}
+		if (randomActivity == 1) {
+			this.setCurrentActivity("working");
+		}
+		if (randomActivity == 2) {
+			this.setCurrentActivity("resting");
+		}
+	}
+	
+	
 }
 
 //SPRINTING
@@ -1437,25 +1455,29 @@ public void startDefaultBehavior() {
 *       | ! isValidIsSprinting(getIsSprinting())
 */
 public void startSprinting() throws IllegalStateException{
-	//if (!this.isAbleToSprint())
-	//	throw new IllegalStateException();
+	if (!this.isAbleToSprint())
+		throw new IllegalStateException();
 	this.isSprinting = true;
 	
 }
-
 
 /*
  * --------------ACTIVITY TERMINATORS--------------------
  */
 
 /**
- * Stop default behaviour of Unit
+ * Stop default behavior of Unit
  * 
  * @post the activity of the unit is switched off to nothing
- * 		 | new.getCurrentAcivity() == "nothing"
+ * 		 | new.getCurrentAcivity() == "none"
+ * 
+ * @post the default behavior is switched off
+ * 		| new.hasDefaultBehaviour() == false
+ * 
  */
 public void stopDefaultBehaviour() {
 	this.setCurrentActivity("none");
+	this.hasDefaultBehavior = false;
 }
 
 
@@ -1528,6 +1550,8 @@ private final float getFightingTime(){
  * ---------------------------ABILITY CHECKERS-------------------------------
  */
 
+//TODO write documentation
+
 public boolean isAbleToMove(){
 	return this.getCurrentActivity()!="attacking" && this.getCurrentActivity()!="working";
 }
@@ -1551,6 +1575,8 @@ public boolean isAbleToWork(){
  * ____________________________________________________________
  *_____________________________________________________________
  */
+
+//TODO write documentation
 
 private boolean equals(double[] position1, double[] position2) {
 	return (position1[0] == position2[0])&&
