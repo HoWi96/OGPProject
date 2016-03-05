@@ -275,22 +275,22 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 		toughness = 100;
 	setToughness(toughness);
 	
-	if (!isValidInitialWeight(weight)&& !isValidWeight(weight,strength,agility))
+	if (!isValidInitialWeight(weight) && !isValidWeight(weight,strength,agility))
 		weight = 100;
 	setWeight(weight,strength,agility);
 	
-	this.setHitpoints(getMaxHitpoints(weight, toughness), weight, toughness);
+	setHitpoints(getMaxHitpoints(weight, toughness), weight, toughness);
 	
-	this.setStamina(getMaxStamina(weight, toughness),weight, toughness);
+	setStamina(getMaxStamina(weight, toughness),weight, toughness);
 	
-	this.setOrientation(PI/2);
+	setOrientation(PI/2);
 	
 	
 	
 	if(enableDefaultBehavior)
-		this.hasDefaultBehavior();
+		hasDefaultBehavior();
 	else
-		 this.setCurrentActivity("none");
+		 setCurrentActivity("none");
 }
 
 /*
@@ -666,7 +666,7 @@ public static boolean isValidPosition(double[] position) {
 */
 public static boolean isValidWeight(int weight,int strength, int agility) {
 	return 	(1<=weight)&&(weight<=200)&&
-			(weight>getMinWeight(strength, agility)) ;
+			(weight>=getMinWeight(strength, agility)) ;
 }
 
 
@@ -957,7 +957,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			double[] tPosition = this.getTargetPosition();
 			
 			if(equals(cPosition,nPosition)){
-				if(equals(cPosition, tPosition)){
+				if(tPosition == null || equals(cPosition, tPosition)){
 					this.setCurrentActivity("none");
 				}else{
 					//pathfinding algorithm
@@ -970,9 +970,15 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 							step[i] = -1;
 						}
 						this.setStep(step);
+						
 						this.moveToAdjacent(step[0],step[1],step[2]);
 				}}
+			System.out.println("kom ik hier terecht?");
 			step = this.getStep();
+			System.out.println(step[0]);
+			System.out.println(step[1]);
+			System.out.println(step[2]);
+			
 			double[] iPosition = this.getIntermediatePosition(step[0],step[1],step[2], dt);
 			if(inBetween(cPosition, nPosition, iPosition))
 			this.setPosition(iPosition);
@@ -1176,6 +1182,9 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		if (!isValidPosition(nextPosition))
 			throw new IllegalArgumentException();
 		
+		int[] step = new int[] {dx, dy, dz};
+		
+		this.setStep(step);
 		this.setCurrentActivity("moving");
 		this.updateSpeed(dz);
 		this.setOrientation(getMovingOrientation(getVelocityVector(dx, dy, dz, this.getSpeed())));
