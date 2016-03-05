@@ -753,16 +753,17 @@ public float getOrientation() {
  *         orientation.
  *       | if (isValidOrientation(orientation))
  *       |   then new.getOrientation() == orientation
- * @post If the  given orientation is a valid orientation for any Unit,
- *         the orientation of this new Unit is equal to the given
- *         orientation.
+ * @post If the  given orientation is not a valid orientation for any Unit,
+ *         the orientation will be orientation modulo 2*PI
+ *        | if (!isValidOrientation(orientation))
+ *        |  	then new.getOrientation() == orientation%2*PI
  */
 @Raw
 public void setOrientation(float orientation) {
 	if (isValidOrientation(orientation))
 		this.orientation = orientation;
 	else{
-		this.setOrientation(PI/2);
+		this.orientation = orientation%2*PI;
 	}
 }
 
@@ -779,7 +780,129 @@ public static boolean isValidOrientation(float orientation) {
 	return (0<=orientation && orientation<2*PI);
 }
 
+/**
+ * returns the moving orientation of the unit
+ * 
+ * @param velocityVector
+ *			the vector indication the velocity in each direction
+ * @return the moving orientation of the unit
+ * 			| result == (float) Math.atan2(velocityVector[1], velocityVector[0])
+ */
+@Model
+private static float getMovingOrientation(double[] velocityVector){
+	float orientation = (float) Math.atan2(velocityVector[1], velocityVector[0]);
+	return orientation;
+}
+/**
+ * Update the orientations of the units who are fighting
+ * @param attacker
+ * 			the attacking unit
+ * @param defender
+ * 			the defending unit
+ * @post The orientation of the attacking unit will be updated
+ * 			| attacker.getOrientation() = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1])
+ * 			| defender.getOrientation() = (float) Math.atan2(aPosition[1]-dPosition[1], aPosition[0]-dPosition[1])
+ */
+public void updateFightingOrientation(Unit attacker, Unit defender){ 
+	double[] aPosition = attacker.getPosition();
+	double[] dPosition = defender.getPosition();
+	float aOrientation = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1]);
+	float dOrientation = (float) Math.atan2(aPosition[1]-dPosition[1], aPosition[0]-dPosition[1]);
+	attacker.setOrientation(aOrientation);
+	defender.setOrientation(dOrientation);
+}
 
+//SPEED
+
+/**
+* Return the speed of this Unit.
+*/
+@Basic @Raw
+public double getSpeed(){
+	return this.speed;
+}
+
+/**
+* Update the speed of the unit with the information we have about that unit
+* 
+* @param dz
+* 		the difference in z coordinates
+* @post the new speed of the unit is the speed of the unit
+* 		 according the conditions of this unit
+*/
+public void updateSpeed(int dz){
+	double realSpeed;
+	if(this.isMoving()){
+		double baseSpeed = (double) 0.75*(this.getStrength()+this.getAgility())/(this.getWeight());
+		double walkingSpeed;
+		
+		if (dz == 1){
+			walkingSpeed = baseSpeed*0.5;
+			}
+		else if (dz == -1){
+			walkingSpeed = baseSpeed*1.2;
+			}
+		else{
+			walkingSpeed = baseSpeed;
+		}
+		realSpeed = walkingSpeed;
+		
+		if (this.isSprinting())
+			realSpeed = walkingSpeed*2;
+	}else{
+		realSpeed = 0.0;
+	}
+	
+	this.speed = realSpeed;
+}
+
+//SPRINTING
+
+/**
+* Return true if the unit is sprinting
+*/
+@Basic @Raw
+public boolean isSprinting() {
+	return this.isSprinting;
+}
+
+/**
+* The Unit starts to sprint
+* 
+* @post  The unit will go in sprinting mode
+*       | new.isSprinting() == true
+* @throws ExceptionName_Java
+*         The given isSprinting is not a valid isSprinting for any
+*         Unit.
+*       | ! isValidIsSprinting(getIsSprinting())
+*/
+public void startSprinting() throws IllegalStateException{
+	if (!(this.getStamina()>0 && this.isMoving()))
+		throw new IllegalStateException("The unit is not moving or is out of stamina");
+	if(!this.isSprinting()){
+			this.isSprinting = true;
+	}
+}
+
+/**
+* The unit will stop sprinting
+* 
+* @post  The unit will stop sprinting
+*       | new.isSprinting() == false
+*/
+public void stopSprinting() {
+	if (this.isSprinting){
+		this.isSprinting = false;
+	}
+}
+
+/**
+ * ___________________________________________________________________
+ * ____________________________________________________________________________________
+ * WORK IN PROGRESSS!!!
+ * _______________________________________________________________________________
+ * __________________________________________________________________________________
+ */
 
 //ADVANCE TIME
 
@@ -955,17 +1078,6 @@ public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	};
 	return newPosition;
 }
-/**
- * returns the moving orientation of the unit
- * 
- * @param velocityVector
- */
-@Model
-private static float getMovingOrientation(double[] velocityVector){
-	float orientation = (float) Math.atan2(velocityVector[1], velocityVector[0]);
-	return orientation;
-}
-
 
 //Adaptibility: volgende opgaves zullen hindernissen bevatten
 //kan onderbroken worden door: need to rest, enemy interaction
@@ -990,85 +1102,12 @@ public void moveTo(int[] cube){
 	}
 				
 }
-/**
- * Update the speed of the unit with the information we have about that unit
- * 
- * @param dz
- * 		the difference in z coordinates
- * @post the new speed of the unit is the speed of the unit
- * 		 according the conditions of this unit
- */
-public void updateSpeed(int dz){
-	double realSpeed;
-	if(this.isMoving()){
-		double baseSpeed = (double) 0.75*(this.getStrength()+this.getAgility())/(this.getWeight());
-		double walkingSpeed;
-		
-		if (dz == 1){
-			walkingSpeed = baseSpeed*0.5;
-			}
-		else if (dz == -1){
-			walkingSpeed = baseSpeed*1.2;
-			}
-		else{
-			walkingSpeed = baseSpeed;
-		}
-		realSpeed = walkingSpeed;
-		
-		if (this.isSprinting())
-			realSpeed = walkingSpeed*2;
-	}else{
-		realSpeed = 0.0;
-	}
-	
-	this.speed = realSpeed;
-}
 
-/**
- * Return the speed of this Unit.
- */
-@Basic @Raw
-public double getSpeed(){
-	return this.speed;
-}
 
-/**
- * Return true if the unit is sprinting
- */
-@Basic @Raw
-public boolean isSprinting() {
-	return this.isSprinting;
-}
 
-/**
- * The Unit starts to sprint
- * 
- * @post  The unit will go in sprinting mode
- *       | new.isSprinting() == true
- * @throws ExceptionName_Java
- *         The given isSprinting is not a valid isSprinting for any
- *         Unit.
- *       | ! isValidIsSprinting(getIsSprinting())
- */
-public void startSprinting() throws IllegalStateException{
-	if (!(this.getStamina()>0 && this.isMoving()))
-		throw new IllegalStateException("The unit is not moving or is out of stamina");
-	if(!this.isSprinting()){
-			this.isSprinting = true;
-	}
-}
+//ACTIVITIES
 
-/**
- * The unit will stop sprinting
- * 
- * @post  The unit will stop sprinting
- *       | new.isSprinting() == false
- */
-public void stopSprinting() {
-	if (this.isSprinting){
-		this.isSprinting = false;
-	}
-}
+
 
 private String activity;
 private double activityTime;
@@ -1077,9 +1116,6 @@ private double restingTime;
 public boolean isMoving(){
 	return (this.getCurrentActivity()=="moving");
 }
-
-//ACTIVITIES
-
 
 public void setCurrentActivity(String activity){
 	if (this.getCurrentActivity() == "rest") {
@@ -1153,16 +1189,6 @@ public void defend(Unit attacker){
 	int newHitpointss = this.getHitpoints()- damage;
 	this.setHitpoints(newHitpointss);
 	}
-	
-//lukt niet statisch --> update orientatie attacker en defender
-public void updateFightingOrientation(Unit attacker, Unit defender){ 
-	double[] aPosition = attacker.getPosition();
-	double[] dPosition = defender.getPosition();
-	float aOrientation = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1]);
-	float dOrientation = (float) Math.atan2(aPosition[1]-dPosition[1], aPosition[0]-dPosition[1]);
-	attacker.setOrientation(aOrientation);
-	defender.setOrientation(dOrientation);
-}
 
 //RESTING
 
