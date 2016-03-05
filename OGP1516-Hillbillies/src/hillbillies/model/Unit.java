@@ -609,8 +609,14 @@ public void setOrientation(float orientation) {
 	if (isValidOrientation(orientation))
 		this.orientation = orientation;
 	else{
-		this.orientation = orientation%2*PI;
+		this.orientation = orientation%(2*PI);
 	}
+}
+
+//TODO write documentation
+@Raw
+public void setSpeed(double speed){
+	this.speed = speed;
 }
 
 /*------------------------CHECKERS
@@ -955,9 +961,10 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			double[] nPosition = this.getNextPosition();
 			double[] tPosition = this.getTargetPosition();
 			
-			if(equals(cPosition,nPosition)){
+			if(nPosition == null||equals(cPosition,nPosition)){
 				if(tPosition == null || equals(cPosition, tPosition)){
 					this.setCurrentActivity("none");
+					this.setSpeed(0);
 				}else{
 					//pathfinding algorithm
 					for(int i = 0; i<3; i++){
@@ -1005,6 +1012,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			if (this.getActivityTime() <= 0) {
 					this.setCurrentActivity("none");
 			}
+			
 	if (activity == "none") {
 			counterTillDefault = counterTillDefault+dt;
 			if(counterTillDefault > NONE_INTERVAL){
@@ -1231,7 +1239,7 @@ public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
  */
 @Model
 private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
-	double distance = Math.sqrt(dx^2+dy^2+dz^2);
+	double distance = Math.sqrt(dx*dx+dy*dy+dz*dz);
 	double[] velocity = new double[] {
 			speed*dx/distance,
 			speed*dy/distance,
