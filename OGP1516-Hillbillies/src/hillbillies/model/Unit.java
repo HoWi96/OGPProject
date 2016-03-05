@@ -275,7 +275,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 		toughness = 100;
 	setToughness(toughness);
 	
-	if (!isValidInitialWeight(weight) && !isValidWeight(weight,strength,agility))
+	if (!isValidInitialWeight(weight) || !isValidWeight(weight,strength,agility))
 		weight = 100;
 	setWeight(weight,strength,agility);
 	
@@ -951,7 +951,6 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			}
 			
 			int[] step = new int[3];
-			
 			double[] cPosition = this.getPosition();
 			double[] nPosition = this.getNextPosition();
 			double[] tPosition = this.getTargetPosition();
@@ -969,22 +968,16 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 						}else{
 							step[i] = -1;
 						}
-						this.setStep(step);
-						
 						this.moveToAdjacent(step[0],step[1],step[2]);
-				}}
-			System.out.println("kom ik hier terecht?");
+				}}}
+
 			step = this.getStep();
-			System.out.println(step[0]);
-			System.out.println(step[1]);
-			System.out.println(step[2]);
 			
 			double[] iPosition = this.getIntermediatePosition(step[0],step[1],step[2], dt);
 			if(inBetween(cPosition, nPosition, iPosition))
 			this.setPosition(iPosition);
 			else
 				this.setPosition(nPosition);
-		}
 	}
 	
 	if (activity == "working") {
@@ -1181,10 +1174,9 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		
 		if (!isValidPosition(nextPosition))
 			throw new IllegalArgumentException();
+
 		
-		int[] step = new int[] {dx, dy, dz};
-		
-		this.setStep(step);
+		this.setStep(new int[]{dx,dy,dz});
 		this.setCurrentActivity("moving");
 		this.updateSpeed(dz);
 		this.setOrientation(getMovingOrientation(getVelocityVector(dx, dy, dz, this.getSpeed())));
