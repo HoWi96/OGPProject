@@ -950,7 +950,6 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				}
 			}
 			
-			
 			int[] step = new int[3];
 			
 			double[] cPosition = this.getPosition();
@@ -972,14 +971,13 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 						}
 						this.setStep(step);
 						this.moveToAdjacent(step[0],step[1],step[2]);
-				}
-					step = this.getStep();
-					double[] iPosition = this.getIntermediatePosition(step[0],step[1],step[2], dt);
-					if(inBetween(cPosition, nPosition, iPosition))
-					this.setPosition(iPosition);
-					else
-						this.setPosition(nPosition);
-				}	
+				}}
+			step = this.getStep();
+			double[] iPosition = this.getIntermediatePosition(step[0],step[1],step[2], dt);
+			if(inBetween(cPosition, nPosition, iPosition))
+			this.setPosition(iPosition);
+			else
+				this.setPosition(nPosition);
 		}
 	}
 	
@@ -1017,6 +1015,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}
 	
 	}
+	
 	}
 
 
@@ -1087,7 +1086,7 @@ public void setTargetPosition(double[] targetPosition) throws IllegalArgumentExc
 public void setNextPosition(double[] nextPosition) throws IllegalArgumentException  {
 	if (!isValidPosition(nextPosition))
 		throw new IllegalArgumentException();
-	this.targetPosition = nextPosition;
+	this.nextPosition = nextPosition;
 }
 
 /**
@@ -1172,7 +1171,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 			throw new IllegalStateException();
 		
 		double[] cubeCenter = getCubeCenter(getCubePosition(this.getPosition()));
-		double[] nextPosition = {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
+		double[] nextPosition = new double[] {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
 		
 		if (!isValidPosition(nextPosition))
 			throw new IllegalArgumentException();
@@ -1207,7 +1206,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	double[] position = this.getPosition();
 	double[] velocityVector = getVelocityVector(dx, dy, dz, this.getSpeed());
-	double[] newPosition = {
+	double[] newPosition = new double[] {
 			position[0]+velocityVector[0]*dt,
 			position[1]+velocityVector[1]*dt,
 			position[2]+velocityVector[2]*dt	
@@ -1232,7 +1231,7 @@ public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 @Model
 private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 	double distance = Math.sqrt(dx^2+dy^2+dz^2);
-	double[] velocity = {
+	double[] velocity = new double[] {
 			speed*dx/distance,
 			speed*dy/distance,
 			speed*dz/distance
@@ -1375,7 +1374,7 @@ public void defend(Unit attacker){
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
 	
 	if(Math.random()<probDodging){
-		int step[] = {0,0,0};
+		int step[] = new int[] {0,0,0};
 		double[] currentPosition = this.getPosition();
 		double[] nextPosition = currentPosition;
 		while ((step[0]==0 && step[1]==0)||(!isValidPosition(nextPosition))){
@@ -1429,7 +1428,7 @@ public void startDefaultBehavior() {
 		int randomActivity = (int) (Math.random()*3);
 		if (randomActivity == 0) {
 
-			double[] target = {Math.random()*50, Math.random()*50, Math.random()*50};
+			double[] target = new double[] {Math.random()*50, Math.random()*50, Math.random()*50};
 			this.setTargetPosition(target);
 				
 		}
