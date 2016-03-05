@@ -277,18 +277,20 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	
 	if (!isValidInitialWeight(weight)&& !isValidWeight(weight,strength,agility))
 		weight = 100;
-	setWeight(weight);
+	setWeight(weight,strength,agility);
 	
-	this.setHitpoints(getMaxHitpoints(weight, toughness));
+	this.setHitpoints(getMaxHitpoints(weight, toughness), weight, toughness);
 	
-	this.setStamina(getMaxStamina(weight, toughness));
+	this.setStamina(getMaxStamina(weight, toughness),weight, toughness);
 	
 	this.setOrientation(PI/2);
 	
+	
+	
 	if(enableDefaultBehavior)
-		this.startDefaultBehavior();
+		this.hasDefaultBehavior();
 	else
-		this.setCurrentActivity("none");
+		 this.setCurrentActivity("none");
 }
 
 /*
@@ -494,8 +496,8 @@ public void setPosition(double[] position) throws IllegalArgumentException {
  *       
  */
 @Raw
-public void setWeight(int weight) {
-	if (isValidWeight(weight,this.getStrength(),this.getAgility()))
+public void setWeight(int weight, int strength, int agility) {
+	if (isValidWeight(weight,strength,agility))
 		this.weight = weight;
 }
 
@@ -564,8 +566,8 @@ public void setToughness(int toughness) {
  *       | new.getHitpoints() == hitpoints
  */
 @Raw
-public void setHitpoints(int hitpoints) {
-	assert isValidHitpoints(hitpoints, this.getWeight(),this.getToughness());
+public void setHitpoints(int hitpoints,int weight, int toughness) {
+	assert isValidHitpoints(hitpoints, weight,toughness);
 	this.hitpoints = hitpoints;
 }
 
@@ -582,8 +584,8 @@ public void setHitpoints(int hitpoints) {
  *       | new.getStamina() == stamina
  */
 @Raw
-public void setStamina(int stamina) {
-	assert isValidStamina(stamina, this.getWeight(), this.getToughness());
+public void setStamina(int stamina,int weight, int toughness) {
+	assert isValidStamina(stamina, weight, toughness);
 	this.stamina = stamina;
 }
 
@@ -931,8 +933,8 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 //		rest();	}
 	
 	
-	// continue moving after doing you are again able to move
-	if((!equals(this.getPosition(),this.getTargetPosition()))){
+	// continue moving after you are again able to move
+	if((this.getTargetPosition()!= null && !equals(this.getPosition(),this.getTargetPosition()))){
 		if (this.isAbleToMove())
 			this.setCurrentActivity("moving");
 	}
@@ -941,9 +943,9 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	if (activity == "moving") {
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
-					this.setStamina((int)(this.getStamina()-10*dt));
+					this.setStamina((int)(this.getStamina()-10*dt), this.getWeight(),this.getToughness());
 				}else{
-					this.setStamina(0);
+					this.setStamina(0,this.getWeight(),this.getToughness());
 					this.stopSprinting();
 				}
 			}
@@ -997,9 +999,9 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			this.setActivityTime(this.getActivityTime()-dt);
 			while(dt !=0){
 				if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
-					this.setHitpoints(this.getHitpoints()+1);
+					this.setHitpoints(this.getHitpoints()+1,this.getWeight(),this.getAgility());
 				}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
-					this.setStamina(this.getStamina()+1);
+					this.setStamina(this.getStamina()+1,this.getWeight(),this.getAgility());
 				dt = dt - this.getMinimalRestTime();
 			}}
 			
@@ -1397,7 +1399,7 @@ public void defend(Unit attacker){
 	//then taking damage
 	int damage = (int) attacker.getStrength()/10;
 	int newHitpointss = this.getHitpoints()- damage;
-	this.setHitpoints(newHitpointss);
+	this.setHitpoints(newHitpointss,this.getWeight(),this.getToughness());
 	}
 
 //RESTING
