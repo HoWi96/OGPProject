@@ -965,6 +965,15 @@ public void advanceTime(double dt) {
 		System.out.println(nextPosition[0]);
 	}
 	
+	
+	if(this.isSprinting()){
+		if(this.getStamina()>=10*dt){
+			this.setStamina((int)(this.getStamina()-10*dt));
+		}else{
+			this.stopSprinting();
+		}
+	}
+	
 	if (activity == "working") {
 		this.setActivityTime(this.getActivityTime()-dt);
 		if (this.getActivityTime() <= 0) {
@@ -982,6 +991,7 @@ public void advanceTime(double dt) {
 		if (this.getActivityTime() <= 0) {
 			this.setCurrentActivity("default");
 		}
+	
 	}
 }
 
@@ -1022,6 +1032,12 @@ public double[] getTargetPosition() {
  * @param dz
  * 		The difference in cubes to go in z direction
  * 
+ * @effect the acivity of the unit will be set to moving
+ * 			| this.setCurrentActivity("moving")
+ * 
+ * @effect The speed will be updated according to the movement in z direction
+ * 			|this.updateSpeed(dz)
+ * 
  * @post The unit will get to the new position,
  * 		this is the center of a neighboring cube
  * 			| 	double[] newPosition = {
@@ -1039,9 +1055,11 @@ public double[] getTargetPosition() {
  */
 public void moveToAdjacent(int dx, int dy, int dz) 
 		throws IllegalArgumentException, IllegalStateException {
+	
 	if (Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1){
 		throw new IllegalArgumentException();
 	}
+	
 	
 	double[] cubeCenter = getCubeCenter(getCubePosition(this.getPosition()));
 	
@@ -1054,8 +1072,9 @@ public void moveToAdjacent(int dx, int dy, int dz)
 	if (!isValidPosition(newPosition))
 		throw new IllegalArgumentException();
 	
+	
 	this.setCurrentActivity("moving");
-	this.setTargetPosition(newPosition);
+	this.updateSpeed(dz);
 }
 
 /**
