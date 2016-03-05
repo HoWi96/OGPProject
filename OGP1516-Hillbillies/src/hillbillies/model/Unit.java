@@ -46,9 +46,9 @@ import be.kuleuven.cs.som.annotate.*;
  *         Unit.
  *       | isValidOrientation(getOrientation())
  *       
- * @invar  The state of each unit must be a valid state for any
- *         unit.
- *       | isValidState(getState())
+ * @invar  The activity of each Unit must be a valid activity for any
+ *         Unit.
+ *       | isValidActivity(getActivity())
  */
 
 public class Unit { 
@@ -222,6 +222,18 @@ private double[] targetPosition;
  * Variable registering if the unit is sprinting
  */
 private boolean isSprinting;
+
+/**
+ * The time a unit needs to conduct an activity
+ */
+private double activityTime;
+
+/**
+ * Variable registering the Activity of this Unit.
+ */
+//TODO vervang alle strings door elementen van de enum Activity om consistentie te verzekeren
+private String activity;
+
 
 
 
@@ -959,13 +971,13 @@ public void advanceTime(double dt) {
 			this.setCurrentActivity("default");
 		}
 	}
-	if (activity == "attack"){
+	if (activity == "attacking"){
 		this.setActivityTime(this.getActivityTime()-dt);
 		if (this.getActivityTime() <= 0) {
 			this.setCurrentActivity("default");
 		}
 	}
-	if (activity == "rest") {
+	if (activity == "resting") {
 		float minimalRestTime = this.getMinimalRestTime();
 		float timeLeft = (float) dt;
 		while (timeLeft >minimalRestTime){
@@ -977,14 +989,29 @@ public void advanceTime(double dt) {
 
 //MOVING
 
-public void setTargetPosition(double[] position) {
-	this.targetPosition = position;
+/**
+ * 
+ * Set the target position of the unit
+ * 
+ * @param targetPosition
+ * 			the position where the unit is heading to
+ * @throws IllegalArgumentException
+ * 			if the position is not valid
+ * 			| (!isValidPosition(targetPosition))
+ * @post the units target position is targetPosition
+ * 			|new.getTargetPosition() == targetPosition
+ */
+public void setTargetPosition(double[] targetPosition) throws IllegalArgumentException  {
+	if (!isValidPosition(targetPosition))
+		throw new IllegalArgumentException();
+	this.targetPosition = targetPosition;
 }
 
+/**
+ * Get the targetPosition of this unit
+ */
+@Basic @Raw
 public double[] getTargetPosition() {
-	if (this.targetPosition == null) {
-		System.out.println("null");
-	}
 	return this.targetPosition;
 }
 
@@ -1000,9 +1027,9 @@ public double[] getTargetPosition() {
  * @post The unit will get to the new position,
  * 		this is the center of a neighboring cube
  * 			| 	double[] newPosition = {
- *			| cubePosition[0]+dx+CUBELENGTH/2,
- *			| cubePosition[1]+dy+CUBELENGTH/2,
- *			| cubePosition[2]+dz+CUBELENGTH/2};
+ *			| cubeCenter[0]+dx,
+ *			| cubeCenter[1]+dy,
+ *			| cubeCenter[2]+dz};
  *			| new.position == setTargetPosition(newPosition)
  *
  * @throws IllegalArgumentException
@@ -1014,7 +1041,6 @@ public double[] getTargetPosition() {
  */
 public void moveToAdjacent(int dx, int dy, int dz) 
 		throws IllegalArgumentException, IllegalStateException {
-	
 	if (Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1){
 		throw new IllegalArgumentException();
 	}
@@ -1028,33 +1054,12 @@ public void moveToAdjacent(int dx, int dy, int dz)
 	};
 	
 	if (!isValidPosition(newPosition))
-		throw new IllegalStateException();
+		throw new IllegalArgumentException();
 	
 	this.setCurrentActivity("moving");
 	this.setTargetPosition(newPosition);
 }
 
-
-/**
- * @param dx
- * @param dy
- * @param dz
- * @param speed
- * 		The speed of the given unit
- * @return the velocity in all directions of the unit
- * 			|result == {speed*dx/distance,speed*dy/distance,speed*dz/distance}
- * 				
- */
-@Model
-private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
-	double distance = Math.sqrt(dx^2+dy^2+dz^2);
-	double[] velocity = {
-			speed*dx/distance,
-			speed*dy/distance,
-			speed*dz/distance
-	};
-	return velocity;
-};
 /**
  * 
  * @param dx
@@ -1079,10 +1084,30 @@ public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	return newPosition;
 }
 
-//Adaptibility: volgende opgaves zullen hindernissen bevatten
-//kan onderbroken worden door: need to rest, enemy interaction
-//na onderbreking --> vervolg pad
-//nieuwe actie moveTo kan wel nog uitgevoerd worden
+
+/**
+ * @param dx
+ * @param dy
+ * @param dz
+ * @param speed
+ * 		The speed of the given unit
+ * @return the velocity in all directions of the unit
+ * 			|result == {speed*dx/distance,speed*dy/distance,speed*dz/distance}
+ * 				
+ */
+@Model
+private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
+	double distance = Math.sqrt(dx^2+dy^2+dz^2);
+	double[] velocity = {
+			speed*dx/distance,
+			speed*dy/distance,
+			speed*dz/distance
+	};
+	return velocity;
+};
+
+
+
 public void moveTo(int[] cube){
 	int[] position = getCubePosition(this.getPosition());
 	int[] step = new int[3];
@@ -1104,25 +1129,70 @@ public void moveTo(int[] cube){
 }
 
 
+/**_____________________________________________________________
+ * _____________________________________________________________
+ * -------------------------ACTIVITIES--------------------------
+ * _____________________________________________________________
+ *_____________________________________________________________
+ */
 
-//ACTIVITIES
+//ACTIVITY CHECKERS
 
+//TODO wijzig strings naar activities uit enum Activity
 
-
-private String activity;
-private double activityTime;
-private double restingTime;
-
+/**
+ * Tells whether the unit is currently moving.
+ * @return
+ * 		true if the unit is currently moving.
+ * 		| result == (this.getCurrentActivity == "moving")
+ */
 public boolean isMoving(){
 	return (this.getCurrentActivity()=="moving");
 }
+/**
+ * Tells whether the unit is currently working.
+ * @return
+ * 		true if the unit is currently working.
+ * 		| result == (this.getCurrentActivity == "working")
+ */
+public  boolean isWorking(){
+	return (this.getCurrentActivity()=="working");	
+}
+/**
+ * Tells whether the unit is currently resting.
+ * @return
+ * 		true if the unit is currently resting.
+ * 		| result == (this.getCurrentActivity == "resting")
+ */
+public boolean isResting(){
+	return (this.getCurrentActivity()=="resting");
+}
+/**
+ * Tells whether the unit is currently attacking.
+ * @return
+ * 		true if the unit is currently attacking.
+ * 		| result == (this.getCurrentActivity == "attacking")
+ */
+public boolean isAttacking(){
+	return (this.getCurrentActivity()=="attacking");
+}
+/**
+ * Tells whether the unit is currently in default behaviour.
+ * @return
+ * 		true if the unit is currently in default behaviour.
+ * 		| result == (this.getCurrentActivity == "default")
+ */
+public boolean isDefaultBehaviourEnabled() {
+	return (this.getCurrentActivity()=="default");
+}
+
+
+
+
+
+
 
 public void setCurrentActivity(String activity){
-	if (this.getCurrentActivity() == "rest") {
-		if (this.restingTime < 0.2) {
-			return;
-		}
-	}
 	this.activity = activity;
 }
 public String getCurrentActivity(){
@@ -1144,21 +1214,16 @@ public void work(){
 	this.setActivityTime(this.getWorkingTime());
 }
 
-public  boolean isWorking(){
-	return (this.getCurrentActivity()=="working");
-	
-}
-
 //FIGHTING
 
 public void attack(){
-	this.setCurrentActivity("attack");
+	this.setCurrentActivity("attacking");
 	this.setActivityTime(this.getFightingTime());
 }
 
 public void defend(Unit attacker){
 	
-	this.setCurrentActivity("defend");
+	this.setCurrentActivity("attacking");
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
 	
@@ -1208,13 +1273,10 @@ public void rest(){
 }
 
 public void startResting() {
-	this.setCurrentActivity("rest");
-	this.restingTime = 0;
+	this.setCurrentActivity("resting");
 }
 
-public boolean isResting(){
-	return (this.getCurrentActivity()=="resting");
-}
+
 
 //DEFAULTBEHAVIOUR
 
@@ -1231,7 +1293,7 @@ public void startDefaultBehaviour() {
 /**
  * Stop default behaviour of Unit
  * 
- * @post the activity of the unit is switched off nothing
+ * @post the activity of the unit is switched off to nothing
  * 		 | new.getCurrentAcivity() == "nothing"
  */
 public void stopDefaultBehaviour() {
@@ -1274,8 +1336,5 @@ private float getWorkingTime(){
 private final float getFightingTime(){
 	return 1;
 }
-
-
-
 
 }

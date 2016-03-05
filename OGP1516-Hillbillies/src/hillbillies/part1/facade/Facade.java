@@ -133,9 +133,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public boolean isMoving(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		boolean moving = unit.isMoving();
-		return moving;
+		return unit.isMoving();
 	}
 
 	@Override
@@ -176,7 +174,6 @@ public class Facade implements IFacade{
 
 	@Override
 	public boolean isWorking(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
 		boolean working = unit.isWorking();
 		return working;
 	}
@@ -190,9 +187,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public boolean isAttacking(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		boolean attacking = (unit.getCurrentActivity()=="attack");
-		return attacking;
+		return unit.isAttacking();
 	}
 
 	@Override
@@ -203,9 +198,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public boolean isResting(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		boolean resting = unit.isResting();
-		return resting;
+		return unit.isResting();
 	}
 
 	@Override
@@ -220,9 +213,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public boolean isDefaultBehaviorEnabled(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		boolean defaultBehaviour = (unit.getCurrentActivity()=="default");
-		return defaultBehaviour;
+		return unit.isDefaultBehaviourEnabled();
 	}
 
 }
