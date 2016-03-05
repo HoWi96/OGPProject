@@ -115,14 +115,20 @@ public class Facade implements IFacade{
 
 	@Override
 	public void advanceTime(Unit unit, double dt) throws ModelException {
-		// TODO Auto-generated method stub
-		unit.advanceTime(dt);
+		try {
+			unit.advanceTime(dt);
+		} catch (IllegalArgumentException e) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
 	public void moveToAdjacent(Unit unit, int dx, int dy, int dz) throws ModelException {
-		// TODO Auto-generated method stub
-		unit.moveToAdjacent(dx, dy, dz);
+		try {
+			unit.moveToAdjacent(dx, dy, dz);
+		} catch (IllegalArgumentException e) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
@@ -162,25 +168,29 @@ public class Facade implements IFacade{
 
 	@Override
 	public void moveTo(Unit unit, int[] cube) throws ModelException {
-		// TODO Auto-generated method stub
-		unit.moveTo(cube);
+		try {
+			unit.moveToTarget(cube);
+		} catch (IllegalArgumentException e) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
 	public void work(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		unit.work();
+		try {
+			unit.work();
+		} catch (IllegalStateException e) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
 	public boolean isWorking(Unit unit) throws ModelException {
-		boolean working = unit.isWorking();
-		return working;
+		return unit.isWorking();
 	}
 
 	@Override
 	public void fight(Unit attacker, Unit defender) throws ModelException {
-		// TODO Auto-generated method stub
 		attacker.attack();
 		defender.defend(attacker);
 	}
@@ -192,8 +202,11 @@ public class Facade implements IFacade{
 
 	@Override
 	public void rest(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		unit.startResting();
+		try {
+			unit.rest();
+		} catch (IllegalStateException e) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
@@ -203,9 +216,8 @@ public class Facade implements IFacade{
 
 	@Override
 	public void setDefaultBehaviorEnabled(Unit unit, boolean value) throws ModelException {
-		// TODO Auto-generated method stub
 		if (value) {
-			unit.startDefaultBehaviour();
+			unit.startDefaultBehavior();
 		}
 		else
 			unit.stopDefaultBehaviour();
@@ -213,7 +225,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public boolean isDefaultBehaviorEnabled(Unit unit) throws ModelException {
-		return unit.isDefaultBehaviourEnabled();
+		return unit.hasDefaultBehavior();
 	}
 
 }

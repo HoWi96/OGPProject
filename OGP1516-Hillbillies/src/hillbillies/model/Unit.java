@@ -60,14 +60,14 @@ public class Unit {
 	
 	private static final String ALLOWED_NAME_PATTERN = "[a-zA-Z \"']+";
 	
-	private static final int CUBELENGTH = 1;
+	private static final double CUBE_LENGTH = 1;
 	private static final int MAXCOORDINATE = 50;
 	private static final int MINCOORDINATE = 0;
 	
 	private static final float PI = (float) Math.PI;
 
-	private static final double REST_INTERVAL = 60*3;
-	
+//	private static final double REST_INTERVAL = 60*3;
+	private static final double NONE_INTERVAL = 10;
 	
 	
 	
@@ -172,7 +172,10 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	
 	this.setOrientation(PI/2);
 	
-	this.setCurrentActivity("none");
+	if(enableDefaultBehavior)
+		this.startDefaultBehavior();
+	else
+		this.setCurrentActivity("none");
 }
 
 
@@ -258,7 +261,7 @@ private String activity;
 /**
  * Variable registering the time till mandatory rest
  */
-private double counterTillRest = 0;
+//private double counterTillRest = 0;
 /**
  * the time till default behaviour is activated
  */
@@ -267,9 +270,10 @@ private double counterTillDefault = 0;
  * the step the unit is currently making
  */
 private int[] step;
-
-
-
+/**
+ * indicates if the unit is operating in default behavior
+ */
+private boolean hasDefaultBehavior;
 
 
 //INITIAL CHECKERS FOR UNIT
@@ -330,13 +334,11 @@ private boolean isValidInitialWeight(int weight){
 
 /*___________________________________________________________________
  * __________________________________________________________________
- * -----------------------METHODS------------------------------------
+ * -----------------------PROPERTIES---------------------------------
  *___________________________________________________________________
- *____________________________________________________________________*/
+ *___________________________________________________________________*/
 
-
-
-// NAME
+//------------------------GETTERS
 
 /**
  * Return the Name of this Unit.
@@ -345,6 +347,80 @@ private boolean isValidInitialWeight(int weight){
 public String getName() {
 	return this.name;
 }
+
+/**
+ * Return the Position of this Unit.
+ */
+@Basic @Raw
+public double[] getPosition() {
+	return this.position;
+}
+
+/**
+ * Return the weight of this Unit.
+ */
+@Basic @Raw
+public int getWeight() {
+	return this.weight;
+}
+
+/**
+ * Return the Strength of this Unit.
+ */
+@Basic @Raw
+public int getStrength() {
+	return this.strength;
+}
+
+/**
+ * Return the Agility of this Unit.
+ */
+@Basic @Raw
+public int getAgility() {
+	return this.agility;
+}
+
+/**
+ * Return the toughness of this Unit.
+ */
+@Basic @Raw
+public int getToughness() {
+	return this.toughness;
+}
+
+/**
+ * Return the hitpoints of this Unit.
+ */
+@Basic @Raw
+public int getHitpoints() {
+	return this.hitpoints;
+}
+
+/**
+ * Return the stamina of this Unit.
+ */
+@Basic @Raw
+public int getStamina() {
+	return this.stamina;
+}
+
+/**
+ * Return the orientation of this Unit.
+ */
+@Basic @Raw
+public float getOrientation() {
+	return this.orientation;
+}
+
+/**
+* Return the speed of this Unit.
+*/
+@Basic @Raw
+public double getSpeed(){
+	return this.speed;
+}
+
+/*---------------------SETTERS
 
 /**
  * Set the Name of this Unit to the given Name.
@@ -364,37 +440,6 @@ public void setName(String name) throws IllegalArgumentException {
 	if (! isValidName(name))
 		throw new IllegalArgumentException();
 	this.name = name;
-}
-
-/**
- * Check whether the given Name is a valid Name for
- * any Unit.
- *  
- * @param  Name
- *         The Name to check.
- * @return true if and only if the name is longer then 2 and
- * 			the first character is an upper case letter and
- * 			the name exists of only letters, numbers, spaces and quotes.
- *       | result == (name.length()>2)&&
- *       (Character.isUpperCase(name.charAt(0))&&
- *       (name.matches("[A-Za-z\"' ]+")))
-*/
-public static boolean isValidName(String name) {
-	return (name.length()>2)&&
-			(Character.isUpperCase(name.charAt(0))&&
-			(name.matches(ALLOWED_NAME_PATTERN)));
-}
-
-
-
-//POSITION
-
-/**
- * Return the Position of this Unit.
- */
-@Basic @Raw
-public double[] getPosition() {
-	return this.position;
 }
 
 /**
@@ -420,78 +465,6 @@ public void setPosition(double[] position) throws IllegalArgumentException {
 }
 
 /**
- * Check whether the given Position is a valid Position for
- * any Unit.
- *  
- * @param  Position
- *         The Position to check.
- * @return The position has to be inside the game world
- *       | result ==
- *       | (MINCOORDINATE<=position[0]&&position[0]<=MAXCOORDINATE)&&
- *       | (MINCOORDINATE<=position[1]&&position[1]<=MAXCOORDINATE)&&
- *       | (MINCOORDINATE<=position[2]&&position[2]<=MAXCOORDINATE)
- *       
-*/
-public static boolean isValidPosition(double[] position) {
-	return (MINCOORDINATE<=position[0]&&position[0]<=MAXCOORDINATE)&&
-	       (MINCOORDINATE<=position[1]&&position[1]<=MAXCOORDINATE)&&
-	       (MINCOORDINATE<=position[2]&&position[2]<=MAXCOORDINATE);
-}
-
-/**
- * Gives back the position of the cube
- * 
- * @param position
- *			The position of this Unit
- *
- * @return The position of the cube where the Unit is located
- * 			| cubePosition[0] = (int) Math.floor(position[0]);
- *			| cubePosition[1] = (int) Math.floor(position[1]);
- *			| cubePosition[2] = (int) Math.floor(position[2]);
- */
-public static int[] getCubePosition(double[] position){
-	int[] cubePosition = new int[3];
-	cubePosition[0] = (int) Math.floor(position[0]);
-	cubePosition[1] = (int) Math.floor(position[1]);
-	cubePosition[2] = (int) Math.floor(position[2]);
-	return cubePosition;
-	}
-
-
-/**
- * Gives back the position of the center of the cube with the given position
- * 
- * @param cubePosition
- * 			the position of the cube
- * 
- * @return
- * 		The position of the center of the cube with given coordinates
- * 		| result == new double[] {
- * 		| 	(double)coordinates[0]+0.5,
- * 		|	(double)coordinates[1]+0.5,
- * 		| 	(double)coordinates[2]+0.5
- * 		| }
- */
-@Model
-private static double[] getCubeCenter(int[] cubePosition) {
-	return new double[] {(double)cubePosition[0]+CUBELENGTH/2,
-						 (double)cubePosition[1]+CUBELENGTH/2,
-						 (double)cubePosition[2]+CUBELENGTH/2};
-}
-
-
-
-//WEIGHT
-
-/**
- * Return the weight of this Unit.
- */
-@Basic @Raw
-public int getWeight() {
-	return this.weight;
-}
-
-/**
  * Set the weight of this Unit to the given weight.
  * 
  * @param  weight
@@ -509,47 +482,6 @@ public void setWeight(int weight) {
 		this.weight = weight;
 }
 
-/**
- * Check whether the given weight is a valid weight for
- * any Unit.
- *  
- * @param  weight
- *         The weight to check.
- * @return true if and only if the weight is between 0 and 200 inclusively and
- * 			the weight must be at least the minimum weight.
- *       | result == (1<=weight&&weight<=200)&&(weight>getMinWeight(strength,agility))
-*/
-public static boolean isValidWeight(int weight,int strength, int agility) {
-	return 	(1<=weight)&&(weight<=200)&&
-			(weight>getMinWeight(strength, agility)) ;
-}
-
-/**
- * The minimum weight
- * 
- * @param strength
- * 			the strength of the unit
- * @param agility
- * 			the agility of the unit
- * @return the minimum weight of this unit
- * 		|result ==  (strength+agility)/2
- */
-@Model
-private static int getMinWeight(int strength, int agility ){
-	return (strength + agility)/2;
-}
-
-
-//STRENGTH
-
-
-/**
- * Return the Strength of this Unit.
- */
-@Basic @Raw
-public int getStrength() {
-	return this.strength;
-}
 
 /**
  * Set the Strength of this Unit to the given Strength.
@@ -566,32 +498,6 @@ public int getStrength() {
 public void setStrength(int strength) {
 	if (isValidStrength(strength))
 		this.strength = strength;
-}
-
-
-/**
- * Check whether the given Strength is a valid Strength for
- * any Unit.
- *  
- * @param  strength
- *         The Strength to check.
- * @return 
- *       | result == (1<=weight&&weight<=200)
-*/
-public static boolean isValidStrength(int strength) {
-	return (1<=strength&&strength<=200);
-	
-}
-
-
-//AGILITY
-
-/**
- * Return the Agility of this Unit.
- */
-@Basic @Raw
-public int getAgility() {
-	return this.agility;
 }
 
 /**
@@ -612,31 +518,6 @@ public void setAgility(int agility) {
 }
 
 /**
- * Check whether the given Agility is a valid Agility for
- * any Unit.
- *  
- * @param  agility
- *         The Agility to check.
- * @return  true if and only if the agility lays between 1 and 200
- *       | result == (1<=agility && agility<=200)
-*/
-public static boolean isValidAgility(int agility) {
-	return (1<=agility&&agility<=200);
-}
-
-
-
-//TOUGHNESS
-
-/**
- * Return the toughness of this Unit.
- */
-@Basic @Raw
-public int getToughness() {
-	return this.toughness;
-}
-
-/**
  * Set the toughness of this Unit to the given toughness.
  * 
  * @param  toughness
@@ -651,29 +532,6 @@ public int getToughness() {
 public void setToughness(int toughness) {
 	if (isValidToughness(toughness))
 		this.toughness = toughness;
-}
-
-/**
- * Check whether the given toughness is a valid toughness for
- * any Unit.
- *  
- * @param  toughness
- *         The toughness to check.
- * @return 
- *       | result == (1<=toughness && toughness <= 200)
-*/
-public static boolean isValidToughness(int toughness) {
-	return (1<=toughness && toughness<=200);
-}
-
-//HITPOINTS
-
-/**
- * Return the hitpoints of this Unit.
- */
-@Basic @Raw
-public int getHitpoints() {
-	return this.hitpoints;
 }
 
 /**
@@ -695,47 +553,6 @@ public void setHitpoints(int hitpoints) {
 }
 
 /**
- * Check whether the given hitpoints is a valid hitpoints for
- * any Unit.
- *  
- * @param  hitpoints
- *         The hitpoints to check.
- * @param weight
- * @param toughness
- * 
- * @return true if and only if the hitpoints are between 0 and getMaxHitpoints(weight, toughness)
- *       | result == (0<=hitpoints && hitpoints <= getMaxHitpoints(weight, toughness)
-*/
-public static boolean isValidHitpoints(int hitpoints, int weight, int toughness) {
-	return (0<=hitpoints && hitpoints <= getMaxHitpoints(weight, toughness));
-}
-
-/**
- * The maximum amount of hitpoints a unit can have
- * 
- * @param weight
- * @param toughness
- * 
- * @return The maximum HP a unit can have is the closest integer
- * 			 to 200 * weight/100 * toughness/100
- * 		| result == Math.ceil(200 * weight/100 * toughness/100)
- */
-public static int getMaxHitpoints(int weight, int toughness){
-	return (int) Math.ceil(200.0*weight/100*toughness/100);
-}
-
-
-//STAMINA
-
-/**
- * Return the stamina of this Unit.
- */
-@Basic @Raw
-public int getStamina() {
-	return this.stamina;
-}
-
-/**
  * Set the stamina of this Unit to the given stamina.
  * 
  * @param  stamina
@@ -751,41 +568,6 @@ public int getStamina() {
 public void setStamina(int stamina) {
 	assert isValidStamina(stamina, this.getWeight(), this.getToughness());
 	this.stamina = stamina;
-}
-
-/**
- * Check whether the given stamina is a valid stamina for
- * any Unit.
- *  
- * @param  stamina
- *         The stamina to check.
- * @return 
- *       | result == (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100))
-*/
-public static boolean isValidStamina(int stamina, int weight, int toughness) {
-	return (0<=stamina && stamina<= getMaxStamina(weight, toughness));
-}
-
-
-/**
- * The maximum amount of stamina a unit can have
- * 
- * @return The maximum Stamina a unit can have is the closest integer
- * 			 to 2 * weight * toughness / 100
- * 		| result == Math.ceil(2 * weight * toughness / 100)
- */
-public static int getMaxStamina(int weight, int toughness){
-	return (int) Math.ceil(2*weight*toughness/100);
-}
-
-//ORIENTATION
-
-/**
- * Return the orientation of this Unit.
- */
-@Basic @Raw
-public float getOrientation() {
-	return this.orientation;
 }
 
 /**
@@ -812,6 +594,133 @@ public void setOrientation(float orientation) {
 	}
 }
 
+/*------------------------CHECKERS
+
+/**
+ * Check whether the given Name is a valid Name for
+ * any Unit.
+ *  
+ * @param  Name
+ *         The Name to check.
+ * @return true if and only if the name is longer then 2 and
+ * 			the first character is an upper case letter and
+ * 			the name exists of only letters, numbers, spaces and quotes.
+ *       | result == (name.length()>2)&&
+ *       (Character.isUpperCase(name.charAt(0))&&
+ *       (name.matches("[A-Za-z\"' ]+")))
+*/
+public static boolean isValidName(String name) {
+	return (name.length()>2)&&
+			(Character.isUpperCase(name.charAt(0))&&
+			(name.matches(ALLOWED_NAME_PATTERN)));
+}
+
+
+/**
+ * Check whether the given Position is a valid Position for
+ * any Unit.
+ *  
+ * @param  Position
+ *         The Position to check.
+ * @return The position has to be inside the game world
+ *       | result ==
+ *       | (MINCOORDINATE<=position[0]&&position[0]<=MAXCOORDINATE)&&
+ *       | (MINCOORDINATE<=position[1]&&position[1]<=MAXCOORDINATE)&&
+ *       | (MINCOORDINATE<=position[2]&&position[2]<=MAXCOORDINATE)
+ *       
+*/
+public static boolean isValidPosition(double[] position) {
+	return (MINCOORDINATE<=position[0]&&position[0]<=MAXCOORDINATE)&&
+	       (MINCOORDINATE<=position[1]&&position[1]<=MAXCOORDINATE)&&
+	       (MINCOORDINATE<=position[2]&&position[2]<=MAXCOORDINATE);
+}
+
+/**
+ * Check whether the given weight is a valid weight for
+ * any Unit.
+ *  
+ * @param  weight
+ *         The weight to check.
+ * @return true if and only if the weight is between 0 and 200 inclusively and
+ * 			the weight must be at least the minimum weight.
+ *       | result == (1<=weight&&weight<=200)&&(weight>getMinWeight(strength,agility))
+*/
+public static boolean isValidWeight(int weight,int strength, int agility) {
+	return 	(1<=weight)&&(weight<=200)&&
+			(weight>getMinWeight(strength, agility)) ;
+}
+
+
+/**
+ * Check whether the given Strength is a valid Strength for
+ * any Unit.
+ *  
+ * @param  strength
+ *         The Strength to check.
+ * @return 
+ *       | result == (1<=weight&&weight<=200)
+*/
+public static boolean isValidStrength(int strength) {
+	return (1<=strength&&strength<=200);
+	
+}
+
+/**
+ * Check whether the given Agility is a valid Agility for
+ * any Unit.
+ *  
+ * @param  agility
+ *         The Agility to check.
+ * @return  true if and only if the agility lays between 1 and 200
+ *       | result == (1<=agility && agility<=200)
+*/
+public static boolean isValidAgility(int agility) {
+	return (1<=agility&&agility<=200);
+}
+
+/**
+ * Check whether the given toughness is a valid toughness for
+ * any Unit.
+ *  
+ * @param  toughness
+ *         The toughness to check.
+ * @return 
+ *       | result == (1<=toughness && toughness <= 200)
+*/
+public static boolean isValidToughness(int toughness) {
+	return (1<=toughness && toughness<=200);
+}
+
+/**
+ * Check whether the given hitpoints is a valid hitpoints for
+ * any Unit.
+ *  
+ * @param  hitpoints
+ *         The hitpoints to check.
+ * @param weight
+ * @param toughness
+ * 
+ * @return true if and only if the hitpoints are between 0 and getMaxHitpoints(weight, toughness)
+ *       | result == (0<=hitpoints && hitpoints <= getMaxHitpoints(weight, toughness)
+*/
+public static boolean isValidHitpoints(int hitpoints, int weight, int toughness) {
+	return (0<=hitpoints && hitpoints <= getMaxHitpoints(weight, toughness));
+}
+
+
+/**
+ * Check whether the given stamina is a valid stamina for
+ * any Unit.
+ *  
+ * @param  stamina
+ *         The stamina to check.
+ * @return 
+ *       | result == (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100))
+*/
+public static boolean isValidStamina(int stamina, int weight, int toughness) {
+	return (0<=stamina && stamina<= getMaxStamina(weight, toughness));
+}
+
 /**
  * Check whether the given orientation is a valid orientation for
  * any Unit.
@@ -824,6 +733,100 @@ public void setOrientation(float orientation) {
 public static boolean isValidOrientation(float orientation) {
 	return (0<=orientation && orientation<2*PI);
 }
+
+
+/*--------------------HELPER METHODS
+
+//POSITION
+
+/**
+ * Gives back the position of the cube
+ * 
+ * @param position
+ *			The position of this Unit
+ *
+ * @return The position of the cube where the Unit is located
+ * 			| cubePosition[0] = (int) Math.floor(position[0]);
+ *			| cubePosition[1] = (int) Math.floor(position[1]);
+ *			| cubePosition[2] = (int) Math.floor(position[2]);
+ */
+public static int[] getCubePosition(double[] position){
+	int[] cubePosition = new int[3];
+	cubePosition[0] = (int) Math.floor(position[0]);
+	cubePosition[1] = (int) Math.floor(position[1]);
+	cubePosition[2] = (int) Math.floor(position[2]);
+	return cubePosition;
+	}
+
+/**
+ * Gives back the position of the center of the cube with the given position
+ * 
+ * @param cubePosition
+ * 			the position of the cube
+ * 
+ * @return
+ * 		The position of the center of the cube with given coordinates
+ * 		| result == new double[] {
+ * 		| 	(double)coordinates[0]+0.5,
+ * 		|	(double)coordinates[1]+0.5,
+ * 		| 	(double)coordinates[2]+0.5
+ * 		| }
+ */
+@Model
+private static double[] getCubeCenter(int[] cubePosition) {
+	return new double[] {(double)(cubePosition[0]+CUBE_LENGTH/2),
+						 (double)(cubePosition[1]+CUBE_LENGTH/2),
+						 (double)(cubePosition[2]+CUBE_LENGTH/2)};
+}
+
+//WEIGTH
+
+/**
+ * The minimum weight
+ * 
+ * @param strength
+ * 			the strength of the unit
+ * @param agility
+ * 			the agility of the unit
+ * @return the minimum weight of this unit
+ * 		|result ==  (strength+agility)/2
+ */
+@Model
+private static int getMinWeight(int strength, int agility ){
+	return (strength + agility)/2;
+}
+
+//HITPOINTS
+
+/**
+ * The maximum amount of hitpoints a unit can have
+ * 
+ * @param weight
+ * @param toughness
+ * 
+ * @return The maximum HP a unit can have is the closest integer
+ * 			 to 200 * weight/100 * toughness/100
+ * 		| result == Math.ceil(200 * weight/100 * toughness/100)
+ */
+public static int getMaxHitpoints(int weight, int toughness){
+	return (int) Math.ceil(200.0*weight/100*toughness/100);
+}
+
+
+//STAMINA
+
+/**
+ * The maximum amount of stamina a unit can have
+ * 
+ * @return The maximum Stamina a unit can have is the closest integer
+ * 			 to 2 * weight * toughness / 100
+ * 		| result == Math.ceil(2 * weight * toughness / 100)
+ */
+public static int getMaxStamina(int weight, int toughness){
+	return (int) Math.ceil(2*weight*toughness/100);
+}
+
+//ORIENTATION
 
 /**
  * returns the moving orientation of the unit
@@ -859,13 +862,6 @@ public void updateOrientation(Unit attacker, Unit defender){
 
 //SPEED
 
-/**
-* Return the speed of this Unit.
-*/
-@Basic @Raw
-public double getSpeed(){
-	return this.speed;
-}
 
 /**
 * Update the speed of the unit with the information we have about that unit
@@ -901,82 +897,38 @@ public void updateSpeed(int dz){
 	this.speed = realSpeed;
 }
 
-//SPRINTING
-
-/**
-* Return true if the unit is sprinting
-*/
-@Basic @Raw
-public boolean isSprinting() {
-	return this.isSprinting;
-}
-
-/**
-* The Unit starts to sprint
-* 
-* @post  The unit will go in sprinting mode
-*       | new.isSprinting() == true
-* @throws ExceptionName_Java
-*         The given isSprinting is not a valid isSprinting for any
-*         Unit.
-*       | ! isValidIsSprinting(getIsSprinting())
-*/
-public void startSprinting() throws IllegalStateException{
-	if (!(this.getStamina()>0 && this.isMoving()))
-		throw new IllegalStateException("The unit is not moving or is out of stamina");
-	if(!this.isSprinting()){
-			this.isSprinting = true;
-	}
-}
-
-/**
-* The unit will stop sprinting
-* 
-* @post  The unit will stop sprinting
-*       | new.isSprinting() == false
-*/
-public void stopSprinting() {
-	if (this.isSprinting){
-		this.isSprinting = false;
-	}
-}
-
-/**
- * ___________________________________________________________________
- * ____________________________________________________________________________________
- * WORK IN PROGRESSS!!!
- * _______________________________________________________________________________
- * __________________________________________________________________________________
- */
-
-//ADVANCETIME
+/*___________________________________________________________________
+ * __________________________________________________________________
+ * -----------------------ADVANCE TIME-------------------------------
+ *___________________________________________________________________
+ *___________________________________________________________________*/
 
 
-public void advanceTime(double dt) {
+public void advanceTime(double dt) throws IllegalArgumentException {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
 	
-	counterTillRest += dt;
-	if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
-		rest();
-	}
+//	counterTillRest += dt;
+//	if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
+//		rest();
+//	}
 	
-	if (activity == "default") {
+	if (this.hasDefaultBehavior()) {
 		int randomActivity = (int) (Math.random()*3);
 		if (randomActivity == 0) {
-			activity = "moving";
+			this.setCurrentActivity("moving");
 			double[] target = {Math.random()*50, Math.random()*50, Math.random()*50};
 			this.setTargetPosition(target);
 		}
 		if (randomActivity == 1) {
-			activity = "working";
+			this.setCurrentActivity("working");
 		}
 		if (randomActivity == 2) {
-			activity = "rest";
+			this.setCurrentActivity("resting");
 		}
 	}
-	//TODO FIXEN
 	if (activity == "moving") {
+		
 		if(this.isSprinting()){
 			if(this.getStamina()>=10*dt){
 				this.setStamina((int)(this.getStamina()-10*dt));
@@ -996,6 +948,7 @@ public void advanceTime(double dt) {
 			if(equals(cPosition, targetPosition)){
 				this.setCurrentActivity("none");
 			}else{
+				//pathfinding algorithm
 				for(int i = 0; i<3; i++){
 					if (cPosition[i] == targetPosition[i]){
 						step[i] = 0;
@@ -1014,35 +967,9 @@ public void advanceTime(double dt) {
 				else
 					this.setPosition(nPosition);
 			}
-			
-			
+				
 		}
-		
-		
-		
-//		int[] cubePosition = getCubePosition(this.getPosition());
-//		double[] target = this.getTargetPosition();
-//		int[] targetPosition = {(int)target[0], (int)target[1], (int)target[2]};
-//		int[] dCube = {targetPosition[0] - cubePosition[0],
-//					   targetPosition[1] - cubePosition[1],
-//					   targetPosition[2] - cubePosition[2]
-//		};
-//		this.setOrientation(getMovingOrientation(getVelocityVector(dCube[0], dCube[1], dCube[2],this.getSpeed())));
-//		double[] nextPosition = this.getIntermediatePosition(dCube[0], dCube[1], dCube[2], dt);
-//		int[] dNext = {targetPosition[0] - (int)nextPosition[0],
-//				       targetPosition[1] - (int)nextPosition[1],
-//				       targetPosition[2] - (int)nextPosition[2]
-//		};
-//		
-//		if ((dCube[0]*dNext[0]<=0) && (dCube[1]*dNext[1]<=0) && (dCube[2]*dNext[2]<=0)) {
-//			this.setCurrentActivity("default");
-//			
-//			this.setPosition(target);
-//		}
 	}
-	
-	
-	
 	
 	if (activity == "working") {
 		this.setActivityTime(this.getActivityTime()-dt);
@@ -1058,43 +985,62 @@ public void advanceTime(double dt) {
 	}
 	if (activity == "resting") {
 		this.setActivityTime(this.getActivityTime()-dt);
+		while(dt !=0){
+			if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
+				this.setHitpoints(this.getHitpoints()+1);
+			}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
+				this.setStamina(this.getStamina()+1);
+			dt = dt - this.getMinimalRestTime();
+		}}
+		
 		if (this.getActivityTime() <= 0) {
 			this.setCurrentActivity("none");
 		}
 	if (activity == "none") {
 		counterTillDefault = counterTillDefault+dt;
-		if(counterTillDefault > 10)
-			this.startDefaultBehaviour();
+		if(counterTillDefault > NONE_INTERVAL){
+			this.startDefaultBehavior();
 			counterTillDefault = 0;
+		}
 	}
 	
 	}
 	}
 
-private boolean equals(double[] position1, double[] position2) {
-	return (position1[0] == position2[0])&&
-			(position1[1] == position2[1])&&
-			(position1[2] == position2[2]);
+
+/*___________________________________________________________________
+ * __________________________________________________________________
+ * -----------------------MOVING-------------------------------------
+ *___________________________________________________________________
+ *___________________________________________________________________*/
+
+/*------------------GETTERS
+ 
+/**
+ * Get the targetPosition of this unit
+ */
+@Basic @Raw
+public double[] getTargetPosition() {
+	return this.targetPosition;
 }
 
-private boolean inBetween(double[] position1, double[] position2, double[] positionInBetween) {
-	return (position2[0]<=positionInBetween[0]&&positionInBetween[0] <=position1[0]||position2[0]>=positionInBetween[0]&&positionInBetween[0]>=position1[0])&&
-			(position2[1]<=positionInBetween[1]&&positionInBetween[1]<=position1[1]||position2[1]>=positionInBetween[1]&&positionInBetween[1]>=position1[1])&&
-			(position2[2]<=positionInBetween[2]&&positionInBetween[2]<=position1[2]||position2[2]>=positionInBetween[2]&&positionInBetween[2]>=position1[2]);
+/**
+ * Get the nextPosition of this unit
+ */
+@Basic @Raw
+public double[] getNextPosition() {
+	return this.nextPosition;
 }
-
+/**
+ * 
+ * Get the step to be taken by the unit
+ */
+@Basic @Raw
 public int[] getStep(){
 	return this.step;
 }
 
-public void setStep(int[] step){
-	this.step = step;
-}
-
-
-
-
-//MOVING TO TARGET POSITION
+/*-----------------SETTERS
 
 /**
  * 
@@ -1114,17 +1060,6 @@ public void setTargetPosition(double[] targetPosition) throws IllegalArgumentExc
 	this.targetPosition = targetPosition;
 }
 
-
-/**
- * Get the targetPosition of this unit
- */
-@Basic @Raw
-public double[] getTargetPosition() {
-	return this.targetPosition;
-}
-
-//MOVING TO NEXT POSITION
-
 /**
  * 
  * Set the target position of the unit
@@ -1143,14 +1078,49 @@ public void setNextPosition(double[] nextPosition) throws IllegalArgumentExcepti
 	this.targetPosition = nextPosition;
 }
 
+/**
+ * 
+ * Set the step to be taken by the unit
+ * 
+ * @param step
+ * 			the position where the unit is heading to
+ * 
+ * @post the units step is set to step
+ * 			|new.getStep() == step
+ */
+public void setStep(int[] step) {
+	this.step = step;
+}
+
+
+/*
+ * -------------------MOVING-------------------
+ */
 
 /**
- * Get the nextPosition of this unit
+ * 
+ * @param cube
+ * 			the cube where the unit will move to
+ * 
+ * @post the current activity of the unit will change to "moving"
+ * 			|new.getCurrentActivity == "moving"
+ * @post the target position will be set to the center of cube
+ * 			| new.getTargetPosition == getCubeCenter(cube)
+ * @throws IllegalArgumentException
+ * 			will be thrown if the cube is out of bounds
+ * 				|!isValidPosition(getCubeCenter(cube)
  */
-@Basic @Raw
-public double[] getNextPosition() {
-	return this.nextPosition;
+public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalStateException{
+	
+	if(!isValidPosition(getCubeCenter(cube)))
+		throw new IllegalArgumentException();
+	if(!this.isAbleToMove())
+		throw new IllegalStateException();
+	
+	this.setCurrentActivity("moving");
+	this.setTargetPosition(getCubeCenter(cube));			
 }
+
 /**
  * 
  * @param dx
@@ -1181,39 +1151,40 @@ public double[] getNextPosition() {
  * 		If the calculated destination is out of bounds
  * 		| !isValidPosition(newPosition)
  */
-public void moveToAdjacent(int dx, int dy, int dz) 
-		throws IllegalArgumentException, IllegalStateException {
-	if (!this.isMoving()){
+public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentException, IllegalStateException{
+	
 		if (Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1){
 			throw new IllegalArgumentException();
 		}
-		
+		if(!this.isAbleToMove())
+			throw new IllegalStateException();
 		
 		double[] cubeCenter = getCubeCenter(getCubePosition(this.getPosition()));
-		
-		double[] nextPosition = {
-				cubeCenter[0]+dx,
-				cubeCenter[1]+dy,
-				cubeCenter[2]+dz
-		};
+		double[] nextPosition = {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
 		
 		if (!isValidPosition(nextPosition))
 			throw new IllegalArgumentException();
 		
-		
-		this.startMoving();
+		this.setCurrentActivity("moving");
 		this.updateSpeed(dz);
 		this.setOrientation(getMovingOrientation(getVelocityVector(dx, dy, dz, this.getSpeed())));
 		this.setNextPosition(nextPosition);
 	}
-}
+
+/*
+ * ----------------------HELPER METHODS--------------------------
+ */
 
 /**
  * 
  * @param dx
+ * 		difference in x direction
  * @param dy
+ * 		difference in y direction
  * @param dz
+ * 		difference in z direction
  * @param dt
+ * 		time
  * @return the intermediate position of unit who is walking
  * 			 from his original position to his new position
  * 			| result == {this.position[0]+this.getVelocityVector[0]*dt,
@@ -1232,11 +1203,14 @@ public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	return newPosition;
 }
 
-
-/**
+/*
+ * 
  * @param dx
+ * 			difference in x direction
  * @param dy
+ * 			difference in y direction
  * @param dz
+ * 			difference in z direction
  * @param speed
  * 		The speed of the given unit
  * @return the velocity in all directions of the unit
@@ -1255,38 +1229,6 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 };
 
 
-/**
- * 
- * @param cube
- * 			the cube where the unit will move to
- * @throws IllegalArgumentException
- * 			will be thrown if the cube is out of bounds
- * 				|!isValidPosition(getCubeCenter(cube)
- */
-public void moveTo(int[] cube) throws IllegalArgumentException{
-	
-	if(!isValidPosition(getCubeCenter(cube)))
-		throw new IllegalArgumentException();
-	
-	int[] position = getCubePosition(this.getPosition());
-	int[] step = new int[3];
-	while ((position[0] != cube[0])&&
-			(position[1] != cube[1])&&
-			(position[2] != cube[2])){
-		for(int i = 0; i<3; i++){
-			if (position[i] == cube[i]){
-				step[i] = 0;
-			}else if(position[i] < cube[i]){
-				step[i] = 1;
-			}else{
-				step[i] = -1;
-			}
-			this.moveToAdjacent(step[0],step[1],step[2]);
-		}
-	}
-				
-}
-
 
 /**_____________________________________________________________
  * _____________________________________________________________
@@ -1295,7 +1237,37 @@ public void moveTo(int[] cube) throws IllegalArgumentException{
  *_____________________________________________________________
  */
 
-//ACTIVITY CHECKERS
+/*
+ * -----------------GETTERS-----------------
+ */
+@Model
+private String getCurrentActivity(){
+	return this.activity;
+}
+
+@Model
+private double getActivityTime(){
+	return this.activityTime;
+}
+
+/*
+ * ----------------SETTERS----------------
+ */
+
+
+@Model
+private void setCurrentActivity(String activity) throws IllegalArgumentException{
+	this.activity = activity;
+}
+
+@Model
+private void setActivityTime(double time){
+	this.activityTime = time;
+}
+
+/*
+ * ----------------------ACTIVITY CHECKERS-----------------------
+ */
 
 //TODO wijzig strings naar activities uit enum Activity
 
@@ -1336,103 +1308,47 @@ public boolean isAttacking(){
 	return (this.getCurrentActivity()=="attacking");
 }
 /**
- * Tells whether the unit is currently in default behaviour.
+ * Tells whether the unit is currently in default behavior.
  * @return
- * 		true if the unit is currently in default behaviour.
+ * 		true if the unit is currently in default behavior.
  * 		| result == (this.getCurrentActivity == "default")
  */
-public boolean isDefaultBehaviourEnabled() {
-	return (this.getCurrentActivity()=="default");
+public boolean hasDefaultBehavior() {
+	return this.hasDefaultBehavior;
 }
-
-//ACTIVITY STARTERS
-//TODO 
-
-
-
-public void startResting() throws IllegalStateException{
-	if ((this.getCurrentActivity() == "moving")||
-			(this.getCurrentActivity() == "attacking"))
-			throw new IllegalStateException();
-	
-	this.setCurrentActivity("resting");
-	this.setActivityTime(this.getMaximalRestTime());
-}
-
-public void startWorking() throws IllegalStateException{
-	
-	
-
-}
-
-public void startMoving() throws IllegalStateException{
-	
-	if ((this.getCurrentActivity() == "attacking")||
-		(this.getCurrentActivity() == "attacking"))
-		throw new IllegalStateException();
-	
-	this.setCurrentActivity("moving");
-
-}
-
-public void startAttacking() throws IllegalStateException{
-	
-	
-}
-
 
 /**
- * Change state of Unit to default behaviour
- * 
- * @post the activity of the unit is switched to default behaviour
- * 		 | new.getCurrentAcivity() == "default"
+* Returns true if the unit is sprinting
+*/
+@Basic @Raw
+public boolean isSprinting() {
+	return this.isSprinting;
+}
+
+/*
+ * ---------------ACTIVITY INITIALISERS----------------------
  */
-public void startDefaultBehaviour() {
-	this.setCurrentActivity("default");
-}
-
-
-
-//ACTIVITY GETTERS AND SETTERS 
-
-@Model
-private void setCurrentActivity(String activity) throws IllegalArgumentException{
-	this.activity = activity;
-}
-@Model
-private String getCurrentActivity(){
-	return this.activity;
-}
-@Model
-private void setActivityTime(double time){
-	this.activityTime = time;
-}
-@Model
-private double getActivityTime(){
-	return this.activityTime;
-}
 
 //WORKING
 
-public void work(){
-	if ((this.getCurrentActivity() == "moving")||
-			(this.getCurrentActivity() == "attacking"))
+public void work() throws IllegalStateException{
+	if (!this.isAbleToWork())
 			throw new IllegalStateException();
 	
 	this.setCurrentActivity("working");
 	this.setActivityTime(this.getWorkingTime());
 }
 
-//
+//FIGHTING
 
 public void attack(){
 	this.setCurrentActivity("attacking");
-	this.setActivityTime(this.getTime());
+	this.setActivityTime(this.getFightingTime());
 }
 
 public void defend(Unit attacker){
 	this.setCurrentActivity("attacking");
-	this.setActivityTime(this.getTime());
+	this.setActivityTime(this.getFightingTime());
 	
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
@@ -1470,24 +1386,51 @@ public void defend(Unit attacker){
 /**
  * Let the unit rest
  * 
- * Each time this function is hit, the unit will or gain one hitpoint or gain one stamina.
- * The time for healing one point is getMinimalRestTime()
  */
-public void rest(){
-	if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
-		this.setHitpoints(this.getHitpoints()+1);
-	}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
-		this.setStamina(this.getStamina()+1);
-	}
-			
+public void rest() throws IllegalStateException{
+	if(!this.isAbleToRest())
+		throw new IllegalStateException();
+	
+	this.setCurrentActivity("resting");
+	this.setActivityTime(this.getMaximalRestTime());		
 }
-
-
-
 
 //DEFAULTBEHAVIOUR
 
 
+/**
+ * Change state of Unit to default behavior
+ * 
+ * @post the activity of the unit is switched to default behavior
+ * 		 | new.getCurrentAcivity() == "default"
+ */
+public void startDefaultBehavior() {
+	this.hasDefaultBehavior = true;
+}
+
+//SPRINTING
+
+/**
+* The Unit starts to sprint
+* 
+* @post  The unit will go in sprinting mode
+*       | new.isSprinting() == true
+* @throws IllegalStateException
+*         The given isSprinting is not a valid isSprinting for any
+*         Unit.
+*       | ! isValidIsSprinting(getIsSprinting())
+*/
+public void startSprinting() throws IllegalStateException{
+	//if (!this.isAbleToSprint())
+	//	throw new IllegalStateException();
+	this.isSprinting = true;
+	
+}
+
+
+/*
+ * --------------ACTIVITY TERMINATORS--------------------
+ */
 
 /**
  * Stop default behaviour of Unit
@@ -1496,12 +1439,24 @@ public void rest(){
  * 		 | new.getCurrentAcivity() == "nothing"
  */
 public void stopDefaultBehaviour() {
-	this.setCurrentActivity("nothing");
+	this.setCurrentActivity("none");
 }
 
-//HELPER METHODS
 
-//TIME
+/**
+* The unit will stop sprinting
+* 
+* @post  The unit will stop sprinting
+*       | new.isSprinting() == false
+*/
+public void stopSprinting() {
+		this.isSprinting = false;
+}
+
+/*
+ * ---------------ACTIVITY TIME-------------------------
+ */
+
 
 /**
  * Gives the minimal rest time.
@@ -1549,11 +1504,13 @@ private float getWorkingTime(){
  * 		| result == 1
  */
 @Immutable
-private final float getTime(){
+private final float getFightingTime(){
 	return 1;
 }
 
-//ACTIVITY CHECKERS
+/*
+ * ---------------------------ABILITY CHECKERS-------------------------------
+ */
 
 public boolean isAbleToMove(){
 	return this.getCurrentActivity()!="attacking" && this.getCurrentActivity()!="working";
@@ -1572,4 +1529,22 @@ public boolean isAbleToWork(){
 	return this.getCurrentActivity() != "attacking";
 }
 
+/*_____________________________________________________________
+ * ____________________________________________________________
+ *-------------------------HELPER METHODS----------------------
+ * ____________________________________________________________
+ *_____________________________________________________________
+ */
+
+private boolean equals(double[] position1, double[] position2) {
+	return (position1[0] == position2[0])&&
+			(position1[1] == position2[1])&&
+			(position1[2] == position2[2]);
+}
+
+private boolean inBetween(double[] position1, double[] position2, double[] positionInBetween) {
+	return (position2[0]<=positionInBetween[0]&&positionInBetween[0] <=position1[0]||position2[0]>=positionInBetween[0]&&positionInBetween[0]>=position1[0])&&
+			(position2[1]<=positionInBetween[1]&&positionInBetween[1]<=position1[1]||position2[1]>=positionInBetween[1]&&positionInBetween[1]>=position1[1])&&
+			(position2[2]<=positionInBetween[2]&&positionInBetween[2]<=position1[2]||position2[2]>=positionInBetween[2]&&positionInBetween[2]>=position1[2]);
+}
 }
