@@ -916,7 +916,7 @@ public void stopSprinting() {
  * __________________________________________________________________________________
  */
 
-//ADVANCE TIME
+//ADVANCETIME
 
 
 public void advanceTime(double dt) {
@@ -978,11 +978,9 @@ public void advanceTime(double dt) {
 		}
 	}
 	if (activity == "resting") {
-		float minimalRestTime = this.getMinimalRestTime();
-		float timeLeft = (float) dt;
-		while (timeLeft >minimalRestTime){
-			timeLeft-=minimalRestTime;
-			this.rest();
+		this.setActivityTime(this.getActivityTime()-dt);
+		if (this.getActivityTime() <= 0) {
+			this.setCurrentActivity("default");
 		}
 	}
 }
@@ -1274,6 +1272,7 @@ public void rest(){
 
 public void startResting() {
 	this.setCurrentActivity("resting");
+	this.setActivityTime(this.getMaximalRestTime());
 }
 
 
@@ -1308,11 +1307,28 @@ public void stopDefaultBehaviour() {
  * Gives the minimal rest time.
  * The time it takes for a unit to restore one hitpoint or stamina
  * 
- * @return  the minimal rest tim
+ * @return  the minimal rest time
  * 			|result == this.getToughness()/1000
  */ 
 private float getMinimalRestTime(){
 	return this.getToughness()/1000;
+}
+
+/**
+ * Gives the maximal rest time.
+ * The time it takes for a unit to restore all hitpoint and stamina
+ * 
+ * @return  the maximal rest time
+ * 			| result == (getMaxHitpoints(this.getWeight(), this.getToughness())+
+ *					   getMaxStamina(this.getWeight(), this.getToughness())-
+ *					   (this.getHitpoints()+this.getStamina()))*this.getMinimalRestTime()
+ */ 
+private float getMaximalRestTime(){
+	int pointsToHeal = getMaxHitpoints(this.getWeight(), this.getToughness())+
+					   getMaxStamina(this.getWeight(), this.getToughness())-
+					   (this.getHitpoints()+this.getStamina());
+	float timeToHeal = pointsToHeal*this.getMinimalRestTime();
+	return timeToHeal;
 }
 
 /**
