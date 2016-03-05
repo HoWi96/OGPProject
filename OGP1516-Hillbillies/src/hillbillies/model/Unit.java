@@ -1,5 +1,6 @@
 package hillbillies.model;
 
+
 import be.kuleuven.cs.som.annotate.*;
 
 
@@ -55,10 +56,21 @@ public class Unit {
 	
 	//CONSTANTS
 	
-	private static final float PI = (float) Math.PI;
+	//TODO Place here all constants
+	
+	private static final String ALLOWED_NAME_PATTERN = "[a-zA-Z \"']+";
+	
 	private static final int CUBELENGTH = 1;
 	private static final int MAXCOORDINATE = 50;
 	private static final int MINCOORDINATE = 0;
+	
+	private static final float PI = (float) Math.PI;
+
+	private static final double REST_INTERVAL = 60*3;
+	
+	
+	
+	
 	
 	//CONSTRUCTOR
 /**
@@ -84,6 +96,8 @@ public class Unit {
  * Initialize this new Unit with default orientation PI/2.
  * Initialize this new Unit with the maximum amount of hitpoints.
  * Initialize this new Unit with the maximum amount of stamina.
+ * Initialize this new Unit with activity "none".
+ * 
  * 
  * ____________________________________________________________
  * 
@@ -157,6 +171,8 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	this.setStamina(getMaxStamina(weight, toughness));
 	
 	this.setOrientation(PI/2);
+	
+	this.setCurrentActivity("none");
 }
 
 
@@ -219,6 +235,12 @@ private double speed;
 private double[] targetPosition;
 
 /**
+ * The next position of the unit
+ */
+
+private double[] nextPosition;
+
+/**
  * Variable registering if the unit is sprinting
  */
 private boolean isSprinting;
@@ -233,7 +255,18 @@ private double activityTime;
  */
 //TODO vervang alle strings door elementen van de enum Activity om consistentie te verzekeren
 private String activity;
-
+/**
+ * Variable registering the time till mandatory rest
+ */
+private double counterTillRest = 0;
+/**
+ * the time till default behaviour is activated
+ */
+private double counterTillDefault = 0;
+/**
+ * the step the unit is currently making
+ */
+private int[] step;
 
 
 
@@ -349,7 +382,7 @@ public void setName(String name) throws IllegalArgumentException {
 public static boolean isValidName(String name) {
 	return (name.length()>2)&&
 			(Character.isUpperCase(name.charAt(0))&&
-			(name.matches("[A-Za-z\"' ]+")));
+			(name.matches(ALLOWED_NAME_PATTERN)));
 }
 
 
@@ -806,7 +839,7 @@ private static float getMovingOrientation(double[] velocityVector){
 	return orientation;
 }
 /**
- * Update the orientations of the units who are fighting
+ * Update the orientations of the units who are 
  * @param attacker
  * 			the attacking unit
  * @param defender
@@ -815,7 +848,7 @@ private static float getMovingOrientation(double[] velocityVector){
  * 			| attacker.getOrientation() = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1])
  * 			| defender.getOrientation() = (float) Math.atan2(aPosition[1]-dPosition[1], aPosition[0]-dPosition[1])
  */
-public void updateFightingOrientation(Unit attacker, Unit defender){ 
+public void updateOrientation(Unit attacker, Unit defender){ 
 	double[] aPosition = attacker.getPosition();
 	double[] dPosition = defender.getPosition();
 	float aOrientation = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1]);
@@ -923,8 +956,10 @@ public void advanceTime(double dt) {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
 	
-	String activity;
-	activity = this.getCurrentActivity();
+	counterTillRest += dt;
+	if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
+		rest();
+	}
 	
 	if (activity == "default") {
 		int randomActivity = (int) (Math.random()*3);
@@ -940,60 +975,124 @@ public void advanceTime(double dt) {
 			activity = "rest";
 		}
 	}
-	
+	//TODO FIXEN
 	if (activity == "moving") {
-		int[] cubePosition = getCubePosition(this.getPosition());
-		double[] target = this.getTargetPosition();
-		int[] targetPosition = {(int)target[0], (int)target[1], (int)target[2]};
-		int[] dCube = {targetPosition[0] - cubePosition[0],
-					   targetPosition[1] - cubePosition[1],
-					   targetPosition[2] - cubePosition[2]
-		};
-		this.setOrientation(getMovingOrientation(getVelocityVector(dCube[0], dCube[1], dCube[2],this.getSpeed())));
-		double[] nextPosition = this.getIntermediatePosition(dCube[0], dCube[1], dCube[2], dt);
-		int[] dNext = {targetPosition[0] - (int)nextPosition[0],
-				       targetPosition[1] - (int)nextPosition[1],
-				       targetPosition[2] - (int)nextPosition[2]
-		};
+		if(this.isSprinting()){
+			if(this.getStamina()>=10*dt){
+				this.setStamina((int)(this.getStamina()-10*dt));
+			}else{
+				this.setStamina(0);
+				this.stopSprinting();
+			}
+		}
 		
-		if ((dCube[0]*dNext[0]<=0) && (dCube[1]*dNext[1]<=0) && (dCube[2]*dNext[2]<=0)) {
-			this.setCurrentActivity("default");
+		double[] cPosition = this.getPosition();
+		double[] nPosition = this.getNextPosition();
+		double[] targetPosition = this.getTargetPosition();
+		int[] step = new int[3];
+		
+		
+		if(equals(cPosition,nPosition)){
+			if(equals(cPosition, targetPosition)){
+				this.setCurrentActivity("none");
+			}else{
+				for(int i = 0; i<3; i++){
+					if (cPosition[i] == targetPosition[i]){
+						step[i] = 0;
+					}else if(cPosition[i] < targetPosition[i]){
+						step[i] = 1;
+					}else{
+						step[i] = -1;
+					}
+					this.setStep(step);
+					this.moveToAdjacent(step[0],step[1],step[2]);
+			}
+				step = this.getStep();
+				double[] iPosition = this.getIntermediatePosition(step[0],step[1],step[2], dt);
+				if(inBetween(cPosition, nPosition, iPosition))
+				this.setPosition(iPosition);
+				else
+					this.setPosition(nPosition);
+			}
 			
-			this.setPosition(target);
+			
 		}
-		// Ai ik ben vergeten de positie ook echt aan te passen, komt er aan.
-		System.out.println(nextPosition[0]);
+		
+		
+		
+//		int[] cubePosition = getCubePosition(this.getPosition());
+//		double[] target = this.getTargetPosition();
+//		int[] targetPosition = {(int)target[0], (int)target[1], (int)target[2]};
+//		int[] dCube = {targetPosition[0] - cubePosition[0],
+//					   targetPosition[1] - cubePosition[1],
+//					   targetPosition[2] - cubePosition[2]
+//		};
+//		this.setOrientation(getMovingOrientation(getVelocityVector(dCube[0], dCube[1], dCube[2],this.getSpeed())));
+//		double[] nextPosition = this.getIntermediatePosition(dCube[0], dCube[1], dCube[2], dt);
+//		int[] dNext = {targetPosition[0] - (int)nextPosition[0],
+//				       targetPosition[1] - (int)nextPosition[1],
+//				       targetPosition[2] - (int)nextPosition[2]
+//		};
+//		
+//		if ((dCube[0]*dNext[0]<=0) && (dCube[1]*dNext[1]<=0) && (dCube[2]*dNext[2]<=0)) {
+//			this.setCurrentActivity("default");
+//			
+//			this.setPosition(target);
+//		}
 	}
 	
 	
-	if(this.isSprinting()){
-		if(this.getStamina()>=10*dt){
-			this.setStamina((int)(this.getStamina()-10*dt));
-		}else{
-			this.stopSprinting();
-		}
-	}
+	
 	
 	if (activity == "working") {
 		this.setActivityTime(this.getActivityTime()-dt);
 		if (this.getActivityTime() <= 0) {
-			this.setCurrentActivity("default");
+			this.setCurrentActivity("none");
 		}
 	}
 	if (activity == "attacking"){
 		this.setActivityTime(this.getActivityTime()-dt);
 		if (this.getActivityTime() <= 0) {
-			this.setCurrentActivity("default");
+			this.setCurrentActivity("none");
 		}
 	}
 	if (activity == "resting") {
 		this.setActivityTime(this.getActivityTime()-dt);
 		if (this.getActivityTime() <= 0) {
-			this.setCurrentActivity("default");
+			this.setCurrentActivity("none");
 		}
+	if (activity == "none") {
+		counterTillDefault = counterTillDefault+dt;
+		if(counterTillDefault > 10)
+			this.startDefaultBehaviour();
+			counterTillDefault = 0;
+	}
 	
 	}
+	}
+
+private boolean equals(double[] position1, double[] position2) {
+	return (position1[0] == position2[0])&&
+			(position1[1] == position2[1])&&
+			(position1[2] == position2[2]);
 }
+
+private boolean inBetween(double[] position1, double[] position2, double[] positionInBetween) {
+	return (position2[0]<=positionInBetween[0]&&positionInBetween[0] <=position1[0]||position2[0]>=positionInBetween[0]&&positionInBetween[0]>=position1[0])&&
+			(position2[1]<=positionInBetween[1]&&positionInBetween[1]<=position1[1]||position2[1]>=positionInBetween[1]&&positionInBetween[1]>=position1[1])&&
+			(position2[2]<=positionInBetween[2]&&positionInBetween[2]<=position1[2]||position2[2]>=positionInBetween[2]&&positionInBetween[2]>=position1[2]);
+}
+
+public int[] getStep(){
+	return this.step;
+}
+
+public void setStep(int[] step){
+	this.step = step;
+}
+
+
+
 
 //MOVING TO TARGET POSITION
 
@@ -1015,6 +1114,7 @@ public void setTargetPosition(double[] targetPosition) throws IllegalArgumentExc
 	this.targetPosition = targetPosition;
 }
 
+
 /**
  * Get the targetPosition of this unit
  */
@@ -1023,6 +1123,34 @@ public double[] getTargetPosition() {
 	return this.targetPosition;
 }
 
+//MOVING TO NEXT POSITION
+
+/**
+ * 
+ * Set the target position of the unit
+ * 
+ * @param nextPosition
+ * 			the position where the unit is heading to
+ * @throws IllegalArgumentException
+ * 			if the position is not valid
+ * 			| (!isValidPosition(nextPosition))
+ * @post the units next position is nextPosition
+ * 			|new.getNextPosition() == nextPosition
+ */
+public void setNextPosition(double[] nextPosition) throws IllegalArgumentException  {
+	if (!isValidPosition(nextPosition))
+		throw new IllegalArgumentException();
+	this.targetPosition = nextPosition;
+}
+
+
+/**
+ * Get the nextPosition of this unit
+ */
+@Basic @Raw
+public double[] getNextPosition() {
+	return this.nextPosition;
+}
 /**
  * 
  * @param dx
@@ -1055,26 +1183,29 @@ public double[] getTargetPosition() {
  */
 public void moveToAdjacent(int dx, int dy, int dz) 
 		throws IllegalArgumentException, IllegalStateException {
-	
-	if (Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1){
-		throw new IllegalArgumentException();
+	if (!this.isMoving()){
+		if (Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1){
+			throw new IllegalArgumentException();
+		}
+		
+		
+		double[] cubeCenter = getCubeCenter(getCubePosition(this.getPosition()));
+		
+		double[] nextPosition = {
+				cubeCenter[0]+dx,
+				cubeCenter[1]+dy,
+				cubeCenter[2]+dz
+		};
+		
+		if (!isValidPosition(nextPosition))
+			throw new IllegalArgumentException();
+		
+		
+		this.startMoving();
+		this.updateSpeed(dz);
+		this.setOrientation(getMovingOrientation(getVelocityVector(dx, dy, dz, this.getSpeed())));
+		this.setNextPosition(nextPosition);
 	}
-	
-	
-	double[] cubeCenter = getCubeCenter(getCubePosition(this.getPosition()));
-	
-	double[] newPosition = {
-			cubeCenter[0]+dx,
-			cubeCenter[1]+dy,
-			cubeCenter[2]+dz
-	};
-	
-	if (!isValidPosition(newPosition))
-		throw new IllegalArgumentException();
-	
-	
-	this.setCurrentActivity("moving");
-	this.updateSpeed(dz);
 }
 
 /**
@@ -1214,39 +1345,94 @@ public boolean isDefaultBehaviourEnabled() {
 	return (this.getCurrentActivity()=="default");
 }
 
+//ACTIVITY STARTERS
+//TODO 
 
 
-//ACTIVITY GETTERS AND SETTERS
+
+public void startResting() throws IllegalStateException{
+	if ((this.getCurrentActivity() == "moving")||
+			(this.getCurrentActivity() == "attacking"))
+			throw new IllegalStateException();
+	
+	this.setCurrentActivity("resting");
+	this.setActivityTime(this.getMaximalRestTime());
+}
+
+public void startWorking() throws IllegalStateException{
+	
+	
+
+}
+
+public void startMoving() throws IllegalStateException{
+	
+	if ((this.getCurrentActivity() == "attacking")||
+		(this.getCurrentActivity() == "attacking"))
+		throw new IllegalStateException();
+	
+	this.setCurrentActivity("moving");
+
+}
+
+public void startAttacking() throws IllegalStateException{
+	
+	
+}
 
 
-public void setCurrentActivity(String activity) throws IllegalArgumentException{
+/**
+ * Change state of Unit to default behaviour
+ * 
+ * @post the activity of the unit is switched to default behaviour
+ * 		 | new.getCurrentAcivity() == "default"
+ */
+public void startDefaultBehaviour() {
+	this.setCurrentActivity("default");
+}
+
+
+
+//ACTIVITY GETTERS AND SETTERS 
+
+@Model
+private void setCurrentActivity(String activity) throws IllegalArgumentException{
 	this.activity = activity;
 }
-public String getCurrentActivity(){
+@Model
+private String getCurrentActivity(){
 	return this.activity;
 }
-
-public void setActivityTime(double time){
+@Model
+private void setActivityTime(double time){
 	this.activityTime = time;
 }
-
-public double getActivityTime(){
+@Model
+private double getActivityTime(){
 	return this.activityTime;
 }
 
 //WORKING
 
 public void work(){
+	if ((this.getCurrentActivity() == "moving")||
+			(this.getCurrentActivity() == "attacking"))
+			throw new IllegalStateException();
+	
 	this.setCurrentActivity("working");
 	this.setActivityTime(this.getWorkingTime());
 }
 
-//FIGHTING
+//
 
-public void attack(Unit attacker){
-	
+public void attack(){
 	this.setCurrentActivity("attacking");
-	this.setActivityTime(this.getFightingTime());
+	this.setActivityTime(this.getTime());
+}
+
+public void defend(Unit attacker){
+	this.setCurrentActivity("attacking");
+	this.setActivityTime(this.getTime());
 	
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
@@ -1296,24 +1482,12 @@ public void rest(){
 			
 }
 
-public void startResting() {
-	this.setCurrentActivity("resting");
-	this.setActivityTime(this.getMaximalRestTime());
-}
 
 
 
 //DEFAULTBEHAVIOUR
 
-/**
- * Change state of Unit to default behaviour
- * 
- * @post the activity of the unit is switched to default behaviour
- * 		 | new.getCurrentAcivity() == "default"
- */
-public void startDefaultBehaviour() {
-	this.setCurrentActivity("default");
-}
+
 
 /**
  * Stop default behaviour of Unit
@@ -1375,8 +1549,27 @@ private float getWorkingTime(){
  * 		| result == 1
  */
 @Immutable
-private final float getFightingTime(){
+private final float getTime(){
 	return 1;
+}
+
+//ACTIVITY CHECKERS
+
+public boolean isAbleToMove(){
+	return this.getCurrentActivity()!="attacking" && this.getCurrentActivity()!="working";
+}
+
+public boolean isAbleToRest(){
+	return this.getCurrentActivity()!="attacking";
+}
+
+public boolean isAbleToSprint(){
+	return this.isMoving() && getStamina()>0;
+}
+
+
+public boolean isAbleToWork(){
+	return this.getCurrentActivity() != "attacking";
 }
 
 }
