@@ -995,7 +995,7 @@ public void advanceTime(double dt) {
 	}
 }
 
-//MOVING
+//MOVING TO TARGET POSITION
 
 /**
  * 
@@ -1124,8 +1124,19 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 };
 
 
-
-public void moveTo(int[] cube){
+/**
+ * 
+ * @param cube
+ * 			the cube where the unit will move to
+ * @throws IllegalArgumentException
+ * 			will be thrown if the cube is out of bounds
+ * 				|!isValidPosition(getCubeCenter(cube)
+ */
+public void moveTo(int[] cube) throws IllegalArgumentException{
+	
+	if(!isValidPosition(getCubeCenter(cube)))
+		throw new IllegalArgumentException();
+	
 	int[] position = getCubePosition(this.getPosition());
 	int[] step = new int[3];
 	while ((position[0] != cube[0])&&
@@ -1205,11 +1216,10 @@ public boolean isDefaultBehaviourEnabled() {
 
 
 
+//ACTIVITY GETTERS AND SETTERS
 
 
-
-
-public void setCurrentActivity(String activity){
+public void setCurrentActivity(String activity) throws IllegalArgumentException{
 	this.activity = activity;
 }
 public String getCurrentActivity(){
@@ -1233,14 +1243,11 @@ public void work(){
 
 //FIGHTING
 
-public void attack(){
-	this.setCurrentActivity("attacking");
-	this.setActivityTime(this.getFightingTime());
-}
-
-public void defend(Unit attacker){
+public void attack(Unit attacker){
 	
 	this.setCurrentActivity("attacking");
+	this.setActivityTime(this.getFightingTime());
+	
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
 	
