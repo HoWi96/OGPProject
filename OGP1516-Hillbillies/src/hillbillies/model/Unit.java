@@ -54,7 +54,11 @@ import be.kuleuven.cs.som.annotate.*;
 
 public class Unit { 
 	
-	//CONSTANTS
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------CONSTANTS---------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
 	
 	//TODO Place here all constants
 	
@@ -69,10 +73,113 @@ public class Unit {
 //	private static final double REST_INTERVAL = 60*3;
 	private static final double NONE_INTERVAL = 10;
 	
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------PARAMETERS---------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+
+	/**
+	* Variable registering the Name of this Unit.
+	*/
+	private String name;
+
+	/**
+	* Variable registering the Position of this Unit.
+	* The length is set to 3 and will not change.
+	*/
+	private double[] position = new double[3];
+
+	/**
+	* Variable registering the weight of this Unit.
+	*/
+	private int weight;
+
+	/**
+	* Variable registering the Strength of this Unit.
+	*/
+	private int strength;
+
+	/**
+	* Variable registering the toughness of this Unit.
+	*/
+	private int toughness;
+
+	/**
+	* Variable registering the Agility of this Unit.
+	*/
+	private int agility;
+
+	/**
+	* Variable registering the hitpoints of this Unit.
+	*/
+	private int hitpoints;
+
+	/**
+	* Variable registering the stamina of this Unit.
+	*/
+	private int stamina;
+
+	/**
+	* Variable registering the orientation of this Unit.
+	*/
+	private float orientation;
+
+	/**
+	 * Variable registering the speed of this Unit.
+	 */
+	private double speed;
+
+	/**
+	 * The position where the unit is heading to
+	 */
+	private double[] targetPosition;
+
+	/**
+	 * The next position of the unit
+	 */
+
+	private double[] nextPosition;
+
+	/**
+	 * Variable registering if the unit is sprinting
+	 */
+	private boolean isSprinting;
+
+	/**
+	 * The time a unit needs to conduct an activity
+	 */
+	private double activityTime;
+
+	/**
+	 * Variable registering the Activity of this Unit.
+	 */
+	//TODO vervang alle strings door elementen van de enum Activity
+	private String activity;
+	/**
+	 * Variable registering the time till mandatory rest
+	 */
+	//TODO count till rest
+	//private double counterTillRest = 0;
+	/**
+	 * the time till default behaviour is activated
+	 */
+	private double counterTillDefault = 0;
+	/**
+	 * the step the unit is currently making
+	 */
+	private int[] step;
+	/**
+	 * indicates if the unit is operating in default behavior
+	 */
+	private boolean hasDefaultBehavior;
 	
-	
-	
-	//CONSTRUCTOR
+/*___________________________________________________________________
+ * __________________________________________________________________
+ * -----------------------CONSTRUCTOR--------------------------------
+ *___________________________________________________________________
+ *___________________________________________________________________*/	
+
 /**
  * Create a new unit with the given attributes.
  * 
@@ -97,7 +204,6 @@ public class Unit {
  * Initialize this new Unit with the maximum amount of hitpoints.
  * Initialize this new Unit with the maximum amount of stamina.
  * Initialize this new Unit with activity "none".
- * 
  * 
  * ____________________________________________________________
  * 
@@ -140,6 +246,13 @@ public class Unit {
  *       | if (isValidInitialWeight(weight) && isValidWeight(weight))
  *       |   then new.getWeight() == weight
  *       |   else new.getWeight() == 100
+ * @post if the given boolean enableDefaultBehavior is true,
+ * 		 the unit will go into default behavior. 
+ * 		 Else the activity of the unit is set to "none"
+ * 		| if(enableDefaultBehavior)
+ *	    |	new.hasDefaultBehavior() == true;
+ *	    | else
+ *		|	new.getCurrentActivity() == "none";
  *
  */
 public Unit(String name, int[] initialPosition, int weight, int agility,
@@ -178,105 +291,9 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 		this.setCurrentActivity("none");
 }
 
-
-//ALL PARAMETERS
-
-/**
-* Variable registering the Name of this Unit.
-*/
-private String name;
-
-/**
-* Variable registering the Position of this Unit.
-* The length is set to 3 and will not change.
-*/
-private double[] position = new double[3];
-
-/**
-* Variable registering the weight of this Unit.
-*/
-private int weight;
-
-/**
-* Variable registering the Strength of this Unit.
-*/
-private int strength;
-
-/**
-* Variable registering the toughness of this Unit.
-*/
-private int toughness;
-
-/**
-* Variable registering the Agility of this Unit.
-*/
-private int agility;
-
-/**
-* Variable registering the hitpoints of this Unit.
-*/
-private int hitpoints;
-
-/**
-* Variable registering the stamina of this Unit.
-*/
-private int stamina;
-
-/**
-* Variable registering the orientation of this Unit.
-*/
-private float orientation;
-
-/**
- * Variable registering the speed of this Unit.
+/*
+ * ------------------INITIAL CHECKERS-----------------------------
  */
-private double speed;
-
-/**
- * The position where the unit is heading to
- */
-private double[] targetPosition;
-
-/**
- * The next position of the unit
- */
-
-private double[] nextPosition;
-
-/**
- * Variable registering if the unit is sprinting
- */
-private boolean isSprinting;
-
-/**
- * The time a unit needs to conduct an activity
- */
-private double activityTime;
-
-/**
- * Variable registering the Activity of this Unit.
- */
-//TODO vervang alle strings door elementen van de enum Activity om consistentie te verzekeren
-private String activity;
-/**
- * Variable registering the time till mandatory rest
- */
-//private double counterTillRest = 0;
-/**
- * the time till default behaviour is activated
- */
-private double counterTillDefault = 0;
-/**
- * the step the unit is currently making
- */
-private int[] step;
-/**
- * indicates if the unit is operating in default behavior
- */
-private boolean hasDefaultBehavior;
-
-
-//INITIAL CHECKERS FOR UNIT
 
 /**
  * Checks whether the given value is a valid initial value for toughness.
@@ -910,8 +927,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	
 //	counterTillRest += dt;
 //	if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
-//		rest();
-//	}
+//		rest();	}
 	
 	if (this.hasDefaultBehavior()) {
 		int randomActivity = (int) (Math.random()*3);
@@ -929,79 +945,79 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}
 	if (activity == "moving") {
 		
-		if(this.isSprinting()){
-			if(this.getStamina()>=10*dt){
-				this.setStamina((int)(this.getStamina()-10*dt));
-			}else{
-				this.setStamina(0);
-				this.stopSprinting();
+			if(this.isSprinting()){
+				if(this.getStamina()>=10*dt){
+					this.setStamina((int)(this.getStamina()-10*dt));
+				}else{
+					this.setStamina(0);
+					this.stopSprinting();
+				}
 			}
-		}
-		
-		double[] cPosition = this.getPosition();
-		double[] nPosition = this.getNextPosition();
-		double[] targetPosition = this.getTargetPosition();
-		int[] step = new int[3];
-		
-		
-		if(equals(cPosition,nPosition)){
-			if(equals(cPosition, targetPosition)){
-				this.setCurrentActivity("none");
-			}else{
-				//pathfinding algorithm
-				for(int i = 0; i<3; i++){
-					if (cPosition[i] == targetPosition[i]){
-						step[i] = 0;
-					}else if(cPosition[i] < targetPosition[i]){
-						step[i] = 1;
-					}else{
-						step[i] = -1;
-					}
-					this.setStep(step);
-					this.moveToAdjacent(step[0],step[1],step[2]);
-			}
-				step = this.getStep();
-				double[] iPosition = this.getIntermediatePosition(step[0],step[1],step[2], dt);
-				if(inBetween(cPosition, nPosition, iPosition))
-				this.setPosition(iPosition);
-				else
-					this.setPosition(nPosition);
-			}
+			
+			double[] cPosition = this.getPosition();
+			double[] nPosition = this.getNextPosition();
+			double[] targetPosition = this.getTargetPosition();
+			int[] step = new int[3];
+			
+			
+			if(equals(cPosition,nPosition)){
+				if(equals(cPosition, targetPosition)){
+					this.setCurrentActivity("none");
+				}else{
+					//pathfinding algorithm
+					for(int i = 0; i<3; i++){
+						if (cPosition[i] == targetPosition[i]){
+							step[i] = 0;
+						}else if(cPosition[i] < targetPosition[i]){
+							step[i] = 1;
+						}else{
+							step[i] = -1;
+						}
+						this.setStep(step);
+						this.moveToAdjacent(step[0],step[1],step[2]);
+				}
+					step = this.getStep();
+					double[] iPosition = this.getIntermediatePosition(step[0],step[1],step[2], dt);
+					if(inBetween(cPosition, nPosition, iPosition))
+					this.setPosition(iPosition);
+					else
+						this.setPosition(nPosition);
+				}
 				
 		}
 	}
 	
 	if (activity == "working") {
-		this.setActivityTime(this.getActivityTime()-dt);
-		if (this.getActivityTime() <= 0) {
-			this.setCurrentActivity("none");
-		}
+			this.setActivityTime(this.getActivityTime()-dt);
+			if (this.getActivityTime() <= 0) {
+				this.setCurrentActivity("none");
+			}
 	}
 	if (activity == "attacking"){
-		this.setActivityTime(this.getActivityTime()-dt);
-		if (this.getActivityTime() <= 0) {
-			this.setCurrentActivity("none");
-		}
+			this.setActivityTime(this.getActivityTime()-dt);
+			if (this.getActivityTime() <= 0) {
+				this.setCurrentActivity("none");
+			}
 	}
 	if (activity == "resting") {
-		this.setActivityTime(this.getActivityTime()-dt);
-		while(dt !=0){
-			if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
-				this.setHitpoints(this.getHitpoints()+1);
-			}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
-				this.setStamina(this.getStamina()+1);
-			dt = dt - this.getMinimalRestTime();
-		}}
-		
-		if (this.getActivityTime() <= 0) {
-			this.setCurrentActivity("none");
-		}
+			this.setActivityTime(this.getActivityTime()-dt);
+			while(dt !=0){
+				if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
+					this.setHitpoints(this.getHitpoints()+1);
+				}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
+					this.setStamina(this.getStamina()+1);
+				dt = dt - this.getMinimalRestTime();
+			}}
+			
+			if (this.getActivityTime() <= 0) {
+					this.setCurrentActivity("none");
+			}
 	if (activity == "none") {
-		counterTillDefault = counterTillDefault+dt;
-		if(counterTillDefault > NONE_INTERVAL){
-			this.startDefaultBehavior();
-			counterTillDefault = 0;
-		}
+			counterTillDefault = counterTillDefault+dt;
+			if(counterTillDefault > NONE_INTERVAL){
+				this.startDefaultBehavior();
+				counterTillDefault = 0;
+			}
 	}
 	
 	}
