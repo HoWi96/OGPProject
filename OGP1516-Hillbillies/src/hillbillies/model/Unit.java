@@ -968,7 +968,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}
 	
 	// continue moving after you are again able to move
-	if(this.getTargetPosition()!= null && !equals(this.getPosition(),this.getTargetPosition())&&this.isAbleToMove()){
+	if(this.getTargetPosition()!= null && !equals(this.getPosition(),this.getTargetPosition())&&this.isAbleToMoveFurther()){
 			this.setCurrentActivity(Activity.MOVING);
 	}
 	
@@ -991,6 +991,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}		
 			
 	if (activity == Activity.MOVING) {
+		System.out.println(this.getCurrentActivity());
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
 					this.setStamina((this.getStamina()-10*dt), this.getWeight(),this.getToughness());
@@ -1054,13 +1055,13 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			} else {
 				this.setProgressTime((float)(this.getProgressTime()+dt));
 				
-					if(this.getMinimalHitpointTime()>this.getProgressTime() && 
+					if(this.getProgressTime()>this.getMinimalHitpointTime() && 
 							this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
 						
 						this.setHitpoints(this.getHitpoints()+1,this.getWeight(),this.getAgility());
 						this.setProgressTime(this.getProgressTime()-this.getMinimalStaminaTime());
 
-					}else if (this.getMinimalHitpointTime()>this.getProgressTime() && 
+					}else if (this.getProgressTime()>this.getMinimalHitpointTime() && 
 							this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
 						
 						this.setStamina((int)this.getStamina()+1,this.getWeight(),this.getAgility());
@@ -1432,7 +1433,6 @@ public boolean isSprinting() {
  * ---------------ACTIVITY INITIALISERS----------------------
  */
 
-
 //WORKING
 
 /**
@@ -1527,8 +1527,7 @@ public void attack(Unit defender) throws IllegalStateException{
 
 public void defend(Unit attacker){
 	
-	this.setCurrentActivity(Activity.ATTACKING);
-	this.setProgressTime(1);
+	this.setCurrentActivity(Activity.NOTHING);
 	
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
@@ -1597,6 +1596,8 @@ public void startSprinting() throws IllegalStateException{
 		throw new IllegalStateException();
 	this.isSprinting = true;
 }
+
+
 
 /*
  * --------------ACTIVITY TERMINATORS--------------------
@@ -1691,7 +1692,17 @@ private final float getFightingTime(){
  * 			| result == this.getCurrentActivity()!=Activity.ATTACKING && this.getCurrentActivity()!=Activity.WORKING
  */
 public boolean isAbleToMove(){
-	return this.getCurrentActivity()!=Activity.ATTACKING && this.getCurrentActivity()!=Activity.WORKING;
+	return this.getCurrentActivity()!=Activity.ATTACKING;
+}
+
+/**
+ * Checks if this unit can move further.
+ * A unit can move further if it has no activity
+ * @return	true if unit is not attacking and not working.
+ * 			| result == this.getCurrentActivity()!=Activity.NOTHING
+ */
+public boolean isAbleToMoveFurther(){
+	return this.getCurrentActivity()==Activity.NOTHING;
 }
 
 /**
