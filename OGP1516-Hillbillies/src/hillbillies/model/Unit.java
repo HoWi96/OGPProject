@@ -12,7 +12,7 @@ import be.kuleuven.cs.som.annotate.*;
  * 
  */
 
-/** TO BE ADDED TO CLASS HEADING
+/** 
  * @invar  The Name of each Unit must be a valid Name for any
  *         Unit.
  *       | isValidName(getName())
@@ -50,6 +50,15 @@ import be.kuleuven.cs.som.annotate.*;
  * @invar  The activity of each Unit must be a valid activity for any
  *         Unit.
  *       | isValidActivity(getActivity())
+ *       
+ * @invar  The nextPosition of each Unit must be a valid position for any
+ *         Unit.
+ *       | isValidPosition(getNextPosition())
+ *       
+ * @invar  The targetPosition of each Unit must be a valid position for any
+ *         Unit.
+ *       | isValidPosition(getTargetPosition())      
+ *       
  */
 
 public class Unit { 
@@ -197,11 +206,6 @@ public class Unit {
  *            The initial toughness of the unit
  * @param enableDefaultBehavior
  *            Whether the default behavior of the unit is enabled
- *            
- * Initialize this new Unit with default orientation PI/2.
- * Initialize this new Unit with the maximum amount of hitpoints.
- * Initialize this new Unit with the maximum amount of stamina.
- * Initialize this new Unit with activity "none".
  * 
  * ____________________________________________________________
  * 
@@ -212,6 +216,20 @@ public class Unit {
  * @effect The Position of this new Unit is set to
  *         the given Position.
  *       | this.setPosition(position)
+ *       
+ * @effect The nextPosition of this new Unit is set to
+ *         the given Position.
+ *       | this.setNextPosition(position)
+ *       
+ * @effect the orientation of this unit will be set to PI/2
+ * 		| this.setOrientation(PI/2)
+ * 
+ * @effect the hitpoints will be set to the maximal amount of hitpoints
+ * 		| this.setHitpoints(this.getMaxHitpoints))
+ * 
+ * @effect the stamina will be set to the maximal amount of stamina
+ * 		| this.setStamina(this.getStamina))
+ *       
  * 
  * @post   If the given Strength is a valid Strength for any Unit,
  *         the Strength of this new Unit is equal to the given
@@ -257,9 +275,11 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 			int strength, int toughness, boolean enableDefaultBehavior)
 			throws IllegalArgumentException {
 	
-	this.setName(name);
+	setName(name);
 	
-	this.setPosition(getCubeCenter(initialPosition));
+	setPosition(getCubeCenter(initialPosition));
+	
+	setNextPosition(getCubeCenter(initialPosition));
 	
 	if (!isValidInitialStrength(strength))
 		strength = 100;
@@ -282,6 +302,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	setStamina(getMaxStamina(weight, toughness),weight, toughness);
 	
 	setOrientation(PI/2);
+	
 	
 	if(enableDefaultBehavior)
 		this.startDefaultBehavior();
@@ -940,7 +961,7 @@ public void updateSpeed(int dz){
  *___________________________________________________________________
  *___________________________________________________________________*/
 
-//TODO fix advance time :(
+//TODO further optimize advanceTime
 
 public void advanceTime(double dt) throws IllegalArgumentException {
 	if (!(0.0<=dt&&dt<=0.2))
@@ -948,6 +969,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	
     counterTillRest += dt;
     
+    //set counter to the moment the unit needs to rest
     if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
     	rest();
     	counterTillRest = 0.0;
@@ -989,20 +1011,18 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				work();
 			}
 			if (randomActivity == 2) {
-				try {
-					rest();
-				} catch (IllegalStateException e) {
-					work();
-				}
+				rest();
 			}
 	}
 	
 	/*
 	 * --------------------------HANDEL DIFFERENT ACTIVITIES-----------------------------
 	 */
+	
 	Activity activity =this.getCurrentActivity();
 			
 	if (activity == Activity.MOVING) {
+		
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
 					this.setStamina((this.getStamina()-10*dt), this.getWeight(),this.getToughness());
@@ -1019,7 +1039,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			double[] tPosition = this.getTargetPosition();
 			
 			
-			if(nPosition == null||equals(cPosition,nPosition)){
+			if(equals(cPosition,nPosition)){
 				if(tPosition == null || equals(cPosition, tPosition)){
 					this.setCurrentActivity(Activity.NOTHING);
 					counterTillDefault = 0;
@@ -1047,6 +1067,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}
 	
 	if (activity == Activity.WORKING) {
+		
 			this.setProgressTime((float)(this.getProgressTime()+dt));
 			if (this.getProgressTime() >= this.getWorkingTime()) {
 				this.setCurrentActivity(Activity.NOTHING);
@@ -1054,6 +1075,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			}
 	}
 	if (activity == Activity.ATTACKING){
+		
 			this.setProgressTime((float)(this.getProgressTime()+dt));
 			if (this.getProgressTime() >= this.getFightingTime()) {
 				this.setCurrentActivity(Activity.NOTHING);
@@ -1061,6 +1083,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			}
 	}
 	if (activity == Activity.RESTING) {
+		
 			if (this.isFullyHealed()) {
 				this.setCurrentActivity(Activity.NOTHING);
 				counterTillDefault = 0;
@@ -1085,6 +1108,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			}
 			
 	if (activity == Activity.NOTHING) {
+		
 			counterTillDefault = counterTillDefault+dt;
 			if(counterTillDefault >= NOTHING_INTERVAL){
 				counterTillDefault = 0.0;
@@ -1094,7 +1118,6 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			}
 	}
 }
-
 
 /*___________________________________________________________________
  * __________________________________________________________________
@@ -1356,10 +1379,10 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
  * @return If the step goes to a neighbouring cube
  * 		|result == Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1
  */
-private boolean isValidStep(int dx, int dy, int dz) {
+@Model
+private static boolean isValidStep(int dx, int dy, int dz) {
 	return !(Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1);
 }
-
 
 
 /**_____________________________________________________________
@@ -1762,7 +1785,7 @@ public boolean isAbleToMoveFurther(){
  * 			| result == this.getCurrentActivity()!=Activity.ATTACKING && !this.isFullyHealed()
  */
 public boolean isAbleToRest(){
-	return this.getCurrentActivity()!=Activity.ATTACKING  && !this.isFullyHealed();
+	return this.getCurrentActivity()!=Activity.ATTACKING;
 }
 
 /**
