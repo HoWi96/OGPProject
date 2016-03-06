@@ -610,6 +610,13 @@ public void setOrientation(float orientation) {
 	}
 }
 
+/**
+ * Sets the speedof this unit to the given speed.
+ * @param	speed
+ * 			The new speed of this unit.
+ * @post	The speed of this unit is equal to the given speed.
+ * 			| new.getSpeed() == speed
+ */
 
 @Raw
 public void setSpeed(double speed){
@@ -1270,7 +1277,7 @@ public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	return newPosition;
 }
 
-/*
+/**
  * 
  * @param dx
  * 			difference in x direction
@@ -1311,7 +1318,7 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 
 //TODO write documentation
 
-/*
+/**
  * Returns the activity this unit is doing.
  */
 @Model
@@ -1319,7 +1326,7 @@ private Activity getCurrentActivity(){
 	return this.activity;
 }
 
-/*
+/**
  * Returns the time this unit will continue its current activity.
  */
 @Model
@@ -1331,7 +1338,7 @@ private float getProgressTime(){
  * ----------------SETTERS----------------
  */
 
-/*
+/**
  * Sets the current activity to the given activity.
  * 
  * @param	activity
@@ -1346,7 +1353,7 @@ private void setCurrentActivity(Activity activity) throws IllegalArgumentExcepti
 	this.activity = activity;
 }
 
-/*
+/**
  * Sets the current activity time to the given time.
  * 
  * @param	time
@@ -1405,7 +1412,7 @@ public boolean isAttacking(){
  * Tells whether the unit is currently in default behavior.
  * @return
  * 		true if the unit is currently in default behavior.
- * 		| result == (this.getCurrentActivity == "default")
+ * 		| result == (this.hasDefaultBehaviorEnabled)
  */
 public boolean hasDefaultBehavior() {
 	return this.hasDefaultBehaviorEnabled;
@@ -1431,17 +1438,15 @@ public boolean isSprinting() {
 
 /**
  * 
- * The unit starts resting
+ * The unit starts working
  * 
  * @post the progress time will be set to 0
- * 		| new.getAcivityTime = 0
+ * 		| new.getProgressTime = 0
  * 
  * @post the activity of the unit is switched off to nothing
  * 		 | new.getCurrentAcivity() == Activity.WORKING
- * 
-
+ *
  */
-
 public void work() throws IllegalStateException{
 	if (!this.isAbleToWork())
 			throw new IllegalStateException();
@@ -1454,10 +1459,10 @@ public void work() throws IllegalStateException{
 
 /**
  * @post the activity time will be set to the maximal resting time
- * 		| new.getAcivityTime = 0
+ * 		| new.getProgressTime = 0
  * 
  * @post the activity of the unit is switched off to nothing
- * 		 | new.getCurrentAcivity() == Activity.WORKING
+ * 		 | new.getCurrentAcivity() == Activity.ATTACKING
  * 
  * @throws IllegalStateException
  * 			if the  unit is not able to work
@@ -1466,11 +1471,27 @@ public void work() throws IllegalStateException{
 public void attack() throws IllegalStateException{
 	if(!this.isAbleToAttack())
 		throw new IllegalStateException();
+	
 	this.setCurrentActivity(Activity.ATTACKING);
 	this.setProgressTime(0);
 }
 
-//TODO documentation
+
+
+/**
+ * Makes the unit defend against a given attacker.
+ * 
+ * The defender has a 0.2*defender.agility/attacker.agility chanche to dodge an attack.
+ * If dodging is succesfull, the defending unit will move to a random adjecent square.
+ * 
+ * If dodging is unsuccesfull, the defending unit will try to block the attack.
+ * The chanche of blocking is 0.25*(defender.strength*defender.agility)/(attacker.strength+attacker.agility)
+ * If blocking is succesfull, the defending unit takes no damage.
+ * 
+ * If both dodging and blocking are unsuccesfull, the defending unit takes damage.
+ * The damage the unit takes equals attacker.strength/10
+ */
+
 public void defend(Unit attacker){
 	this.setCurrentActivity(Activity.ATTACKING);
 	this.setProgressTime(0);
@@ -1508,8 +1529,7 @@ public void defend(Unit attacker){
 
 //RESTING
 
-/**
- * 
+/** 
  * The unit starts resting
  * 
  * 
@@ -1518,7 +1538,7 @@ public void defend(Unit attacker){
  * 
  * @throws IllegalStateException
  * 			if the  unit is not able to rest
- * 			| !this.isAbleToRest
+ * 			| !this.isAbleToRest()
  */
 public void rest() throws IllegalStateException{
 	if(!this.isAbleToRest())
@@ -1635,25 +1655,52 @@ private final float getFightingTime(){
  * ---------------------------ABILITY CHECKERS-------------------------------
  */
 
-//TODO write documentation
-
+/**
+ * Checks if this unit can move.
+ * A unit can move if it is not attacking and if it is not working.
+ * @return	true if unit is not attacking and not working.
+ * 			| result == this.getCurrentActivity()!=Activity.ATTACKING && this.getCurrentActivity()!=Activity.WORKING
+ */
 public boolean isAbleToMove(){
 	return this.getCurrentActivity()!=Activity.ATTACKING && this.getCurrentActivity()!=Activity.WORKING;
 }
 
+/**
+ * Checks if this unit can rest.
+ * A unit can rest if it is not attacking.
+ * @return	true if unit is not attacking.
+ * 			| result == this.getCurrentActivity()!=Activity.ATTACKING
+ */
 public boolean isAbleToRest(){
 	return this.getCurrentActivity()!=Activity.ATTACKING;
 }
 
+/**
+ * Checks if this unit is currently able to sprint.
+ * A unit can sprint if its stamina is above 0 and if it is already moving.
+ * @return	true if the unit is moving and its stamina is higher than 0.
+ * 			| result == this.isMoving() && getStamina()>0
+ */
 public boolean isAbleToSprint(){
 	return this.isMoving() && getStamina()>0;
 }
 
-
+/**
+ * Checks if this unit is currently able to work.
+ * A unit can work if it is not attacking.
+ * @return	true if this unit is not attacking.
+ * 			| result == this.getCurrentActivity() != Activity.ATTACKING
+ */
 public boolean isAbleToWork(){
 	return this.getCurrentActivity() != Activity.ATTACKING;
 }
-
+/**
+ * Checks if this unit is currently able to attack.
+ * A unit can work if it is not attacking.
+ * @return	true if this unit is not attacking.
+ * 			| result == true
+ */
+@Immutable
 public boolean isAbleToAttack(){
 	return true;
 }
@@ -1665,8 +1712,7 @@ public boolean isAbleToAttack(){
  *_____________________________________________________________
  */
 
-//TODO write documentation
-/*
+/**
  * Checks whether two coordinates are identical.
  * 
  * @return	Returns true if the given positions are the same, false if they are not.
@@ -1680,7 +1726,7 @@ private boolean equals(double[] position1, double[] position2) {
 			(position1[2] == position2[2]);
 }
 
-/*
+/**
  * Checks whether a position is in between two positions.
  * 
  * @return	Returns true if the position is in between the other positions.
