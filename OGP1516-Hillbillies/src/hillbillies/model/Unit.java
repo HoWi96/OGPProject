@@ -159,7 +159,7 @@ public class Unit {
 	 * Variable registering the time till mandatory rest
 	 */
 	//TODO count till rest
-	private double counterTillRest = 0;
+	//private double counterTillRest = 0;
 	/**
 	 * the time till default behaviour is activated
 	 */
@@ -451,7 +451,7 @@ public double getSpeed(){
  *       | ! isValidName(getName())
  */
 @Raw
-public void setName(String name) throws IllegalArgumentException {
+private void setName(String name) throws IllegalArgumentException {
 	if (! isValidName(name))
 		throw new IllegalArgumentException();
 	this.name = name;
@@ -471,7 +471,7 @@ public void setName(String name) throws IllegalArgumentException {
  *       | ! isValidPosition(getPosition())
  */	
 @Raw
-public void setPosition(double[] position) throws IllegalArgumentException {
+private void setPosition(double[] position) throws IllegalArgumentException {
 	
 	if (! isValidPosition(position))
 		throw new IllegalArgumentException();
@@ -492,7 +492,7 @@ public void setPosition(double[] position) throws IllegalArgumentException {
  *       
  */
 @Raw
-public void setWeight(int weight, int strength, int agility) {
+private void setWeight(int weight, int strength, int agility) {
 	if (isValidWeight(weight,strength,agility))
 		this.weight = weight;
 }
@@ -510,7 +510,7 @@ public void setWeight(int weight, int strength, int agility) {
  *       |   then new.getStrength() == strength
  */
 @Raw
-public void setStrength(int strength) {
+private void setStrength(int strength) {
 	if (isValidStrength(strength))
 		this.strength = strength;
 }
@@ -527,7 +527,7 @@ public void setStrength(int strength) {
  *       |   then new.getAgility() == agility
  */
 @Raw
-public void setAgility(int agility) {
+private void setAgility(int agility) {
 	if (isValidAgility(agility))
 		this.agility = agility;
 }
@@ -544,7 +544,7 @@ public void setAgility(int agility) {
  *       |   then new.getToughness() == toughness
  */
 @Raw
-public void setToughness(int toughness) {
+private void setToughness(int toughness) {
 	if (isValidToughness(toughness))
 		this.toughness = toughness;
 }
@@ -562,7 +562,7 @@ public void setToughness(int toughness) {
  *       | new.getHitpoints() == hitpoints
  */
 @Raw
-public void setHitpoints(int hitpoints,int weight, int toughness) {
+private void setHitpoints(int hitpoints,int weight, int toughness) {
 	assert isValidHitpoints(hitpoints, weight,toughness);
 	this.hitpoints = hitpoints;
 }
@@ -580,7 +580,7 @@ public void setHitpoints(int hitpoints,int weight, int toughness) {
  *       | new.getStamina() == stamina
  */
 @Raw
-public void setStamina(double stamina,int weight, int toughness) {
+private void setStamina(double stamina,int weight, int toughness) {
 	assert isValidStamina(stamina, weight, toughness);
 	this.stamina = stamina;
 }
@@ -601,7 +601,7 @@ public void setStamina(double stamina,int weight, int toughness) {
  *        |  	then new.getOrientation() == orientation%2*PI
  */
 @Raw
-public void setOrientation(float orientation) {
+private void setOrientation(float orientation) {
 	if (isValidOrientation(orientation))
 		this.orientation = orientation;
 	else{
@@ -618,7 +618,7 @@ public void setOrientation(float orientation) {
  */
 
 @Raw
-public void setSpeed(double speed){
+private void setSpeed(double speed){
 	this.speed = speed;
 }
 
@@ -1125,7 +1125,7 @@ public int[] getStep(){
  * @post the units target position is targetPosition
  * 			|new.getTargetPosition() == targetPosition
  */
-public void setTargetPosition(double[] targetPosition) throws IllegalArgumentException  {
+private void setTargetPosition(double[] targetPosition) throws IllegalArgumentException  {
 	if (!isValidPosition(targetPosition))
 		throw new IllegalArgumentException();
 	this.targetPosition = targetPosition;
@@ -1143,7 +1143,7 @@ public void setTargetPosition(double[] targetPosition) throws IllegalArgumentExc
  * @post the units next position is nextPosition
  * 			|new.getNextPosition() == nextPosition
  */
-public void setNextPosition(double[] nextPosition) throws IllegalArgumentException  {
+private void setNextPosition(double[] nextPosition) throws IllegalArgumentException  {
 	if (!isValidPosition(nextPosition))
 		throw new IllegalArgumentException();
 	this.nextPosition = nextPosition;
@@ -1159,7 +1159,7 @@ public void setNextPosition(double[] nextPosition) throws IllegalArgumentExcepti
  * @post the units step is set to step
  * 			|new.getStep() == step
  */
-public void setStep(int[] step) {
+private void setStep(int[] step) {
 	this.step = step;
 }
 
