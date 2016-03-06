@@ -960,9 +960,9 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}
 	
 	//if the unit is in default mode, it can randomly start to sprint while moving
-	if(this.hasDefaultBehavior() && !this.isSprinting() && this.isMoving()){
+	if(this.hasDefaultBehavior() && !this.isSprinting() && this.isMoving() && this.isAbleToSprint()){
 		double randomSprint = Math.random();
-		if(randomSprint<0.05)
+		if(randomSprint<0.01)
 			this.startSprinting();
 	}
 	
@@ -990,7 +990,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			}
 	}		
 			
-	if (activity == Activity.MOVING || !equals(this.getPosition(),this.getNextPosition())) {
+	if (activity == Activity.MOVING) {
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
 					this.setStamina((this.getStamina()-10*dt), this.getWeight(),this.getToughness());
@@ -1031,10 +1031,6 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				this.setPosition(iPosition);
 			else
 				this.setPosition(nPosition);
-			
-			System.out.println(cPosition[0]);
-			System.out.println(iPosition[0]);
-			System.out.println(step[2]);
 	}
 	
 	if (activity == Activity.WORKING) {
@@ -1233,10 +1229,6 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		
 		double[] cubeCenter = getCubeCenter(getCubePosition(this.getPosition()));
 		double[] nextPosition = new double[] {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
-		//System.out.println("text");
-		//System.out.println(nextPosition[0]);
-		//System.out.println(nextPosition[1]);
-		//System.out.println(nextPosition[2]);
 		
 		if (!isValidPosition(nextPosition))
 			throw new IllegalArgumentException();
@@ -1273,8 +1265,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	double[] position = this.getPosition();
 	double[] velocityVector = getVelocityVector(dx, dy, dz, this.getSpeed());
-	System.out.println("test");
-	System.out.println(dx);
+
 	double[] newPosition = new double[] {
 			position[0]+velocityVector[0]*dt,
 			position[1]+velocityVector[1]*dt,
@@ -1305,7 +1296,6 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 			speed*dy/distance,
 			speed*dz/distance
 	};
-	System.out.println(speed);
 	return velocity;
 };
 
@@ -1457,7 +1447,7 @@ public boolean isSprinting() {
 *       | ! isAbleToWork()&&!hasDefaultBehavior())
  */
 public void work() throws IllegalStateException{
-	if (!this.isAbleToWork()&&!this.hasDefaultBehavior())
+	if (!this.isAbleToWork())
 			throw new IllegalStateException();
 	
 	this.setCurrentActivity(Activity.WORKING);
@@ -1478,7 +1468,7 @@ public void work() throws IllegalStateException{
  * 			| !this.isAbleToAttack() &&!this.hasDefaultBehavior()
  */
 public void attack() throws IllegalStateException{
-	if(!this.isAbleToAttack()&&!this.hasDefaultBehavior())
+	if(!this.isAbleToAttack())
 		throw new IllegalStateException();
 	
 	this.setCurrentActivity(Activity.ATTACKING);
@@ -1550,7 +1540,7 @@ public void defend(Unit attacker){
  * 			| !this.isAbleToRest()&&!this.hasDefaultBehavior()
  */
 public void rest() throws IllegalStateException{
-	if(!this.isAbleToRest()&&!this.hasDefaultBehavior())
+	if(!this.isAbleToRest())
 		throw new IllegalStateException();
 	
 	this.setCurrentActivity(Activity.RESTING);		
