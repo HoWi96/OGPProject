@@ -118,7 +118,7 @@ public class Unit {
 	/**
 	* Variable registering the stamina of this Unit.
 	*/
-	private int stamina;
+	private double stamina;
 
 	/**
 	* Variable registering the orientation of this Unit.
@@ -155,7 +155,7 @@ public class Unit {
 	 * Variable registering the Activity of this Unit.
 	 */
 	//TODO vervang alle strings door elementen van de enum Activity
-	private String activity;
+	private Activity activity;
 	/**
 	 * Variable registering the time till mandatory rest
 	 */
@@ -290,7 +290,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	if(enableDefaultBehavior)
 		hasDefaultBehavior();
 	else
-		 setCurrentActivity("none");
+		 setCurrentActivity(Activity.NOTHING);
 }
 
 /*
@@ -419,7 +419,7 @@ public int getHitpoints() {
  * Return the stamina of this Unit.
  */
 @Basic @Raw
-public int getStamina() {
+public double getStamina() {
 	return this.stamina;
 }
 
@@ -584,7 +584,7 @@ public void setHitpoints(int hitpoints,int weight, int toughness) {
  *       | new.getStamina() == stamina
  */
 @Raw
-public void setStamina(int stamina,int weight, int toughness) {
+public void setStamina(double stamina,int weight, int toughness) {
 	assert isValidStamina(stamina, weight, toughness);
 	this.stamina = stamina;
 }
@@ -742,7 +742,7 @@ public static boolean isValidHitpoints(int hitpoints, int weight, int toughness)
  * @return 
  *       | result == (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100))
 */
-public static boolean isValidStamina(int stamina, int weight, int toughness) {
+public static boolean isValidStamina(double stamina, int weight, int toughness) {
 	return (0<=stamina && stamina<= getMaxStamina(weight, toughness));
 }
 
@@ -942,14 +942,14 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	// continue moving after you are again able to move
 	if((this.getTargetPosition()!= null && !equals(this.getPosition(),this.getTargetPosition()))){
 		if (this.isAbleToMove())
-			this.setCurrentActivity("moving");
+			this.setCurrentActivity(Activity.MOVING);
 	}
 			
 			
-	if (activity == "moving") {
+	if (activity == Activity.MOVING) {
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
-					this.setStamina((int)(this.getStamina()-10*dt), this.getWeight(),this.getToughness());
+					this.setStamina((this.getStamina()-10*dt), this.getWeight(),this.getToughness());
 				}else{
 					this.setStamina(0,this.getWeight(),this.getToughness());
 					this.stopSprinting();
@@ -961,9 +961,11 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			double[] nPosition = this.getNextPosition();
 			double[] tPosition = this.getTargetPosition();
 			
+			
 			if(nPosition == null||equals(cPosition,nPosition)){
 				if(tPosition == null || equals(cPosition, tPosition)){
-					this.setCurrentActivity("none");
+					this.setCurrentActivity(Activity.NOTHING);
+					this.stopSprinting();
 					this.setSpeed(0);
 				}else{
 					//pathfinding algorithm
@@ -985,35 +987,40 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			this.setPosition(iPosition);
 			else
 				this.setPosition(nPosition);
+			
+			System.out.println("text");
+			System.out.println(cPosition[0]);
+			System.out.println(iPosition[0]);
+			System.out.println(step[2]);
 	}
 	
-	if (activity == "working") {
+	if (activity == Activity.WORKING) {
 			this.setActivityTime(this.getActivityTime()-dt);
 			if (this.getActivityTime() <= 0) {
-				this.setCurrentActivity("none");
+				this.setCurrentActivity(Activity.NOTHING);
 			}
 	}
-	if (activity == "attacking"){
+	if (activity == Activity.ATTACKING){
 			this.setActivityTime(this.getActivityTime()-dt);
 			if (this.getActivityTime() <= 0) {
-				this.setCurrentActivity("none");
+				this.setCurrentActivity(Activity.NOTHING);
 			}
 	}
-	if (activity == "resting") {
+	if (activity == Activity.RESTING) {
 			this.setActivityTime(this.getActivityTime()-dt);
 			while(dt !=0){
 				if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
 					this.setHitpoints(this.getHitpoints()+1,this.getWeight(),this.getAgility());
 				}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
-					this.setStamina(this.getStamina()+1,this.getWeight(),this.getAgility());
+					this.setStamina((int)this.getStamina()+1,this.getWeight(),this.getAgility());
 				dt = dt - this.getMinimalRestTime();
 			}}
 			
 			if (this.getActivityTime() <= 0) {
-					this.setCurrentActivity("none");
+					this.setCurrentActivity(Activity.NOTHING);
 			}
 			
-	if (activity == "none") {
+	if (activity == Activity.NOTHING) {
 			counterTillDefault = counterTillDefault+dt;
 			if(counterTillDefault > NONE_INTERVAL){
 				this.startDefaultBehavior();
@@ -1135,7 +1142,8 @@ public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalSta
 	if(!this.isAbleToMove())
 		throw new IllegalStateException();
 	
-	this.setCurrentActivity("moving");
+	this.setCurrentActivity(Activity.MOVING);
+	this.setNextPosition(this.getPosition());
 	this.setTargetPosition(getCubeCenter(cube));			
 }
 
@@ -1179,13 +1187,17 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		
 		double[] cubeCenter = getCubeCenter(getCubePosition(this.getPosition()));
 		double[] nextPosition = new double[] {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
+		//System.out.println("text");
+		//System.out.println(nextPosition[0]);
+		//System.out.println(nextPosition[1]);
+		//System.out.println(nextPosition[2]);
 		
 		if (!isValidPosition(nextPosition))
 			throw new IllegalArgumentException();
 
 		
 		this.setStep(new int[]{dx,dy,dz});
-		this.setCurrentActivity("moving");
+		this.setCurrentActivity(Activity.MOVING);
 		this.updateSpeed(dz);
 		this.setOrientation(getMovingOrientation(getVelocityVector(dx, dy, dz, this.getSpeed())));
 		this.setNextPosition(nextPosition);
@@ -1215,6 +1227,8 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	double[] position = this.getPosition();
 	double[] velocityVector = getVelocityVector(dx, dy, dz, this.getSpeed());
+	System.out.println("test");
+	System.out.println(dx);
 	double[] newPosition = new double[] {
 			position[0]+velocityVector[0]*dt,
 			position[1]+velocityVector[1]*dt,
@@ -1245,6 +1259,7 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 			speed*dy/distance,
 			speed*dz/distance
 	};
+	System.out.println(speed);
 	return velocity;
 };
 
@@ -1263,11 +1278,17 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 
 //TODO write documentation
 
+/*
+ * Returns the activity this unit is doing.
+ */
 @Model
-private String getCurrentActivity(){
+private Activity getCurrentActivity(){
 	return this.activity;
 }
 
+/*
+ * Returns the time this unit will continue its current activity.
+ */
 @Model
 private double getActivityTime(){
 	return this.activityTime;
@@ -1277,12 +1298,29 @@ private double getActivityTime(){
  * ----------------SETTERS----------------
  */
 
-
+/*
+ * Sets the current activity to the given activity.
+ * 
+ * @param	activity
+ * 			The activity the unit will be performing.
+ * @post	The activity of the unit will be the given activity.
+ * 			| new.getCurrentActivity == activity
+ * @throws	IllegalArgumentException
+ * 			The given activity is not a valid activity.
+ */
 @Model
-private void setCurrentActivity(String activity) throws IllegalArgumentException{
+private void setCurrentActivity(Activity activity) throws IllegalArgumentException{
 	this.activity = activity;
 }
 
+/*
+ * Sets the current activity time to the given time.
+ * 
+ * @param	time
+ * 			The time the unit will be performing its activity.
+ * @post	The activity time of the unit will be the given time.
+ * 			| new.getActivityTime == time
+ */
 @Model
 private void setActivityTime(double time){
 	this.activityTime = time;
@@ -1301,7 +1339,7 @@ private void setActivityTime(double time){
  * 		| result == (this.getCurrentActivity == "moving")
  */
 public boolean isMoving(){
-	return (this.getCurrentActivity()=="moving");
+	return (this.getCurrentActivity()==Activity.MOVING);
 }
 /**
  * Tells whether the unit is currently working.
@@ -1310,7 +1348,7 @@ public boolean isMoving(){
  * 		| result == (this.getCurrentActivity == "working")
  */
 public  boolean isWorking(){
-	return (this.getCurrentActivity()=="working");	
+	return (this.getCurrentActivity()==Activity.WORKING);	
 }
 /**
  * Tells whether the unit is currently resting.
@@ -1319,7 +1357,7 @@ public  boolean isWorking(){
  * 		| result == (this.getCurrentActivity == "resting")
  */
 public boolean isResting(){
-	return (this.getCurrentActivity()=="resting");
+	return (this.getCurrentActivity()==Activity.RESTING);
 }
 /**
  * Tells whether the unit is currently attacking.
@@ -1328,7 +1366,7 @@ public boolean isResting(){
  * 		| result == (this.getCurrentActivity == "attacking")
  */
 public boolean isAttacking(){
-	return (this.getCurrentActivity()=="attacking");
+	return (this.getCurrentActivity()==Activity.ATTACKING);
 }
 /**
  * Tells whether the unit is currently in default behavior.
@@ -1364,19 +1402,19 @@ public void work() throws IllegalStateException{
 	if (!this.isAbleToWork())
 			throw new IllegalStateException();
 	
-	this.setCurrentActivity("working");
+	this.setCurrentActivity(Activity.WORKING);
 	this.setActivityTime(this.getWorkingTime());
 }
 
 //FIGHTING
 
 public void attack(){
-	this.setCurrentActivity("attacking");
+	this.setCurrentActivity(Activity.ATTACKING);
 	this.setActivityTime(this.getFightingTime());
 }
 
 public void defend(Unit attacker){
-	this.setCurrentActivity("attacking");
+	this.setCurrentActivity(Activity.ATTACKING);
 	this.setActivityTime(this.getFightingTime());
 	
 	//first Dodging
@@ -1420,7 +1458,7 @@ public void rest() throws IllegalStateException{
 	if(!this.isAbleToRest())
 		throw new IllegalStateException();
 	
-	this.setCurrentActivity("resting");
+	this.setCurrentActivity(Activity.RESTING);
 	this.setActivityTime(this.getMaximalRestTime());		
 }
 
@@ -1442,10 +1480,10 @@ public void startDefaultBehavior() {
 				
 		}
 		if (randomActivity == 1) {
-			this.setCurrentActivity("working");
+			this.setCurrentActivity(Activity.WORKING);
 		}
 		if (randomActivity == 2) {
-			this.setCurrentActivity("resting");
+			this.setCurrentActivity(Activity.RESTING);
 		}
 	}
 	
@@ -1486,7 +1524,7 @@ public void startSprinting() throws IllegalStateException{
  * 
  */
 public void stopDefaultBehaviour() {
-	this.setCurrentActivity("none");
+	this.setCurrentActivity(Activity.NOTHING);
 	this.hasDefaultBehavior = false;
 }
 
@@ -1498,7 +1536,7 @@ public void stopDefaultBehaviour() {
 *       | new.isSprinting() == false
 */
 public void stopSprinting() {
-		this.isSprinting = false;
+	this.isSprinting = false;
 }
 
 /*
@@ -1529,7 +1567,7 @@ private float getMinimalRestTime(){
 private float getMaximalRestTime(){
 	int pointsToHeal = getMaxHitpoints(this.getWeight(), this.getToughness())+
 					   getMaxStamina(this.getWeight(), this.getToughness())-
-					   (this.getHitpoints()+this.getStamina());
+					   (this.getHitpoints()+(int)this.getStamina());
 	float timeToHeal = pointsToHeal*this.getMinimalRestTime();
 	return timeToHeal;
 }
@@ -1563,11 +1601,11 @@ private final float getFightingTime(){
 //TODO write documentation
 
 public boolean isAbleToMove(){
-	return this.getCurrentActivity()!="attacking" && this.getCurrentActivity()!="working";
+	return this.getCurrentActivity()!=Activity.ATTACKING && this.getCurrentActivity()!=Activity.WORKING;
 }
 
 public boolean isAbleToRest(){
-	return this.getCurrentActivity()!="attacking";
+	return this.getCurrentActivity()!=Activity.ATTACKING;
 }
 
 public boolean isAbleToSprint(){
@@ -1576,7 +1614,7 @@ public boolean isAbleToSprint(){
 
 
 public boolean isAbleToWork(){
-	return this.getCurrentActivity() != "attacking";
+	return this.getCurrentActivity() != Activity.ATTACKING;
 }
 
 /*_____________________________________________________________
@@ -1587,6 +1625,13 @@ public boolean isAbleToWork(){
  */
 
 //TODO write documentation
+/*
+ * Checks whether two coordinates are identical.
+ * 
+ * @return	Returns true if the given positions are the same, false if they are not.
+ * 			| result == (position[0] == position2[0]) && (position1[1] == position2[1])
+ * 						&& (position1[2] == position2[2])
+ */
 
 private boolean equals(double[] position1, double[] position2) {
 	return (position1[0] == position2[0])&&
@@ -1594,9 +1639,22 @@ private boolean equals(double[] position1, double[] position2) {
 			(position1[2] == position2[2]);
 }
 
+/*
+ * Checks whether a position is in between two positions.
+ * 
+ * @return	Returns true if the position is in between the other positions.
+ * 			| result == (position2[0] <= positionInBetween[0] && positionInBetween[0] <= position1[0]) ||
+ * 						(position2[0] >= positionInBetween[0] && positionInBetween[0] >= position1[0]) &&
+ * 						(position2[1] <= positionInBetween[1] && positionInBetween[1] <= position1[1]) ||
+ * 						(position2[1] >= positionInBetween[1] && positionInBetween[1] >= position1[1]) &&
+ * 						
+ */
 private boolean inBetween(double[] position1, double[] position2, double[] positionInBetween) {
-	return (position2[0]<=positionInBetween[0]&&positionInBetween[0] <=position1[0]||position2[0]>=positionInBetween[0]&&positionInBetween[0]>=position1[0])&&
-			(position2[1]<=positionInBetween[1]&&positionInBetween[1]<=position1[1]||position2[1]>=positionInBetween[1]&&positionInBetween[1]>=position1[1])&&
-			(position2[2]<=positionInBetween[2]&&positionInBetween[2]<=position1[2]||position2[2]>=positionInBetween[2]&&positionInBetween[2]>=position1[2]);
+	return (((position2[0]<=positionInBetween[0]&&positionInBetween[0]<=position1[0])||
+			(position2[0]>=positionInBetween[0]&&positionInBetween[0]>=position1[0]))&&
+			(position2[1]<=positionInBetween[1]&&positionInBetween[1]<=position1[1]||
+			position2[1]>=positionInBetween[1]&&positionInBetween[1]>=position1[1])&&
+			(position2[2]<=positionInBetween[2]&&positionInBetween[2]<=position1[2]||
+			position2[2]>=positionInBetween[2]&&positionInBetween[2]>=position1[2]));
 }
 }

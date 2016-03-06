@@ -53,7 +53,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public void setWeight(Unit unit, int newValue) throws ModelException {
-			unit.setWeight(newValue);
+			unit.setWeight(newValue, unit.getStrength(), unit.getAgility());
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public int getCurrentStaminaPoints(Unit unit) throws ModelException {
-		int stamina = unit.getStamina();
+		int stamina = (int)unit.getStamina();
 		return stamina;
 	}
 
