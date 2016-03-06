@@ -953,10 +953,15 @@ public void advanceTime(double dt) throws IllegalArgumentException {
     	counterTillRest = 0.0;
     }
 	
-	//if the unit stopped moving, we have to stop sprinting
-	if(this.isSprinting() && !this.isMoving()){
-		this.stopSprinting();
+	//if the unit stopped moving, we have to stop sprinting and stop the speed
+	if(!this.isMoving()){
+		if(!this.isSprinting())
+			this.stopSprinting();
+		if(this.getSpeed()>0)
+			this.setSpeed(0);
 	}
+	
+	//if the unit stopped 
 	
 	//if the unit is in default mode, it can randomly start to sprint while moving
 	if(this.hasDefaultBehavior() && !this.isSprinting() && this.isMoving() && this.isAbleToSprint()){
@@ -984,7 +989,11 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				work();
 			}
 			if (randomActivity == 2) {
-				rest();
+				try {
+					rest();
+				} catch (IllegalStateException e) {
+					work();
+				}
 			}
 	}
 	
@@ -1004,7 +1013,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				
 			}
 			
-			int[] step = new int[3];
+			
 			double[] cPosition = this.getPosition();
 			double[] nPosition = this.getNextPosition();
 			double[] tPosition = this.getTargetPosition();
@@ -1017,6 +1026,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 					this.stopSprinting();
 					this.setSpeed(0);
 				}else{
+					int[] step = new int[3];
 					//pathfinding algorithm
 					for(int i = 0; i<3; i++){
 						if (cPosition[i] == tPosition[i]){
@@ -1237,6 +1247,9 @@ public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalSta
  *			| cubeCenter[1]+dy,
  *			| cubeCenter[2]+dz};
  *			| new.position == setTargetPosition(newPosition)
+ * @post the unit will update his targetposition when only advanceTime is pressed
+ * 			|if(this.getTargetPosition() != null && equals(this.getPosition(),this.getTargetPosition()))
+			|	new.getTargetPosition = nextPosition
  *
  * @throws IllegalArgumentException
  * 		If at least one of the parameters is not -1, 0, or 1
@@ -1251,19 +1264,23 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		}
 		if(!this.isAbleToMove())
 			throw new IllegalStateException();
-		
+
 		double[] cubeCenter = getCubeCenter(getCubePosition(this.getPosition()));
 		double[] nextPosition = new double[] {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
 		
 		if (!isValidPosition(nextPosition))
 			throw new IllegalArgumentException();
 
+		//when hitting only moveToAdjacent
+		if(this.getTargetPosition() != null && equals(this.getPosition(),this.getTargetPosition()))
+			this.setTargetPosition(nextPosition);
 		
 		this.setStep(new int[]{dx,dy,dz});
 		this.setCurrentActivity(Activity.MOVING);
 		this.updateSpeed(dz);
 		this.setOrientation(getMovingOrientation(getVelocityVector(dx, dy, dz, this.getSpeed())));
 		this.setNextPosition(nextPosition);
+			
 	}
 
 /*
