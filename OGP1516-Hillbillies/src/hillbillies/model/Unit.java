@@ -970,9 +970,10 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			int randomActivity = (int) (Math.random()*3);
 			
 			if (randomActivity == 0) {
-		
-				double[] target = new double[] {Math.random()*50, Math.random()*50, Math.random()*50};
-				this.setTargetPosition(target);
+				// een unit kan enkel naar het centrum van een cube bewegen!
+				double[] randomPosition = new double[] {Math.random()*50, Math.random()*50, Math.random()*50};
+				double[] targetPosition = getCubeCenter(getCubePosition(randomPosition));
+				this.setTargetPosition(targetPosition);
 					
 			}
 			if (randomActivity == 1) {
@@ -1017,15 +1018,14 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 						this.moveToAdjacent(step[0],step[1],step[2]);
 				}}}
 
-			step = this.getStep();
 			
-			double[] iPosition = this.getIntermediatePosition(step[0],step[1],step[2], dt);
+			
+			double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
 			if(inBetween(cPosition, nPosition, iPosition))
-			this.setPosition(iPosition);
+				this.setPosition(iPosition);
 			else
 				this.setPosition(nPosition);
 			
-			System.out.println("text");
 			System.out.println(cPosition[0]);
 			System.out.println(iPosition[0]);
 			System.out.println(step[2]);
@@ -1445,10 +1445,13 @@ public boolean isSprinting() {
  * 
  * @post the activity of the unit is switched off to nothing
  * 		 | new.getCurrentAcivity() == Activity.WORKING
- *
+ * 
+ * @throws IllegalStateException
+*         the given unit is not able to work or is in default behavior.
+*       | ! isAbleToWork()&&!hasDefaultBehavior())
  */
 public void work() throws IllegalStateException{
-	if (!this.isAbleToWork())
+	if (!this.isAbleToWork()&&!this.hasDefaultBehavior())
 			throw new IllegalStateException();
 	
 	this.setCurrentActivity(Activity.WORKING);
@@ -1465,11 +1468,11 @@ public void work() throws IllegalStateException{
  * 		 | new.getCurrentAcivity() == Activity.ATTACKING
  * 
  * @throws IllegalStateException
- * 			if the  unit is not able to work
- * 			| !this.isAbleToWork
+ * 			if the  unit is not able to attack or is in default behavior
+ * 			| !this.isAbleToAttack() &&!this.hasDefaultBehavior()
  */
 public void attack() throws IllegalStateException{
-	if(!this.isAbleToAttack())
+	if(!this.isAbleToAttack()&&!this.hasDefaultBehavior())
 		throw new IllegalStateException();
 	
 	this.setCurrentActivity(Activity.ATTACKING);
@@ -1538,10 +1541,10 @@ public void defend(Unit attacker){
  * 
  * @throws IllegalStateException
  * 			if the  unit is not able to rest
- * 			| !this.isAbleToRest()
+ * 			| !this.isAbleToRest()&&!this.hasDefaultBehavior()
  */
 public void rest() throws IllegalStateException{
-	if(!this.isAbleToRest())
+	if(!this.isAbleToRest()&&!this.hasDefaultBehavior())
 		throw new IllegalStateException();
 	
 	this.setCurrentActivity(Activity.RESTING);		
@@ -1573,9 +1576,8 @@ public void startDefaultBehavior() {
 *       | new.isSprinting() == true
 *       
 * @throws IllegalStateException
-*         The given isSprinting is not a valid isSprinting for any
-*         Unit.
-*       | ! isValidIsSprinting(getIsSprinting())
+*         the given unit is not able to sprint
+*       | ! this.isAbleToSprint()
 */
 public void startSprinting() throws IllegalStateException{
 	if (!this.isAbleToSprint())
