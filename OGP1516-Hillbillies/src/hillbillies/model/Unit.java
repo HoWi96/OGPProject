@@ -892,7 +892,8 @@ private static float getMovingOrientation(double[] velocityVector){
  * 			| attacker.getOrientation() = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1])
  * 			| defender.getOrientation() = (float) Math.atan2(aPosition[1]-dPosition[1], aPosition[0]-dPosition[1])
  */
-public void updateOrientation(Unit attacker, Unit defender){ 
+@Model
+private static void updateOrientation(Unit attacker, Unit defender){ 
 	double[] aPosition = attacker.getPosition();
 	double[] dPosition = defender.getPosition();
 	float aOrientation = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1]);
@@ -967,8 +968,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}
 	
 	// continue moving after you are again able to move
-	if((this.getTargetPosition()!= null && !equals(this.getPosition(),this.getTargetPosition()))){
-		if (this.isAbleToMove())
+	if(this.getTargetPosition()!= null && !equals(this.getPosition(),this.getTargetPosition())&&this.isAbleToMove()){
 			this.setCurrentActivity(Activity.MOVING);
 	}
 	
@@ -1010,6 +1010,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			if(nPosition == null||equals(cPosition,nPosition)){
 				if(tPosition == null || equals(cPosition, tPosition)){
 					this.setCurrentActivity(Activity.NOTHING);
+					counterTillDefault = 0;
 					this.stopSprinting();
 					this.setSpeed(0);
 				}else{
@@ -1036,33 +1037,39 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			this.setProgressTime((float)(this.getProgressTime()+dt));
 			if (this.getProgressTime() >= this.getWorkingTime()) {
 				this.setCurrentActivity(Activity.NOTHING);
+				counterTillDefault =0;
 			}
 	}
 	if (activity == Activity.ATTACKING){
 			this.setProgressTime((float)(this.getProgressTime()+dt));
 			if (this.getProgressTime() >= this.getFightingTime()) {
 				this.setCurrentActivity(Activity.NOTHING);
+				counterTillDefault = 0;
 			}
 	}
 	if (activity == Activity.RESTING) {
 			if (this.isFullyHealed()) {
 				this.setCurrentActivity(Activity.NOTHING);
+				counterTillDefault = 0;
 			} else {
-				double restTimeLeft = new Double(dt);
+				this.setProgressTime((float)(this.getProgressTime()+dt));
 				
-				while(restTimeLeft>0){
-					if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
+					if(this.getMinimalHitpointTime()>this.getProgressTime() && 
+							this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
+						
 						this.setHitpoints(this.getHitpoints()+1,this.getWeight(),this.getAgility());
-						restTimeLeft = restTimeLeft - this.getMinimalHitpointTime();
-					}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
+						this.setProgressTime(this.getProgressTime()-this.getMinimalStaminaTime());
+
+					}else if (this.getMinimalHitpointTime()>this.getProgressTime() && 
+							this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
+						
 						this.setStamina((int)this.getStamina()+1,this.getWeight(),this.getAgility());
-						restTimeLeft = restTimeLeft - this.getMinimalStaminaTime();
+						this.setProgressTime(this.getProgressTime()-this.getMinimalStaminaTime());
 					}
 					
 				}
 				
 			}
-	}
 			
 	if (activity == Activity.NOTHING) {
 			counterTillDefault = counterTillDefault+dt;
@@ -1221,7 +1228,6 @@ public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalSta
  * 		| !isValidPosition(newPosition)
  */
 public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentException, IllegalStateException{
-	
 		if (Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1){
 			throw new IllegalArgumentException();
 		}
@@ -1313,12 +1319,10 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
  * -----------------GETTERS-----------------
  */
 
-//TODO write documentation
-
 /**
  * Returns the activity this unit is doing.
  */
-@Model
+@Basic @Model @Raw
 private Activity getCurrentActivity(){
 	return this.activity;
 }
@@ -1326,7 +1330,7 @@ private Activity getCurrentActivity(){
 /**
  * Returns the time this unit will continue its current activity.
  */
-@Model
+@Basic @Model @Raw
 private float getProgressTime(){
 	return this.progressTime;
 }
@@ -1366,8 +1370,6 @@ private void setProgressTime(float time){
 /*
  * ----------------------ACTIVITY CHECKERS-----------------------
  */
-
-//TODO wijzig strings naar activities uit enum Activity
 
 /**
  * Tells whether the unit is currently moving.
@@ -1455,9 +1457,34 @@ public void work() throws IllegalStateException{
 	this.setProgressTime(0);
 }
 
+//RESTING
+
+/** 
+* The unit starts resting
+* 
+* 
+* @post the activity of the unit is switched off to nothing
+* 		 | new.getCurrentAcivity() == Activity.RESTING
+* 
+* @post the progress time will be set to 0
+ * 		| new.getProgressTime = 0
+* 
+* @throws IllegalStateException
+* 			if the  unit is not able to rest
+* 			| !this.isAbleToRest()&&!this.hasDefaultBehavior()
+*/
+public void rest() throws IllegalStateException{
+	if(!this.isAbleToRest())
+		throw new IllegalStateException();
+	
+	this.setCurrentActivity(Activity.RESTING);	
+	this.setProgressTime(0);
+}
 //FIGHTING
 
 /**
+ * Let the unit attack another unit
+ * 
  * @post the activity time will be set to the maximal resting time
  * 		| new.getProgressTime = 0
  * 
@@ -1466,12 +1493,16 @@ public void work() throws IllegalStateException{
  * 
  * @throws IllegalStateException
  * 			if the  unit is not able to attack or is in default behavior
- * 			| !this.isAbleToAttack() &&!this.hasDefaultBehavior()
+ * 			| !this.isAbleToAttack()
+ * 
+ * @effect the orientation of both defender and attacker will be updated
+ * 			| updateOrientation(this, defender)
  */
-public void attack() throws IllegalStateException{
-	if(!this.isAbleToAttack())
+public void attack(Unit defender) throws IllegalStateException{
+	if(!this.isAbleToAttack(defender))
 		throw new IllegalStateException();
 	
+	updateOrientation(this, defender);
 	this.setCurrentActivity(Activity.ATTACKING);
 	this.setProgressTime(0);
 }
@@ -1481,21 +1512,23 @@ public void attack() throws IllegalStateException{
 /**
  * Makes the unit defend against a given attacker.
  * 
- * The defender has a 0.2*defender.agility/attacker.agility chanche to dodge an attack.
- * If dodging is succesfull, the defending unit will move to a random adjecent square.
+ * The defender has a 0.2*defender.agility/attacker.agility chance to dodge an attack.
+ * If dodging is successful, the defending unit will move to a random adjacent square.
  * 
- * If dodging is unsuccesfull, the defending unit will try to block the attack.
- * The chanche of blocking is 0.25*(defender.strength*defender.agility)/(attacker.strength+attacker.agility)
- * If blocking is succesfull, the defending unit takes no damage.
+ * If dodging is unsuccessful, the defending unit will try to block the attack.
+ * The chance of blocking is 0.25*(defender.strength*defender.agility)/(attacker.strength+attacker.agility)
+ * If blocking is successful, the defending unit takes no damage.
  * 
- * If both dodging and blocking are unsuccesfull, the defending unit takes damage.
+ * If both dodging and blocking are unsuccessful, the defending unit takes damage.
  * The damage the unit takes equals attacker.strength/10
+ * 
+ * instantious response, no game time needed
  */
 
 public void defend(Unit attacker){
+	
 	this.setCurrentActivity(Activity.ATTACKING);
-	this.setProgressTime(0);
-	this.updateOrientation(attacker, this);
+	this.setProgressTime(1);
 	
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
@@ -1510,7 +1543,8 @@ public void defend(Unit attacker){
 			nextPosition[0] = currentPosition[0] + step[0];
 			nextPosition[1] = currentPosition[1] + step[1];
 		};
-		this.moveToAdjacent(step[0], step[1], step[2]);
+		//may move instantaneous
+		this.setPosition(getCubeCenter(getCubePosition(nextPosition)));
 		return;
 	};
 	
@@ -1528,26 +1562,6 @@ public void defend(Unit attacker){
 	this.setHitpoints(newHitpointss,this.getWeight(),this.getToughness());
 	}
 
-//RESTING
-
-/** 
- * The unit starts resting
- * 
- * 
- * @post the activity of the unit is switched off to nothing
- * 		 | new.getCurrentAcivity() == Activity.RESTING
- * 
- * @throws IllegalStateException
- * 			if the  unit is not able to rest
- * 			| !this.isAbleToRest()&&!this.hasDefaultBehavior()
- */
-public void rest() throws IllegalStateException{
-	if(!this.isAbleToRest())
-		throw new IllegalStateException();
-	
-	this.setCurrentActivity(Activity.RESTING);		
-}
-
 //DEFAULTBEHAVIOUR
 
 /**
@@ -1561,6 +1575,7 @@ public void rest() throws IllegalStateException{
  * 
  */
 public void startDefaultBehavior() {
+		this.setProgressTime(0);
 		this.setCurrentActivity(Activity.NOTHING);
 		this.hasDefaultBehaviorEnabled = true; 
 }
@@ -1712,11 +1727,17 @@ public boolean isAbleToWork(){
  * Checks if this unit is currently able to attack.
  * A unit can work if it is not attacking.
  * @return	true if this unit is not attacking.
- * 			| result == true
+ * 			| result == (Math.abs(dx)<=1&&Math.abs(dy)<=1&&Math.abs(dz)==0);
  */
 @Immutable
-public boolean isAbleToAttack(){
-	return true;
+public boolean isAbleToAttack(Unit defender){
+	int[] aPosition = getCubePosition(this.getPosition());
+	int[] dPosition = getCubePosition(defender.getPosition());
+	int dx = aPosition[0] - dPosition[0];
+	int dy = aPosition[1] - dPosition[1];
+	int dz = aPosition[2] - dPosition[2];
+
+	return (Math.abs(dx)<=1&&Math.abs(dy)<=1&&Math.abs(dz)==0);
 }
 
 /*_____________________________________________________________

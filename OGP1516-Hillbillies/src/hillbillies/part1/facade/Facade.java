@@ -191,7 +191,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public void fight(Unit attacker, Unit defender) throws ModelException {
-		attacker.attack();
+		attacker.attack(defender);
 		defender.defend(attacker);
 	}
 
