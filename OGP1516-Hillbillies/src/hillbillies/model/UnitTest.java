@@ -166,14 +166,14 @@ public class UnitTest {
 	    	assertFalse(Unit.getMaxStamina(50,  80) == 40);
 	    	assertFalse(Unit.getMaxStamina(54,  34) == 38);
 	    }
-	    
+	    /*
 	    @Test
 	    public void testSetSpeed(){
 	    	Unit unit = new Unit("Baba 'O Reily", position, 50, 50, 50, 50, true);
 	    	unit.setSpeed(30);
 	    	assertTrue(unit.getSpeed() == 30);
 	    }
-	    
+	    */
 	    @Test
 	    public void testUpdateSpeed(){
 	    	Unit unit = new Unit("Baba 'O Reily", position, 50, 50, 50, 50, true);
@@ -219,7 +219,7 @@ public class UnitTest {
 	    	assertTrue(step2[1] == 0);
 	    	assertTrue(step2[2] == -1);
 	    }
-	    
+	    /*
 	    @Test
 	    public void testSetTargetPosition(){
 	    	unit.setTargetPosition(targetPositionDouble);
@@ -228,7 +228,8 @@ public class UnitTest {
 	    	assertTrue(target[1] == 4);
 	    	assertTrue(target[2] == 5);
 	    }
-	    
+	    */
+	    /*
 	    @Test
 	    public void testSetNextPosition(){
 	    	unit.setNextPosition(targetPositionDouble);
@@ -237,7 +238,7 @@ public class UnitTest {
 	    	assertTrue(next[1] == 4);
 	    	assertTrue(next[2] == 5);
 	    }
-	    
+	    */
 	    @Test
 	    public void testMoveToTarget(){
 	    	unit.moveToTarget(targetPosition);
@@ -295,5 +296,143 @@ public class UnitTest {
 	    public void testIsWorking(){
 	    	assertFalse(unit.isWorking());
 	    	unit.work();
+	    	assertTrue(unit.isWorking());
+	    }
+	    
+	    @Test
+	    public void testIsResting(){
+	    	assertFalse(unit.isResting());
+	    	unit.setStamina(0, unit.getWeight(), unit.getToughness());
+	    	unit.rest();
+	    	assertTrue(unit.isResting());
+	    }
+	    
+	    @Test
+	    public void testIsAttacking(){
+	    	assertFalse(unit.isAttacking());
+	    	Unit defender = new Unit("Baba 'O Reil", position, 50, 50, 50, 50, true);
+	    	unit.attack(defender);
+	    	assertTrue(unit.isAttacking());
+	    }
+	    
+	    @Test
+	    public void testHasDefaultBehavior(){
+	    	assertTrue(unit.hasDefaultBehavior());
+	    	unit.stopDefaultBehaviour();
+	    	assertFalse(unit.hasDefaultBehavior());
+	    }
+	    
+	    @Test
+	    public void testIsSprinting(){
+	    	assertFalse(unit.isSprinting());
+	    	unit.moveToAdjacent(1, 1, 1);
+	    	unit.startSprinting();
+	    	assertTrue(unit.isSprinting());
+	    }
+	    
+	    @Test
+	    public void testIsAbleToMove(){
+	    	assertTrue(unit.isAbleToMove());
+	    }
+	    
+	    @Test
+	    public void testIsAbleToSprint(){
+	    	assertFalse(unit.isAbleToSprint());
+	    	unit.moveToAdjacent(1, 1, 1);
+	    	assertTrue(unit.isAbleToSprint());
+	    	unit.setStamina(0, unit.getWeight(), unit.getToughness());
+	    	assertFalse(unit.isAbleToSprint());
+	    }
+	    
+	    @Test
+	    public void testIsAbleToAttack(){
+	    	Unit defender1 = new Unit("Baba 'O Reil", new int[]{2,2,3}, 50, 50, 50, 50, true);
+	    	Unit defender2 = new Unit("Baba 'O Reil", new int[]{1,2,4}, 50, 50, 50, 50, true);
+	    	Unit defender3 = new Unit("Baba 'O Reil", new int[]{2,3,3}, 50, 50, 50, 50, true);
+	    	Unit defender4 = new Unit("Baba 'O Reil", new int[]{20,30,3}, 50, 50, 50, 50, true);
+	    	assertTrue(unit.isAbleToAttack(defender1));
+	    	assertFalse(unit.isAbleToAttack(defender2));
+	    	assertTrue(unit.isAbleToAttack(defender3));
+	    	assertFalse(unit.isAbleToAttack(defender4));
+	    }
+	    
+	    @Test(expected = IllegalArgumentException.class)
+	    public void testSetNameException(){
+	    	unit.setName("3azerty");
+	    }
+	    
+	    @Test(expected = IllegalArgumentException.class)
+	    public void testSetPositionException(){
+	    	unit.setPosition(new double[]{1,2,60});
+	    }
+	    
+	    @Test(expected = IllegalArgumentException.class)
+	    public void testAdvanceTimeException(){
+	    	unit.advanceTime(1);
+	    }
+	    
+	    @Test(expected = IllegalArgumentException.class)
+	    public void testSetTargetPosition(){
+	    	unit.setTargetPosition(new double[]{1,3,-1});
+	    }
+	    
+	    @Test(expected = IllegalArgumentException.class)
+	    public void testSetNextPosition(){
+	    	unit.setNextPosition(new double[]{-4,3,5});
+	    }
+	    
+	    @Test(expected = IllegalArgumentException.class)
+	    public void testMoveToTargetIllegalArgumentException(){
+	    	unit.moveToTarget(new int[]{1,60,3});
+	    }
+	    
+	    @Test(expected = IllegalStateException.class)
+	    public void testMoveToTargetIllegalStateException(){
+	    	Unit defender = new Unit("Baba 'O Reil", position, 50, 50, 50, 50, true);
+	    	unit.attack(defender);
+	    	unit.moveToTarget(targetPosition);
+	    }
+	    
+	    @Test(expected = IllegalArgumentException.class)
+	    public void testMoveToAdjecentIllegalArgumentException1(){
+	    	unit.moveToAdjacent(2, 1, 1);
+	    }
+	    
+	    @Test(expected = IllegalStateException.class)
+	    public void testMoveToAdjecentIllegalStateException(){
+	    	Unit defender = new Unit("Baba 'O Reil", position, 50, 50, 50, 50, true);
+	    	unit.attack(defender);
+	    	unit.moveToAdjacent(0, 1, 0);
+	    }
+	    
+	    @Test(expected = IllegalArgumentException.class)
+	    public void testMoveToAdjecentIllegalArgumentException2(){
+	    	Unit defender = new Unit("Baba 'O Reil", new int[]{50,50,50}, 50, 50, 50, 50, true);
+	    	defender.moveToAdjacent(1, 1, 1);
+	    }
+	    
+	    @Test(expected = IllegalStateException.class)
+	    public void testWorkException(){
+	    	Unit defender = new Unit("Baba 'O Reil", position, 50, 50, 50, 50, true);
+	    	unit.attack(defender);
+	    	unit.work();
+	    }
+	    
+	    @Test(expected = IllegalStateException.class)
+	    public void testRestException(){
+	    	Unit defender = new Unit("Baba 'O Reil", position, 50, 50, 50, 50, true);
+	    	unit.attack(defender);
+	    	unit.rest();
+	    }
+	    
+	    @Test(expected = IllegalStateException.class)
+	    public void testAttackException(){
+	    	Unit defender = new Unit("Baba 'O Reil", new int[]{1,2,5}, 50, 50, 50, 50, true);
+	    	unit.attack(defender);
+	    }
+	    
+	    @Test(expected = IllegalStateException.class)
+	    public void testStartSprinting(){
+	    	unit.startSprinting();
 	    }
 }
