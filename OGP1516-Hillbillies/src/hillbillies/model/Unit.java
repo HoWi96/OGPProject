@@ -71,7 +71,7 @@ public class Unit {
 	private static final float PI = (float) Math.PI;
 
 //	private static final double REST_INTERVAL = 60*3;
-	private static final double NONE_INTERVAL = 10;
+	private static final double NOTHING_INTERVAL = 10;
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -951,6 +951,8 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
 	
+	System.out.println(this.getCurrentActivity());
+	
 //	counterTillRest += dt;
 //	if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
 //		rest();	}
@@ -968,7 +970,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}
 	
 	// continue moving after you are again able to move
-	if(this.getTargetPosition()!= null && !equals(this.getPosition(),this.getTargetPosition())&&this.isAbleToMoveFurther()){
+	if((this.getTargetPosition()!= null) && !equals(this.getPosition(),this.getTargetPosition())&&this.isAbleToMoveFurther()){
 			this.setCurrentActivity(Activity.MOVING);
 	}
 	
@@ -991,7 +993,6 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}		
 			
 	if (activity == Activity.MOVING) {
-		System.out.println(this.getCurrentActivity());
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
 					this.setStamina((this.getStamina()-10*dt), this.getWeight(),this.getToughness());
@@ -1074,7 +1075,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			
 	if (activity == Activity.NOTHING) {
 			counterTillDefault = counterTillDefault+dt;
-			if(counterTillDefault >= NONE_INTERVAL){
+			if(counterTillDefault >= NOTHING_INTERVAL){
 				counterTillDefault = 0.0;
 				this.startDefaultBehavior();
 				this.setProgressTime(0);
@@ -1689,10 +1690,10 @@ private final float getFightingTime(){
  * Checks if this unit can move.
  * A unit can move if it is not attacking and if it is not working.
  * @return	true if unit is not attacking and not working.
- * 			| result == this.getCurrentActivity()!=Activity.ATTACKING && this.getCurrentActivity()!=Activity.WORKING
+ * 			| result == this.getCurrentActivity()!=Activity.ATTACKING
  */
 public boolean isAbleToMove(){
-	return this.getCurrentActivity()!=Activity.ATTACKING;
+	return this.getCurrentActivity()!=Activity.ATTACKING ;
 }
 
 /**
