@@ -959,6 +959,13 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 		this.stopSprinting();
 	}
 	
+	//if the unit is in default mode, it can randomly start to sprint while moving
+	if(this.hasDefaultBehavior() && !this.isSprinting() && this.isMoving()){
+		double randomSprint = Math.random();
+		if(randomSprint<0.05)
+			this.startSprinting();
+	}
+	
 	// continue moving after you are again able to move
 	if((this.getTargetPosition()!= null && !equals(this.getPosition(),this.getTargetPosition()))){
 		if (this.isAbleToMove())
@@ -974,7 +981,6 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				double[] randomPosition = new double[] {Math.random()*50, Math.random()*50, Math.random()*50};
 				double[] targetPosition = getCubeCenter(getCubePosition(randomPosition));
 				this.setTargetPosition(targetPosition);
-					
 			}
 			if (randomActivity == 1) {
 				this.setCurrentActivity(Activity.WORKING);
@@ -984,7 +990,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			}
 	}		
 			
-	if (activity == Activity.MOVING) {
+	if (activity == Activity.MOVING || !equals(this.getPosition(),this.getNextPosition())) {
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
 					this.setStamina((this.getStamina()-10*dt), this.getWeight(),this.getToughness());
@@ -1721,8 +1727,8 @@ public boolean isAbleToAttack(){
  * 			| result == (position[0] == position2[0]) && (position1[1] == position2[1])
  * 						&& (position1[2] == position2[2])
  */
-
-private boolean equals(double[] position1, double[] position2) {
+@Model
+private static boolean equals(double[] position1, double[] position2) {
 	return (position1[0] == position2[0])&&
 			(position1[1] == position2[1])&&
 			(position1[2] == position2[2]);
@@ -1738,7 +1744,8 @@ private boolean equals(double[] position1, double[] position2) {
  * 						(position2[1] >= positionInBetween[1] && positionInBetween[1] >= position1[1]) &&
  * 						
  */
-private boolean inBetween(double[] position1, double[] position2, double[] positionInBetween) {
+@Model
+private static boolean inBetween(double[] position1, double[] position2, double[] positionInBetween) {
 	return (((position2[0]<=positionInBetween[0]&&positionInBetween[0]<=position1[0])||
 			(position2[0]>=positionInBetween[0]&&positionInBetween[0]>=position1[0]))&&
 			(position2[1]<=positionInBetween[1]&&positionInBetween[1]<=position1[1]||
