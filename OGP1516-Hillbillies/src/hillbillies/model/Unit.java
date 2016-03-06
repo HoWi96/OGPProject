@@ -998,6 +998,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 					this.setStamina(0,this.getWeight(),this.getToughness());
 					this.stopSprinting();
 				}
+				
 			}
 			
 			int[] step = new int[3];
@@ -1022,10 +1023,8 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 							step[i] = -1;
 						}
 						this.moveToAdjacent(step[0],step[1],step[2]);
+						nPosition = this.getNextPosition();
 				}}}
-
-			
-			
 			double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
 			if(inBetween(cPosition, nPosition, iPosition))
 				this.setPosition(iPosition);
