@@ -159,7 +159,7 @@ public class Unit {
 	 * Variable registering the time till mandatory rest
 	 */
 	//TODO count till rest
-	//private double counterTillRest;
+	private double counterTillRest = 0;
 	/**
 	 * the time till default behaviour is activated
 	 */
@@ -437,7 +437,6 @@ public double getSpeed(){
 }
 
 /*---------------------SETTERS
-
 /**
  * Set the Name of this Unit to the given Name.
  * 
@@ -624,7 +623,6 @@ public void setSpeed(double speed){
 }
 
 /*------------------------CHECKERS
-
 /**
  * Check whether the given Name is a valid Name for
  * any Unit.
@@ -765,9 +763,7 @@ public static boolean isValidOrientation(float orientation) {
 
 
 /*--------------------HELPER METHODS
-
 //POSITION
-
 /**
  * Gives back the position of the cube
  * 
@@ -864,7 +860,7 @@ private boolean isFullyHealed() {
  * 		| result == Math.ceil(2 * weight * toughness / 100)
  */
 public static int getMaxStamina(int weight, int toughness){
-	return (int) Math.ceil(2*weight*toughness/100);
+	return (int) Math.ceil(2*(double)weight*toughness/100);
 }
 
 //ORIENTATION
@@ -951,7 +947,6 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
 	
-	System.out.println(this.getCurrentActivity());
 	
 //	counterTillRest += dt;
 //	if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
@@ -1118,7 +1113,6 @@ public int[] getStep(){
 }
 
 /*-----------------SETTERS
-
 /**
  * 
  * Set the target position of the unit
