@@ -1053,10 +1053,12 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				while(restTimeLeft>0){
 					if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
 						this.setHitpoints(this.getHitpoints()+1,this.getWeight(),this.getAgility());
+						restTimeLeft = restTimeLeft - this.getMinimalHitpointTime();
 					}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
 						this.setStamina((int)this.getStamina()+1,this.getWeight(),this.getAgility());
+						restTimeLeft = restTimeLeft - this.getMinimalStaminaTime();
 					}
-					restTimeLeft = restTimeLeft - this.getMinimalRestTime();
+					
 				}
 				
 			}
@@ -1493,6 +1495,7 @@ public void attack() throws IllegalStateException{
 public void defend(Unit attacker){
 	this.setCurrentActivity(Activity.ATTACKING);
 	this.setProgressTime(0);
+	this.updateOrientation(attacker, this);
 	
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
@@ -1616,15 +1619,29 @@ public void stopSprinting() {
 
 
 /**
- * Gives the minimal rest time.
- * The time it takes for a unit to restore one hitpoint or stamina
+ * Gives the minimal time to recover one hitpoint.
+ * The time it takes for a unit to restore one hitpoint
  * 
- * @return  the minimal rest time
- * 			|result == this.getToughness()/1000
+ * @return  the minimal 
+ * 			|result == 40/getToughness()
  */ 
-private float getMinimalRestTime(){
-	return (float)this.getToughness()/1000;
+private float getMinimalHitpointTime(){
+	return (float)40/this.getToughness();
 }
+
+/**
+ * Gives the minimal time to recover one stamina.
+ * The time it takes for a unit to restore one stamina
+ * 
+ * @return  the minimal time it takes to recover one stamina
+ * 			|result == 20/getToughness()
+ */ 
+private float getMinimalStaminaTime(){
+	return (float)20/this.getToughness();
+}
+
+
+
 
 /**
  * Gives the time it takes for a unit to carry out some work.
