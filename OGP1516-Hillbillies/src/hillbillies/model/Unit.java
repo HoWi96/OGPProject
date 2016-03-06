@@ -60,7 +60,7 @@ public class Unit {
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 	
-	//TODO Place here all constants
+	//TODO Place all constants here
 	
 	private static final String ALLOWED_NAME_PATTERN = "[a-zA-Z \"']+";
 	
@@ -70,7 +70,7 @@ public class Unit {
 	
 	private static final float PI = (float) Math.PI;
 
-//	private static final double REST_INTERVAL = 60*3;
+	private static final double REST_INTERVAL = 60*3;
 	private static final double NOTHING_INTERVAL = 10;
 	
 	/*___________________________________________________________________
@@ -158,8 +158,7 @@ public class Unit {
 	/**
 	 * Variable registering the time till mandatory rest
 	 */
-	//TODO count till rest
-	//private double counterTillRest = 0;
+	private double counterTillRest = 0.0;
 	/**
 	 * the time till default behaviour is activated
 	 */
@@ -451,7 +450,7 @@ public double getSpeed(){
  *       | ! isValidName(getName())
  */
 @Raw
-private void setName(String name) throws IllegalArgumentException {
+public void setName(String name) throws IllegalArgumentException {
 	if (! isValidName(name))
 		throw new IllegalArgumentException();
 	this.name = name;
@@ -471,7 +470,7 @@ private void setName(String name) throws IllegalArgumentException {
  *       | ! isValidPosition(getPosition())
  */	
 @Raw
-private void setPosition(double[] position) throws IllegalArgumentException {
+public void setPosition(double[] position) throws IllegalArgumentException {
 	
 	if (! isValidPosition(position))
 		throw new IllegalArgumentException();
@@ -492,7 +491,7 @@ private void setPosition(double[] position) throws IllegalArgumentException {
  *       
  */
 @Raw
-private void setWeight(int weight, int strength, int agility) {
+public void setWeight(int weight, int strength, int agility) {
 	if (isValidWeight(weight,strength,agility))
 		this.weight = weight;
 }
@@ -510,7 +509,7 @@ private void setWeight(int weight, int strength, int agility) {
  *       |   then new.getStrength() == strength
  */
 @Raw
-private void setStrength(int strength) {
+public void setStrength(int strength) {
 	if (isValidStrength(strength))
 		this.strength = strength;
 }
@@ -527,7 +526,7 @@ private void setStrength(int strength) {
  *       |   then new.getAgility() == agility
  */
 @Raw
-private void setAgility(int agility) {
+public void setAgility(int agility) {
 	if (isValidAgility(agility))
 		this.agility = agility;
 }
@@ -544,7 +543,7 @@ private void setAgility(int agility) {
  *       |   then new.getToughness() == toughness
  */
 @Raw
-private void setToughness(int toughness) {
+public void setToughness(int toughness) {
 	if (isValidToughness(toughness))
 		this.toughness = toughness;
 }
@@ -562,7 +561,7 @@ private void setToughness(int toughness) {
  *       | new.getHitpoints() == hitpoints
  */
 @Raw
-private void setHitpoints(int hitpoints,int weight, int toughness) {
+public void setHitpoints(int hitpoints,int weight, int toughness) {
 	assert isValidHitpoints(hitpoints, weight,toughness);
 	this.hitpoints = hitpoints;
 }
@@ -580,7 +579,7 @@ private void setHitpoints(int hitpoints,int weight, int toughness) {
  *       | new.getStamina() == stamina
  */
 @Raw
-private void setStamina(double stamina,int weight, int toughness) {
+public void setStamina(double stamina,int weight, int toughness) {
 	assert isValidStamina(stamina, weight, toughness);
 	this.stamina = stamina;
 }
@@ -601,7 +600,7 @@ private void setStamina(double stamina,int weight, int toughness) {
  *        |  	then new.getOrientation() == orientation%2*PI
  */
 @Raw
-private void setOrientation(float orientation) {
+public void setOrientation(float orientation) {
 	if (isValidOrientation(orientation))
 		this.orientation = orientation;
 	else{
@@ -618,7 +617,7 @@ private void setOrientation(float orientation) {
  */
 
 @Raw
-private void setSpeed(double speed){
+public void setSpeed(double speed){
 	this.speed = speed;
 }
 
@@ -947,10 +946,12 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
 	
-	
-//	counterTillRest += dt;
-//	if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
-//		rest();	}
+    counterTillRest += dt;
+    
+    if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
+    	rest();
+    	counterTillRest = 0.0;
+    }
 	
 	//if the unit stopped moving, we have to stop sprinting
 	if(this.isSprinting() && !this.isMoving()){
@@ -966,7 +967,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	
 	// continue moving after you are again able to move
 	if((this.getTargetPosition()!= null) && !equals(this.getPosition(),this.getTargetPosition())&&this.isAbleToMoveFurther()){
-			this.setCurrentActivity(Activity.MOVING);
+			this.moveToTarget(getCubePosition(this.getTargetPosition()));
 	}
 	
 	if(this.hasDefaultBehavior() && this.getCurrentActivity()==Activity.NOTHING){
@@ -976,16 +977,21 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			if (randomActivity == 0) {
 				// een unit kan enkel naar het centrum van een cube bewegen!
 				double[] randomPosition = new double[] {Math.random()*50, Math.random()*50, Math.random()*50};
-				double[] targetPosition = getCubeCenter(getCubePosition(randomPosition));
-				this.setTargetPosition(targetPosition);
+				int[] targetPosition = getCubePosition(randomPosition);
+				this.moveToTarget(targetPosition);
 			}
 			if (randomActivity == 1) {
-				this.setCurrentActivity(Activity.WORKING);
+				work();
 			}
 			if (randomActivity == 2) {
-				this.setCurrentActivity(Activity.RESTING);
+				rest();
 			}
-	}		
+	}
+	
+	/*
+	 * --------------------------HANDEL DIFFERENT ACTIVITIES-----------------------------
+	 */
+	Activity activity =this.getCurrentActivity();
 			
 	if (activity == Activity.MOVING) {
 			if(this.isSprinting()){
@@ -1125,7 +1131,8 @@ public int[] getStep(){
  * @post the units target position is targetPosition
  * 			|new.getTargetPosition() == targetPosition
  */
-private void setTargetPosition(double[] targetPosition) throws IllegalArgumentException  {
+@Raw
+public void setTargetPosition(double[] targetPosition) throws IllegalArgumentException  {
 	if (!isValidPosition(targetPosition))
 		throw new IllegalArgumentException();
 	this.targetPosition = targetPosition;
@@ -1137,13 +1144,16 @@ private void setTargetPosition(double[] targetPosition) throws IllegalArgumentEx
  * 
  * @param nextPosition
  * 			the position where the unit is heading to
+ 
+ * @post the units next position is nextPosition
+ * 			|new.getNextPosition() == nextPosition
+ * 
  * @throws IllegalArgumentException
  * 			if the position is not valid
  * 			| (!isValidPosition(nextPosition))
- * @post the units next position is nextPosition
- * 			|new.getNextPosition() == nextPosition
  */
-private void setNextPosition(double[] nextPosition) throws IllegalArgumentException  {
+@Raw
+public void setNextPosition(double[] nextPosition) throws IllegalArgumentException  {
 	if (!isValidPosition(nextPosition))
 		throw new IllegalArgumentException();
 	this.nextPosition = nextPosition;
@@ -1158,8 +1168,16 @@ private void setNextPosition(double[] nextPosition) throws IllegalArgumentExcept
  * 
  * @post the units step is set to step
  * 			|new.getStep() == step
+ * 
+ * @throws IllegalArgumentException
+ * 			if the position is not valid
+ * 			| !isValidStep(step)
+ * 
  */
-private void setStep(int[] step) {
+@Raw
+public void setStep(int[] step) throws IllegalArgumentException {
+	if(!isValidStep(step[0],step[1],step[2]))
+		throw new IllegalArgumentException();
 	this.step = step;
 }
 
@@ -1169,6 +1187,7 @@ private void setStep(int[] step) {
  */
 
 /**
+ * Let the move to a target cube
  * 
  * @param cube
  * 			the cube where the unit will move to
@@ -1185,6 +1204,7 @@ public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalSta
 	
 	if(!isValidPosition(getCubeCenter(cube)))
 		throw new IllegalArgumentException();
+	
 	if(!this.isAbleToMove())
 		throw new IllegalStateException();
 	
@@ -1194,6 +1214,8 @@ public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalSta
 }
 
 /**
+ * 
+ * Let the unit move to an adjacent position
  * 
  * @param dx
  * 		The difference in cubes to go in x direction
@@ -1224,7 +1246,7 @@ public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalSta
  * 		| !isValidPosition(newPosition)
  */
 public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentException, IllegalStateException{
-		if (Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1){
+		if (!isValidStep(dx, dy, dz)){
 			throw new IllegalArgumentException();
 		}
 		if(!this.isAbleToMove())
@@ -1249,6 +1271,8 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
  */
 
 /**
+ * 
+ * get the intermediate position of the unit
  * 
  * @param dx
  * 		difference in x direction
@@ -1278,6 +1302,7 @@ public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 }
 
 /**
+ * Get the velocity in the different directions of the unit
  * 
  * @param dx
  * 			difference in x direction
@@ -1301,6 +1326,22 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 	};
 	return velocity;
 };
+
+/**
+ * Checks if the step is a valid step
+ * 
+ * @param dx
+ * 			difference in x direction
+ * @param dy
+ * 			difference in y direction
+ * @param dz
+ * 			difference in z direction
+ * @return If the step goes to a neighbouring cube
+ * 		|result == Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1
+ */
+private boolean isValidStep(int dx, int dy, int dz) {
+	return !(Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1);
+}
 
 
 
@@ -1651,9 +1692,6 @@ private float getMinimalStaminaTime(){
 	return (float)20/this.getToughness();
 }
 
-
-
-
 /**
  * Gives the time it takes for a unit to carry out some work.
  * 
@@ -1702,12 +1740,12 @@ public boolean isAbleToMoveFurther(){
 
 /**
  * Checks if this unit can rest.
- * A unit can rest if it is not attacking.
+ * A unit can rest if it is not attacking and it needs to recover
  * @return	true if unit is not attacking.
- * 			| result == this.getCurrentActivity()!=Activity.ATTACKING
+ * 			| result == this.getCurrentActivity()!=Activity.ATTACKING && !this.isFullyHealed()
  */
 public boolean isAbleToRest(){
-	return this.getCurrentActivity()!=Activity.ATTACKING;
+	return this.getCurrentActivity()!=Activity.ATTACKING  && !this.isFullyHealed();
 }
 
 /**
