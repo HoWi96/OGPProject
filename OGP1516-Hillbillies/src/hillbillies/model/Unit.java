@@ -149,22 +149,21 @@ public class Unit {
 	/**
 	 * The time a unit needs to conduct an activity
 	 */
-	private double activityTime;
+	private float  progressTime;
 
 	/**
 	 * Variable registering the Activity of this Unit.
 	 */
-	//TODO vervang alle strings door elementen van de enum Activity
 	private Activity activity;
 	/**
 	 * Variable registering the time till mandatory rest
 	 */
 	//TODO count till rest
-	//private double counterTillRest = 0;
+	//private double counterTillRest;
 	/**
 	 * the time till default behaviour is activated
 	 */
-	private double counterTillDefault = 0;
+	private double counterTillDefault = 0.0;
 	/**
 	 * the step the unit is currently making
 	 */
@@ -172,7 +171,7 @@ public class Unit {
 	/**
 	 * indicates if the unit is operating in default behavior
 	 */
-	private boolean hasDefaultBehavior;
+	private boolean hasDefaultBehaviorEnabled;
 	
 /*___________________________________________________________________
  * __________________________________________________________________
@@ -285,12 +284,10 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	
 	setOrientation(PI/2);
 	
-	
-	
 	if(enableDefaultBehavior)
-		hasDefaultBehavior();
+		this.startDefaultBehavior();
 	else
-		 setCurrentActivity(Activity.NOTHING);
+		this.stopDefaultBehaviour();
 }
 
 /*
@@ -613,7 +610,7 @@ public void setOrientation(float orientation) {
 	}
 }
 
-//TODO write documentation
+
 @Raw
 public void setSpeed(double speed){
 	this.speed = speed;
@@ -837,6 +834,18 @@ public static int getMaxHitpoints(int weight, int toughness){
 	return (int) Math.ceil(200.0*weight/100*toughness/100);
 }
 
+/**
+ * Checks if the unit is fully recovered
+ * 
+ * @return true if the unit is fully recovered
+ * 			|this.getHitpoints() == getMaxHitpoints(this.getWeight(), this.getToughness())&&
+			(this.getStamina()==getMaxStamina(this.getWeight(), this.getToughness()))
+ */
+private boolean isFullyHealed() {
+	return this.getHitpoints() == getMaxHitpoints(this.getWeight(), this.getToughness())&&
+			(this.getStamina()==getMaxStamina(this.getWeight(), this.getToughness()));
+}
+
 
 //STAMINA
 
@@ -938,13 +947,34 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 //	if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
 //		rest();	}
 	
+	//if the unit stopped moving, we have to stop sprinting
+	if(this.isSprinting() && !this.isMoving()){
+		this.stopSprinting();
+	}
 	
 	// continue moving after you are again able to move
 	if((this.getTargetPosition()!= null && !equals(this.getPosition(),this.getTargetPosition()))){
 		if (this.isAbleToMove())
 			this.setCurrentActivity(Activity.MOVING);
 	}
+	
+	if(this.hasDefaultBehavior() && this.getCurrentActivity()==Activity.NOTHING){
+	
+			int randomActivity = (int) (Math.random()*3);
 			
+			if (randomActivity == 0) {
+		
+				double[] target = new double[] {Math.random()*50, Math.random()*50, Math.random()*50};
+				this.setTargetPosition(target);
+					
+			}
+			if (randomActivity == 1) {
+				this.setCurrentActivity(Activity.WORKING);
+			}
+			if (randomActivity == 2) {
+				this.setCurrentActivity(Activity.RESTING);
+			}
+	}		
 			
 	if (activity == Activity.MOVING) {
 			if(this.isSprinting()){
@@ -995,42 +1025,45 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}
 	
 	if (activity == Activity.WORKING) {
-			this.setActivityTime(this.getActivityTime()-dt);
-			if (this.getActivityTime() <= 0) {
+			this.setProgressTime((float)(this.getProgressTime()+dt));
+			if (this.getProgressTime() >= this.getWorkingTime()) {
 				this.setCurrentActivity(Activity.NOTHING);
 			}
 	}
 	if (activity == Activity.ATTACKING){
-			this.setActivityTime(this.getActivityTime()-dt);
-			if (this.getActivityTime() <= 0) {
+			this.setProgressTime((float)(this.getProgressTime()+dt));
+			if (this.getProgressTime() >= this.getFightingTime()) {
 				this.setCurrentActivity(Activity.NOTHING);
 			}
 	}
 	if (activity == Activity.RESTING) {
-			this.setActivityTime(this.getActivityTime()-dt);
-			while(dt !=0){
-				if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
-					this.setHitpoints(this.getHitpoints()+1,this.getWeight(),this.getAgility());
-				}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
-					this.setStamina((int)this.getStamina()+1,this.getWeight(),this.getAgility());
-				dt = dt - this.getMinimalRestTime();
-			}}
-			
-			if (this.getActivityTime() <= 0) {
-					this.setCurrentActivity(Activity.NOTHING);
+			if (this.isFullyHealed()) {
+				this.setCurrentActivity(Activity.NOTHING);
+			} else {
+				double restTimeLeft = new Double(dt);
+				
+				while(restTimeLeft>0){
+					if(this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
+						this.setHitpoints(this.getHitpoints()+1,this.getWeight(),this.getAgility());
+					}else if (this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
+						this.setStamina((int)this.getStamina()+1,this.getWeight(),this.getAgility());
+					}
+					restTimeLeft = restTimeLeft - this.getMinimalRestTime();
+				}
+				
 			}
+	}
 			
 	if (activity == Activity.NOTHING) {
 			counterTillDefault = counterTillDefault+dt;
-			if(counterTillDefault > NONE_INTERVAL){
+			if(counterTillDefault >= NONE_INTERVAL){
+				counterTillDefault = 0.0;
 				this.startDefaultBehavior();
-				counterTillDefault = 0;
+				this.setProgressTime(0);
+				
 			}
 	}
-	
-	}
-	
-	}
+}
 
 
 /*___________________________________________________________________
@@ -1290,8 +1323,8 @@ private Activity getCurrentActivity(){
  * Returns the time this unit will continue its current activity.
  */
 @Model
-private double getActivityTime(){
-	return this.activityTime;
+private float getProgressTime(){
+	return this.progressTime;
 }
 
 /*
@@ -1322,8 +1355,8 @@ private void setCurrentActivity(Activity activity) throws IllegalArgumentExcepti
  * 			| new.getActivityTime == time
  */
 @Model
-private void setActivityTime(double time){
-	this.activityTime = time;
+private void setProgressTime(float time){
+	this.progressTime = time;
 }
 
 /*
@@ -1375,7 +1408,7 @@ public boolean isAttacking(){
  * 		| result == (this.getCurrentActivity == "default")
  */
 public boolean hasDefaultBehavior() {
-	return this.hasDefaultBehavior;
+	return this.hasDefaultBehaviorEnabled;
 }
 
 /**
@@ -1394,28 +1427,53 @@ public boolean isSprinting() {
  */
 
 
-//TODO write documentation
-
 //WORKING
+
+/**
+ * 
+ * The unit starts resting
+ * 
+ * @post the progress time will be set to 0
+ * 		| new.getAcivityTime = 0
+ * 
+ * @post the activity of the unit is switched off to nothing
+ * 		 | new.getCurrentAcivity() == Activity.WORKING
+ * 
+
+ */
 
 public void work() throws IllegalStateException{
 	if (!this.isAbleToWork())
 			throw new IllegalStateException();
 	
 	this.setCurrentActivity(Activity.WORKING);
-	this.setActivityTime(this.getWorkingTime());
+	this.setProgressTime(0);
 }
 
 //FIGHTING
 
-public void attack(){
+/**
+ * @post the activity time will be set to the maximal resting time
+ * 		| new.getAcivityTime = 0
+ * 
+ * @post the activity of the unit is switched off to nothing
+ * 		 | new.getCurrentAcivity() == Activity.WORKING
+ * 
+ * @throws IllegalStateException
+ * 			if the  unit is not able to work
+ * 			| !this.isAbleToWork
+ */
+public void attack() throws IllegalStateException{
+	if(!this.isAbleToAttack())
+		throw new IllegalStateException();
 	this.setCurrentActivity(Activity.ATTACKING);
-	this.setActivityTime(this.getFightingTime());
+	this.setProgressTime(0);
 }
 
+//TODO documentation
 public void defend(Unit attacker){
 	this.setCurrentActivity(Activity.ATTACKING);
-	this.setActivityTime(this.getFightingTime());
+	this.setProgressTime(0);
 	
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
@@ -1451,43 +1509,39 @@ public void defend(Unit attacker){
 //RESTING
 
 /**
- * Let the unit rest
  * 
+ * The unit starts resting
+ * 
+ * 
+ * @post the activity of the unit is switched off to nothing
+ * 		 | new.getCurrentAcivity() == Activity.RESTING
+ * 
+ * @throws IllegalStateException
+ * 			if the  unit is not able to rest
+ * 			| !this.isAbleToRest
  */
 public void rest() throws IllegalStateException{
 	if(!this.isAbleToRest())
 		throw new IllegalStateException();
 	
-	this.setCurrentActivity(Activity.RESTING);
-	this.setActivityTime(this.getMaximalRestTime());		
+	this.setCurrentActivity(Activity.RESTING);		
 }
 
 //DEFAULTBEHAVIOUR
 
 /**
- * Change state of Unit to default behavior
+ * Start the default behavior of this unit
  * 
  * @post the activity of the unit is switched to default behavior
  * 		 | new.hasDefaultBehavior() == true
+ * 
+ * @post the activity of the unit is switched off to nothing
+ * 		 | new.getCurrentAcivity() == Activity.NOTHING
+ * 
  */
 public void startDefaultBehavior() {
-	this.hasDefaultBehavior = true; {
-		int randomActivity = (int) (Math.random()*3);
-		if (randomActivity == 0) {
-
-			double[] target = new double[] {Math.random()*50, Math.random()*50, Math.random()*50};
-			this.setTargetPosition(target);
-				
-		}
-		if (randomActivity == 1) {
-			this.setCurrentActivity(Activity.WORKING);
-		}
-		if (randomActivity == 2) {
-			this.setCurrentActivity(Activity.RESTING);
-		}
-	}
-	
-	
+		this.setCurrentActivity(Activity.NOTHING);
+		this.hasDefaultBehaviorEnabled = true; 
 }
 
 //SPRINTING
@@ -1497,6 +1551,7 @@ public void startDefaultBehavior() {
 * 
 * @post  The unit will go in sprinting mode
 *       | new.isSprinting() == true
+*       
 * @throws IllegalStateException
 *         The given isSprinting is not a valid isSprinting for any
 *         Unit.
@@ -1506,7 +1561,6 @@ public void startSprinting() throws IllegalStateException{
 	if (!this.isAbleToSprint())
 		throw new IllegalStateException();
 	this.isSprinting = true;
-	
 }
 
 /*
@@ -1517,7 +1571,7 @@ public void startSprinting() throws IllegalStateException{
  * Stop default behavior of Unit
  * 
  * @post the activity of the unit is switched off to nothing
- * 		 | new.getCurrentAcivity() == "none"
+ * 		 | new.getCurrentAcivity() == Activity.NOTHING
  * 
  * @post the default behavior is switched off
  * 		| new.hasDefaultBehaviour() == false
@@ -1525,7 +1579,7 @@ public void startSprinting() throws IllegalStateException{
  */
 public void stopDefaultBehaviour() {
 	this.setCurrentActivity(Activity.NOTHING);
-	this.hasDefaultBehavior = false;
+	this.hasDefaultBehaviorEnabled = false;
 }
 
 
@@ -1552,24 +1606,7 @@ public void stopSprinting() {
  * 			|result == this.getToughness()/1000
  */ 
 private float getMinimalRestTime(){
-	return this.getToughness()/1000;
-}
-
-/**
- * Gives the maximal rest time.
- * The time it takes for a unit to restore all hitpoint and stamina
- * 
- * @return  the maximal rest time
- * 			| result == (getMaxHitpoints(this.getWeight(), this.getToughness())+
- *					   getMaxStamina(this.getWeight(), this.getToughness())-
- *					   (this.getHitpoints()+this.getStamina()))*this.getMinimalRestTime()
- */ 
-private float getMaximalRestTime(){
-	int pointsToHeal = getMaxHitpoints(this.getWeight(), this.getToughness())+
-					   getMaxStamina(this.getWeight(), this.getToughness())-
-					   (this.getHitpoints()+(int)this.getStamina());
-	float timeToHeal = pointsToHeal*this.getMinimalRestTime();
-	return timeToHeal;
+	return (float)this.getToughness()/1000;
 }
 
 /**
@@ -1580,7 +1617,7 @@ private float getMaximalRestTime(){
  * 		| result == 500/this.getStrength()
  */
 private float getWorkingTime(){
-	return 500/this.getStrength();
+	return (float)500/this.getStrength();
 }
 
 /**
@@ -1591,7 +1628,7 @@ private float getWorkingTime(){
  */
 @Immutable
 private final float getFightingTime(){
-	return 1;
+	return (float)1;
 }
 
 /*
@@ -1615,6 +1652,10 @@ public boolean isAbleToSprint(){
 
 public boolean isAbleToWork(){
 	return this.getCurrentActivity() != Activity.ATTACKING;
+}
+
+public boolean isAbleToAttack(){
+	return true;
 }
 
 /*_____________________________________________________________
