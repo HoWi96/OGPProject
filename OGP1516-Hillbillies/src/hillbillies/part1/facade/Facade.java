@@ -53,7 +53,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public void setWeight(Unit unit, int newValue) throws ModelException {
-			unit.setWeight(newValue, unit.getStrength(), unit.getAgility());
+			unit.setWeight(newValue);
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public int getMaxHitPoints(Unit unit) throws ModelException {
-		int maxHitPoints = Unit.getMaxHitpoints(unit.getWeight(), unit.getToughness());
+		int maxHitPoints = unit.getMaxHitpoints();
 		return maxHitPoints;
 	}
 
@@ -103,7 +103,7 @@ public class Facade implements IFacade{
 
 	@Override
 	public int getMaxStaminaPoints(Unit unit) throws ModelException {
-		int maxStamina = Unit.getMaxStamina(unit.getWeight(), unit.getToughness());
+		int maxStamina = unit.getMaxStamina();
 		return maxStamina;
 	}
 
@@ -192,7 +192,6 @@ public class Facade implements IFacade{
 	@Override
 	public void fight(Unit attacker, Unit defender) throws ModelException {
 		attacker.attack(defender);
-		defender.defend(attacker);
 	}
 
 	@Override

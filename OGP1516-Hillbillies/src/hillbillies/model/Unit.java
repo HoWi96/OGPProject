@@ -293,13 +293,13 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 		toughness = 100;
 	setToughness(toughness);
 	
-	if (!isValidInitialWeight(weight) || !isValidWeight(weight,strength,agility))
+	if (!isValidInitialWeight(weight) || !isValidWeight(weight))
 		weight = 100;
-	setWeight(weight,strength,agility);
+	setWeight(weight);
 	
-	setHitpoints(getMaxHitpoints(weight, toughness), weight, toughness);
+	setHitpoints(getMaxHitpoints());
 	
-	setStamina(getMaxStamina(weight, toughness),weight, toughness);
+	setStamina(getMaxStamina());
 	
 	setOrientation(PI/2);
 	
@@ -512,8 +512,8 @@ public void setPosition(double[] position) throws IllegalArgumentException {
  *       
  */
 @Raw
-public void setWeight(int weight, int strength, int agility) {
-	if (isValidWeight(weight,strength,agility))
+public void setWeight(int weight) {
+	if (isValidWeight(weight))
 		this.weight = weight;
 }
 
@@ -581,9 +581,9 @@ public void setToughness(int toughness) {
  *         hitpoints.
  *       | new.getHitpoints() == hitpoints
  */
-@Raw
-public void setHitpoints(int hitpoints,int weight, int toughness) {
-	assert isValidHitpoints(hitpoints, weight,toughness);
+@Raw @Model
+private void setHitpoints(int hitpoints) {
+	assert isValidHitpoints(hitpoints);
 	this.hitpoints = hitpoints;
 }
 
@@ -599,9 +599,9 @@ public void setHitpoints(int hitpoints,int weight, int toughness) {
  *         stamina.
  *       | new.getStamina() == stamina
  */
-@Raw
-public void setStamina(double stamina,int weight, int toughness) {
-	assert isValidStamina(stamina, weight, toughness);
+@Raw @Model
+private void setStamina(double stamina) {
+	assert this.isValidStamina(stamina);
 	this.stamina = stamina;
 }
 
@@ -692,9 +692,9 @@ public static boolean isValidPosition(double[] position) {
  * 			the weight must be at least the minimum weight.
  *       | result == (1<=weight&&weight<=200)&&(weight>getMinWeight(strength,agility))
 */
-public static boolean isValidWeight(int weight,int strength, int agility) {
+public boolean isValidWeight(int weight) {
 	return 	(1<=weight)&&(weight<=200)&&
-			(weight>=getMinWeight(strength, agility)) ;
+			(weight>=this.getMinWeight()) ;
 }
 
 
@@ -705,7 +705,7 @@ public static boolean isValidWeight(int weight,int strength, int agility) {
  * @param  strength
  *         The Strength to check.
  * @return 
- *       | result == (1<=weight&&weight<=200)
+ *       | result == (1<=strength&&strength<=200)
 */
 public static boolean isValidStrength(int strength) {
 	return (1<=strength&&strength<=200);
@@ -744,14 +744,11 @@ public static boolean isValidToughness(int toughness) {
  *  
  * @param  hitpoints
  *         The hitpoints to check.
- * @param weight
- * @param toughness
- * 
- * @return true if and only if the hitpoints are between 0 and getMaxHitpoints(weight, toughness)
- *       | result == (0<=hitpoints && hitpoints <= getMaxHitpoints(weight, toughness)
+ * @return true if and only if the hitpoints are between 0 and getMaxHitpoints()
+ *       | result == (0<=hitpoints && hitpoints <= this.getMaxHitpoints()
 */
-public static boolean isValidHitpoints(int hitpoints, int weight, int toughness) {
-	return (0<=hitpoints && hitpoints <= getMaxHitpoints(weight, toughness));
+public boolean isValidHitpoints(int hitpoints) {
+	return (0<=hitpoints && hitpoints <= this.getMaxHitpoints());
 }
 
 
@@ -762,10 +759,10 @@ public static boolean isValidHitpoints(int hitpoints, int weight, int toughness)
  * @param  stamina
  *         The stamina to check.
  * @return 
- *       | result == (0<=stamina && stamina<=Math.ceil(200.0*weight/100*toughness/100))
+ *       | result == (0<=stamina && stamina<= this.getMaxStamina())
 */
-public static boolean isValidStamina(double stamina, int weight, int toughness) {
-	return (0<=stamina && stamina<= getMaxStamina(weight, toughness));
+public boolean isValidStamina(double stamina) {
+	return (0<=stamina && stamina<= this.getMaxStamina());
 }
 
 /**
@@ -783,62 +780,17 @@ public static boolean isValidOrientation(float orientation) {
 
 
 /*--------------------HELPER METHODS
-//POSITION
-/**
- * Gives back the position of the cube
- * 
- * @param position
- *			The position of this Unit
- *
- * @return The position of the cube where the Unit is located
- * 			| cubePosition[0] = (int) Math.floor(position[0]);
- *			| cubePosition[1] = (int) Math.floor(position[1]);
- *			| cubePosition[2] = (int) Math.floor(position[2]);
- */
-public static int[] getCubePosition(double[] position){
-	int[] cubePosition = new int[3];
-	cubePosition[0] = (int) Math.floor(position[0]);
-	cubePosition[1] = (int) Math.floor(position[1]);
-	cubePosition[2] = (int) Math.floor(position[2]);
-	return cubePosition;
-	}
-
-/**
- * Gives back the position of the center of the cube with the given position
- * 
- * @param cubePosition
- * 			the position of the cube
- * 
- * @return
- * 		The position of the center of the cube with given coordinates
- * 		| result == new double[] {
- * 		| 	(double)coordinates[0]+0.5,
- * 		|	(double)coordinates[1]+0.5,
- * 		| 	(double)coordinates[2]+0.5
- * 		| }
- */
-@Model
-private static double[] getCubeCenter(int[] cubePosition) {
-	return new double[] {(double)(cubePosition[0]+CUBE_LENGTH/2),
-						 (double)(cubePosition[1]+CUBE_LENGTH/2),
-						 (double)(cubePosition[2]+CUBE_LENGTH/2)};
-}
-
 //WEIGTH
 
 /**
  * The minimum weight
  * 
- * @param strength
- * 			the strength of the unit
- * @param agility
- * 			the agility of the unit
  * @return the minimum weight of this unit
  * 		|result ==  (strength+agility)/2
  */
 @Model
-private static int getMinWeight(int strength, int agility ){
-	return (strength + agility)/2;
+private int getMinWeight( ){
+	return (this.getStrength()+ this.getAgility())/2;
 }
 
 //HITPOINTS
@@ -846,15 +798,13 @@ private static int getMinWeight(int strength, int agility ){
 /**
  * The maximum amount of hitpoints a unit can have
  * 
- * @param weight
- * @param toughness
- * 
  * @return The maximum HP a unit can have is the closest integer
  * 			 to 200 * weight/100 * toughness/100
- * 		| result == Math.ceil(200 * weight/100 * toughness/100)
+ * 		| result == Math.ceil(0.02*this.getWeight()*this.getToughness())
  */
-public static int getMaxHitpoints(int weight, int toughness){
-	return (int) Math.ceil(200.0*weight/100*toughness/100);
+public int getMaxHitpoints(){
+	
+	return (int) Math.ceil(0.02*this.getWeight()*this.getToughness());
 }
 
 /**
@@ -865,8 +815,8 @@ public static int getMaxHitpoints(int weight, int toughness){
 			(this.getStamina()==getMaxStamina(this.getWeight(), this.getToughness()))
  */
 private boolean isFullyHealed() {
-	return this.getHitpoints() == getMaxHitpoints(this.getWeight(), this.getToughness())&&
-			(this.getStamina()==getMaxStamina(this.getWeight(), this.getToughness()));
+	return this.getHitpoints() == getMaxHitpoints()&&
+			(this.getStamina()==getMaxStamina());
 }
 
 
@@ -879,8 +829,8 @@ private boolean isFullyHealed() {
  * 			 to 2 * weight * toughness / 100
  * 		| result == Math.ceil(2 * weight * toughness / 100)
  */
-public static int getMaxStamina(int weight, int toughness){
-	return (int) Math.ceil(2*(double)weight*toughness/100);
+public int getMaxStamina(){
+	return (int) Math.ceil(0.02*this.getWeight()*this.getToughness());
 }
 
 //ORIENTATION
@@ -912,8 +862,8 @@ private static float getMovingOrientation(double[] velocityVector){
 private static void updateOrientation(Unit attacker, Unit defender){ 
 	double[] aPosition = attacker.getPosition();
 	double[] dPosition = defender.getPosition();
-	float aOrientation = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[1]);
-	float dOrientation = (float) Math.atan2(aPosition[1]-dPosition[1], aPosition[0]-dPosition[1]);
+	float aOrientation = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[0]);
+	float dOrientation = (float) Math.atan2(aPosition[1]-dPosition[1], aPosition[0]-dPosition[0]);
 	attacker.setOrientation(aOrientation);
 	defender.setOrientation(dOrientation);
 }
@@ -1025,9 +975,9 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 		
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
-					this.setStamina((this.getStamina()-10*dt), this.getWeight(),this.getToughness());
+					this.setStamina((this.getStamina()-10*dt));
 				}else{
-					this.setStamina(0,this.getWeight(),this.getToughness());
+					this.setStamina(0);
 					this.stopSprinting();
 				}
 				
@@ -1091,15 +1041,15 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				this.setProgressTime((float)(this.getProgressTime()+dt));
 				
 					if(this.getProgressTime()>this.getMinimalHitpointTime() && 
-							this.getHitpoints()<getMaxHitpoints(this.getWeight(), this.getToughness())){
+							this.getHitpoints()<getMaxHitpoints()){
 						
-						this.setHitpoints(this.getHitpoints()+1,this.getWeight(),this.getAgility());
+						this.setHitpoints(this.getHitpoints()+1);
 						this.setProgressTime(this.getProgressTime()-this.getMinimalStaminaTime());
 
 					}else if (this.getProgressTime()>this.getMinimalHitpointTime() && 
-							this.getStamina()<getMaxStamina(this.getWeight(),this.getToughness())){
+							this.getStamina()<getMaxStamina()){
 						
-						this.setStamina((int)this.getStamina()+1,this.getWeight(),this.getAgility());
+						this.setStamina((int)this.getStamina()+1);
 						this.setProgressTime(this.getProgressTime()-this.getMinimalStaminaTime());
 					}
 					
@@ -1164,8 +1114,8 @@ public int[] getStep(){
  * @post the units target position is targetPosition
  * 			|new.getTargetPosition() == targetPosition
  */
-@Raw
-public void setTargetPosition(double[] targetPosition) throws IllegalArgumentException  {
+@Raw @Model
+private void setTargetPosition(double[] targetPosition) throws IllegalArgumentException  {
 	if (!isValidPosition(targetPosition))
 		throw new IllegalArgumentException();
 	this.targetPosition = targetPosition;
@@ -1185,8 +1135,8 @@ public void setTargetPosition(double[] targetPosition) throws IllegalArgumentExc
  * 			if the position is not valid
  * 			| (!isValidPosition(nextPosition))
  */
-@Raw
-public void setNextPosition(double[] nextPosition) throws IllegalArgumentException  {
+@Raw @Model
+private void setNextPosition(double[] nextPosition) throws IllegalArgumentException  {
 	if (!isValidPosition(nextPosition))
 		throw new IllegalArgumentException();
 	this.nextPosition = nextPosition;
@@ -1207,8 +1157,8 @@ public void setNextPosition(double[] nextPosition) throws IllegalArgumentExcepti
  * 			| !isValidStep(step)
  * 
  */
-@Raw
-public void setStep(int[] step) throws IllegalArgumentException {
+@Raw @Model
+private void setStep(int[] step) throws IllegalArgumentException {
 	if(!isValidStep(step[0],step[1],step[2]))
 		throw new IllegalArgumentException();
 	this.step = step;
@@ -1497,12 +1447,22 @@ public boolean hasDefaultBehavior() {
 /**
 * Returns true if the unit is sprinting
 * @return
-*  		true if the unit is currently in default behavior.
+*  		true if the unit is currently sprinting.
 * 		| result == this.isSprinting
 */
 @Basic @Raw
 public boolean isSprinting() {
 	return this.isSprinting;
+}
+
+/**
+* Returns true if the unit is doing nothing.
+* @return
+*  		true if the unit is currently doing nothing.
+* 		| result == (this.getCurrentActivity() == Activity.NOTHING)
+*/
+public boolean isDoingNothing(){
+	return (this.getCurrentActivity()==Activity.NOTHING);
 }
 
 /*
@@ -1578,6 +1538,8 @@ public void attack(Unit defender) throws IllegalStateException{
 	if(!this.isAbleToAttack(defender))
 		throw new IllegalStateException();
 	
+	defender.defend(this);
+	
 	updateOrientation(this, defender);
 	this.setCurrentActivity(Activity.ATTACKING);
 	this.setProgressTime(0);
@@ -1599,6 +1561,15 @@ public void attack(Unit defender) throws IllegalStateException{
  * The damage the unit takes equals attacker.strength/10
  * 
  * instantious response, no game time needed
+ * 
+ * @post or the unit changed his position
+ * 			| new.getPosition() == getCubeCenter(getCubePosition(nextPosition);
+ * 
+ * @post or the unit blocked the attack and nothing happens
+ * 			| /
+ * 
+ * @post or the defender loses some hitpoints
+ * 			| new.getHitpoints() == this.getHitpoints() - attacker.getStrength()/10
  */
 
 public void defend(Unit attacker){
@@ -1632,9 +1603,11 @@ public void defend(Unit attacker){
 	};
 	
 	//then taking damage
-	int damage = (int) attacker.getStrength()/10;
-	int newHitpointss = this.getHitpoints()- damage;
-	this.setHitpoints(newHitpointss,this.getWeight(),this.getToughness());
+	int damage = attacker.getStrength()/10;
+	int newHitpoints = this.getHitpoints()- damage;
+	if(newHitpoints<=0)
+		newHitpoints =0;
+	this.setHitpoints(newHitpoints);
 	}
 
 //DEFAULTBEHAVIOUR
@@ -1717,6 +1690,7 @@ public void stopSprinting() {
  * @return  the minimal 
  * 			|result == 40/getToughness()
  */ 
+@Model
 private float getMinimalHitpointTime(){
 	return (float)40/this.getToughness();
 }
@@ -1728,6 +1702,7 @@ private float getMinimalHitpointTime(){
  * @return  the minimal time it takes to recover one stamina
  * 			|result == 20/getToughness()
  */ 
+@Model
 private float getMinimalStaminaTime(){
 	return (float)20/this.getToughness();
 }
@@ -1739,6 +1714,7 @@ private float getMinimalStaminaTime(){
  * 			more specific 500/this.getStrength()
  * 		| result == 500/this.getStrength()
  */
+@Model
 private float getWorkingTime(){
 	return (float)500/this.getStrength();
 }
@@ -1830,7 +1806,7 @@ public boolean isAbleToAttack(Unit defender){
  * ____________________________________________________________
  *_____________________________________________________________
  */
-
+//TODO Testen
 /**
  * Checks whether two coordinates are identical.
  * 
@@ -1838,8 +1814,7 @@ public boolean isAbleToAttack(Unit defender){
  * 			| result == (position[0] == position2[0]) && (position1[1] == position2[1])
  * 						&& (position1[2] == position2[2])
  */
-@Model
-private static boolean equals(double[] position1, double[] position2) {
+public static boolean equals(double[] position1, double[] position2) {
 	return (position1[0] == position2[0])&&
 			(position1[1] == position2[1])&&
 			(position1[2] == position2[2]);
@@ -1855,8 +1830,7 @@ private static boolean equals(double[] position1, double[] position2) {
  * 						(position2[1] >= positionInBetween[1] && positionInBetween[1] >= position1[1]) &&
  * 						
  */
-@Model
-private static boolean inBetween(double[] position1, double[] position2, double[] positionInBetween) {
+public static boolean inBetween(double[] position1, double[] position2, double[] positionInBetween) {
 	return (((position2[0]<=positionInBetween[0]&&positionInBetween[0]<=position1[0])||
 			(position2[0]>=positionInBetween[0]&&positionInBetween[0]>=position1[0]))&&
 			(position2[1]<=positionInBetween[1]&&positionInBetween[1]<=position1[1]||
@@ -1864,4 +1838,67 @@ private static boolean inBetween(double[] position1, double[] position2, double[
 			(position2[2]<=positionInBetween[2]&&positionInBetween[2]<=position1[2]||
 			position2[2]>=positionInBetween[2]&&positionInBetween[2]>=position1[2]));
 }
+
+/**
+ * Gives back the position of the cube
+ * 
+ * @param position
+ *			The position of this Unit
+ *
+ * @return The position of the cube where the Unit is located
+ * 			| cubePosition[0] = (int) Math.floor(position[0]);
+ *			| cubePosition[1] = (int) Math.floor(position[1]);
+ *			| cubePosition[2] = (int) Math.floor(position[2]);
+ */
+public static int[] getCubePosition(double[] position){
+	int[] cubePosition = new int[3];
+	cubePosition[0] = (int) Math.floor(position[0]);
+	cubePosition[1] = (int) Math.floor(position[1]);
+	cubePosition[2] = (int) Math.floor(position[2]);
+	return cubePosition;
+	}
+
+/**
+ * Gives back the position of the center of the cube with the given position
+ * 
+ * @param cubePosition
+ * 			the position of the cube
+ * 
+ * @return
+ * 		The position of the center of the cube with given coordinates
+ * 		| result == new double[] {
+ * 		| 	(double)coordinates[0]+0.5,
+ * 		|	(double)coordinates[1]+0.5,
+ * 		| 	(double)coordinates[2]+0.5
+ * 		| }
+ */
+public static double[] getCubeCenter(int[] cubePosition) {
+	return new double[] {(double)(cubePosition[0]+CUBE_LENGTH/2),
+						 (double)(cubePosition[1]+CUBE_LENGTH/2),
+						 (double)(cubePosition[2]+CUBE_LENGTH/2)};
+}
+
+/**
+ * 
+ * @param position1
+ * 		first position
+ * @param position2
+ * 		position to be added to position1
+ * @param factor
+ *  	factor to multiply position2 with
+ * @return
+ * 		result == {position1[0] + position2[0]*factor,
+ *		position1[1] + position2[1]*factor,
+ *		position1[2] + position2[2]*factor}
+ */
+public static double[] addPositionsFactor(double[] position1, double[] position2, double factor){
+	double[] finalPosition = {position1[0] + position2[0]*factor,
+							  position1[1] + position2[1]*factor,
+							  position1[2] + position2[2]*factor
+	};
+	return finalPosition;
+}
+
+
+
 }
