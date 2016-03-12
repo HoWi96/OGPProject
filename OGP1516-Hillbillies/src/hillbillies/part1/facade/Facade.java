@@ -17,7 +17,6 @@ public class Facade implements IFacade{
 		}
 	}
 	
-
 	@Override
 	public double[] getPosition(Unit unit) throws ModelException {
 		double[] position = unit.getPosition();
