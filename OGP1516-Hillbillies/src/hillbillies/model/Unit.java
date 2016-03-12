@@ -165,6 +165,10 @@ public class Unit {
 	 */
 	private Activity activity;
 	/**
+	 * Variable registering the nextActivity of this Unit.
+	 */
+	private Activity nextActivity;
+	/**
 	 * Variable registering the time till mandatory rest
 	 */
 	private double counterTillRest = 0.0;
@@ -180,6 +184,8 @@ public class Unit {
 	 * indicates if the unit is operating in default behavior
 	 */
 	private boolean hasDefaultBehaviorEnabled;
+
+	private boolean isMovingToNext;
 	
 /*___________________________________________________________________
  * __________________________________________________________________
@@ -456,6 +462,14 @@ public double getSpeed(){
 	return this.speed;
 }
 
+/**
+ * Return the nextActivity of this Unit.
+ */
+@Basic @Raw
+public Activity getNextActivity() {
+	return this.nextActivity;
+}
+
 /*---------------------SETTERS
 /**
  * Set the Name of this Unit to the given Name.
@@ -630,7 +644,7 @@ public void setOrientation(float orientation) {
 }
 
 /**
- * Sets the speedof this unit to the given speed.
+ * Sets the speed of this unit to the given speed.
  * @param	speed
  * 			The new speed of this unit.
  * @post	The speed of this unit is equal to the given speed.
@@ -640,6 +654,20 @@ public void setOrientation(float orientation) {
 @Raw
 public void setSpeed(double speed){
 	this.speed = speed;
+}
+
+/**
+ * Set the nextActivity of this Unit to the given nextActivity.
+ * 
+ * @param  nextActivity
+ *         The new nextActivity for this Unit.
+ * @post   The nextActivity of this new Unit is equal to
+ *         the given nextActivity.
+ *       | new.getnextActivity() == nextActivity
+ */
+@Raw
+private void setNextActivity(Activity nextActivity) {
+	this.nextActivity = nextActivity;
 }
 
 /*------------------------CHECKERS
@@ -924,6 +952,19 @@ public void advanceTime(double dt) throws IllegalArgumentException {
     	rest();
     	counterTillRest = 0.0;
     }
+    
+    // if the unit gets a new task, he first have to move to the next position
+    if((!this.isMoving() && !equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext())){
+    	if(!this.isMovingToNext()){
+	    	this.setNextActivity(this.getCurrentActivity());
+	    	this.setCurrentActivity(Activity.MOVING);
+	    	this.setMovingToNext(true);
+    	} else if(equals(this.getPosition(),this.getNextPosition())){
+    		this.setCurrentActivity(this.getNextActivity());
+    		this.setMovingToNext(false);
+    	}
+    	
+    }
 	
 	//if the unit stopped moving, we have to stop sprinting and stop the speed
 	if(!this.isMoving()){
@@ -932,8 +973,6 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 		if(this.getSpeed()>0)
 			this.setSpeed(0);
 	}
-	
-	//if the unit stopped 
 	
 	//if the unit is in default mode, it can randomly start to sprint while moving
 	if(this.hasDefaultBehavior() && !this.isSprinting() && this.isMoving() && this.isAbleToSprint()){
@@ -970,8 +1009,10 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	 */
 	
 	Activity activity =this.getCurrentActivity();
+	
+	switch(activity) {
 			
-	if (activity == Activity.MOVING) {
+	case MOVING: 
 		
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
@@ -982,7 +1023,6 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				}
 				
 			}
-			
 			
 			double[] cPosition = this.getPosition();
 			double[] nPosition = this.getNextPosition();
@@ -1014,25 +1054,28 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				this.setPosition(iPosition);
 			else
 				this.setPosition(nPosition);
-	}
+			break;
 	
-	if (activity == Activity.WORKING) {
+	
+	case WORKING: 
 		
 			this.setProgressTime((float)(this.getProgressTime()+dt));
 			if (this.getProgressTime() >= this.getWorkingTime()) {
 				this.setCurrentActivity(Activity.NOTHING);
 				counterTillDefault =0;
 			}
-	}
-	if (activity == Activity.ATTACKING){
+			break;
+	
+	case ATTACKING: 
 		
 			this.setProgressTime((float)(this.getProgressTime()+dt));
 			if (this.getProgressTime() >= this.getFightingTime()) {
 				this.setCurrentActivity(Activity.NOTHING);
 				counterTillDefault = 0;
 			}
-	}
-	if (activity == Activity.RESTING) {
+			break;
+	
+	case RESTING: 
 		
 			if (this.isFullyHealed()) {
 				this.setCurrentActivity(Activity.NOTHING);
@@ -1054,10 +1097,11 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 					}
 					
 				}
+			break;
 				
-			}
 			
-	if (activity == Activity.NOTHING) {
+			
+	case NOTHING: 
 		
 			counterTillDefault = counterTillDefault+dt;
 			if(counterTillDefault >= NOTHING_INTERVAL){
@@ -1066,14 +1110,18 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				this.setProgressTime(0);
 				
 			}
+			break;
 	}
+	
 }
+
 
 /*___________________________________________________________________
  * __________________________________________________________________
  * -----------------------MOVING-------------------------------------
  *___________________________________________________________________
  *___________________________________________________________________*/
+
 
 /*------------------GETTERS
  
@@ -1163,7 +1211,20 @@ private void setStep(int[] step) throws IllegalArgumentException {
 		throw new IllegalArgumentException();
 	this.step = step;
 }
-
+/**
+ * 
+ * Set the step to be taken by the unit
+ * 
+ * @param b
+ * 			indicates that the unit still have to move
+ * 
+ * @post the isMovingToNext will be set to the boolean b value
+ */
+@Raw @Model
+private void setMovingToNext(boolean b) {
+	this.isMovingToNext = b;
+	
+}
 
 /*
  * -------------------MOVING-------------------
@@ -1332,6 +1393,10 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
 @Model
 private static boolean isValidStep(int dx, int dy, int dz) {
 	return !(Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1);
+}
+
+private boolean isMovingToNext() {
+	return this.isMovingToNext;
 }
 
 
