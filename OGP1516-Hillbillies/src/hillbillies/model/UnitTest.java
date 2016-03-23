@@ -56,11 +56,11 @@ public class UnitTest {
 	
 	 @Test
 	    public void testIsValidPosition(){
-		 	assertTrue(Unit.isValidPosition(new double[]{0,0,0}));
-	        assertTrue(Unit.isValidPosition(new double[]{50,50,50}));
+		 	assertTrue(unit1.isValidPosition(new double[]{0,0,0}));
+	        assertTrue(unit1.isValidPosition(new double[]{50,50,50}));
 	        
-	        assertFalse(Unit.isValidPosition(new double[]{-1,-10,-5}));
-	        assertFalse(Unit.isValidPosition(new double[]{51,51,51}));   
+	        assertFalse(unit1.isValidPosition(new double[]{-1,-10,-5}));
+	        assertFalse(unit1.isValidPosition(new double[]{51,51,51}));   
 	    }
 	 
 	 @Test

@@ -57,9 +57,10 @@ import be.kuleuven.cs.som.annotate.*;
  *       
  * @invar  The targetPosition of each Unit must be a valid position for any
  *         Unit.
- *       | isValidPosition(getTargetPosition())      
- *       
- */
+ *       | isValidPosition(getTargetPosition())
+ * @invar  Each unit can have its world as world.
+ *       | canHaveAsWorld(this.getWorld())
+ */            
 
 public class Unit { 
 	
@@ -74,8 +75,6 @@ public class Unit {
 	private static final String ALLOWED_NAME_PATTERN = "[a-zA-Z \"']+";
 	
 	private static final double CUBE_LENGTH = 1;
-	private static final int MAXCOORDINATE = 50;
-	private static final int MINCOORDINATE = 0;
 	
 	private static final float PI = (float) Math.PI;
 
@@ -84,10 +83,14 @@ public class Unit {
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
-	 * -----------------------PARAMETERS---------------------------------
+ * -----------------------VARIABLES---------------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 
+	/**
+	 * Variable registering the world of this unit.
+	 */
+	private World world;
 	/**
 	* Variable registering the Name of this Unit.
 	*/
@@ -184,7 +187,9 @@ public class Unit {
 	 * indicates if the unit is operating in default behavior
 	 */
 	private boolean hasDefaultBehaviorEnabled;
-
+	/**
+	 * inidicates if the unit is still moving to the center of the next cube
+	 */
 	private boolean isMovingToNext;
 	
 /*___________________________________________________________________
@@ -212,6 +217,8 @@ public class Unit {
  *            The initial toughness of the unit
  * @param enableDefaultBehavior
  *            Whether the default behavior of the unit is enabled
+ * @param  world
+ *         The world for this new unit.
  * 
  * ____________________________________________________________
  * 
@@ -275,11 +282,15 @@ public class Unit {
  *	    |	new.hasDefaultBehavior() == true;
  *	    | else
  *		|	new.getCurrentActivity() == "none";
- *
+ * @post   The world of this new unit is equal to the given
+ *         world.
+ *       | new.getWorld() == world
+ *       
  */
 public Unit(String name, int[] initialPosition, int weight, int agility,
 			int strength, int toughness, boolean enableDefaultBehavior)
 			throws IllegalArgumentException {
+	
 	
 	setName(name);
 	
@@ -308,7 +319,6 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	setStamina(getMaxStamina());
 	
 	setOrientation(PI/2);
-	
 	
 	if(enableDefaultBehavior)
 		this.startDefaultBehavior();
@@ -382,6 +392,29 @@ private boolean isValidInitialWeight(int weight){
 
 //------------------------GETTERS
 
+/**
+ * Check whether this unit can have the given world as its world.
+ *  
+ * @param  world
+ *         The world to check.
+ * @return 
+ *       | result == true; 
+*/
+@Raw
+public boolean canHaveAsWorld(World world) {
+	//TODO:
+	//current position must be passable
+	//you have to stand on a solid cube or on z=0 level
+	return true;
+}
+
+/**
+ * Return the world of this unit.
+ */
+@Basic @Raw @Immutable
+public World getWorld() {
+	return this.world;
+}
 /**
  * Return the Name of this Unit.
  */
@@ -470,7 +503,32 @@ public Activity getNextActivity() {
 	return this.nextActivity;
 }
 
-/*---------------------SETTERS
+/*
+ * ---------------------SETTERS 
+ */
+
+/**
+ * Set the Name of this Unit to the given Name.
+ * 
+ * @param  name
+ *         The new Name for this Unit.
+ * @post   The Name of this new Unit is equal to
+ *         the given Name.
+ *       | new.getName() == name
+ * @throws IllegalArgumentException
+ *         The given Name is not a valid Name for any
+ *         Unit.
+ *       | ! isValidName(getName())
+ */
+@Raw
+public void setWorld(World world) throws IllegalArgumentException {
+	if(this.getWorld() != null)
+		throw new IllegalArgumentException();	
+	this.world = world;
+}
+
+
+
 /**
  * Set the Name of this Unit to the given Name.
  * 
@@ -697,17 +755,12 @@ public static boolean isValidName(String name) {
  *  
  * @param  Position
  *         The Position to check.
- * @return The position has to be inside the game world
- *       | result ==
- *       | (MINCOORDINATE<=position[0]&&position[0]<=MAXCOORDINATE)&&
- *       | (MINCOORDINATE<=position[1]&&position[1]<=MAXCOORDINATE)&&
- *       | (MINCOORDINATE<=position[2]&&position[2]<=MAXCOORDINATE)
- *       
+ * @return 
+ * 			The position needs to be inside the game world
+ * 			| result == World.isValidPosition(getCubePosition(position))     
 */
-public static boolean isValidPosition(double[] position) {
-	return (MINCOORDINATE<=position[0]&&position[0]<=MAXCOORDINATE)&&
-	       (MINCOORDINATE<=position[1]&&position[1]<=MAXCOORDINATE)&&
-	       (MINCOORDINATE<=position[2]&&position[2]<=MAXCOORDINATE);
+public boolean isValidPosition(double[] position) {
+	return world.isValidPosition(getCubePosition(position));
 }
 
 /**

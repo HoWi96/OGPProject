@@ -1,6 +1,7 @@
 package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.part2.listener.TerrainChangeListener;
 
 /**
  * @invar  The TerrainTypes of each world must be a valid TerrainTypes for any
@@ -35,6 +36,11 @@ public class World {
 	private static final int TYPE_WORKSHOP = 3;
 	private static final int[] VALID_CUBE_TYPES = {TYPE_AIR,TYPE_ROCK,TYPE_TREE,TYPE_WORKSHOP};
 	
+	private static final int MAX_UNITS = 100;
+	private static final int MAX_FACTIONS = 5;
+	private static final int MAX_UNITS_IN_FACTION = 50;
+	
+	
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -59,6 +65,10 @@ public class World {
 	 * Variable registering the nbCubesZ of this world.
 	 */
 	private final int nbCubesZ;
+	/**
+	 * Variable registering the TerrainChangeListener of this world.
+	 */
+	private final TerrainChangeListener modelListener;
 	
 		
 	
@@ -70,9 +80,10 @@ public class World {
 	
 /**
  * @param  terraintypes
- *         The TerrainTypes for this new world.
- *         
- *         
+ *         The TerrainTypes for this new world.        
+ * @param  modelListener
+ *         The TerrainChangeListener for this new world.  
+ * ______________________________________________________  
  *         
  * @effect The TerrainTypes of this new world is set to
  *         the given TerrainTypes.
@@ -83,13 +94,20 @@ public class World {
  * @post   The nbCubesY of this new world is equal to terrainTypes[0].length
  *       
  * @post   The nbCubesX of this new world is equal to terrainTypes[0][0].length
- *       
+ * 
+ * @post   The TerrainChangeListener of this new world is equal to the given
+ *         TerrainChangeListener.
+ *       | new.getTerrainChangeListener() == modelListener        
  */
-public World(int[][][] terrainTypes) throws IllegalArgumentException {
+public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws IllegalArgumentException {
+	
 	this.setTerrainTypes(terrainTypes);
+	
+	//Immutable Variables
 	this.nbCubesX = terrainTypes.length;
 	this.nbCubesY = terrainTypes[0].length;
 	this.nbCubesZ = terrainTypes[0][0].length;
+	this.modelListener = modelListener;
 }
 	
 	/*___________________________________________________________________
@@ -154,6 +172,14 @@ public World(int[][][] terrainTypes) throws IllegalArgumentException {
 		
 	}
 	
+	/**
+	 * Return the TerrainChangeListener of this world.
+	 */
+	@Basic @Raw @Immutable
+	public TerrainChangeListener getTerrainChangeListener() {
+		return this.modelListener;
+	}
+	
 	//------------------------SETTERS
 	
 	/**
@@ -196,9 +222,9 @@ public World(int[][][] terrainTypes) throws IllegalArgumentException {
 		int X = position[0];
 		int Y = position[1];
 		int Z = position[2];
-		int[][][] terrainTypes = this.getTerrainTypes();
-		terrainTypes[X][Y][Z] = cubeType;
-		this.setTerrainTypes(terrainTypes);
+		//more efficient than changing the whole world
+		this.terrainTypes[X][Y][Z] = cubeType;
+		this.getTerrainChangeListener().notifyTerrainChanged(X,Y,Z);
 		
 	}
 	
@@ -257,12 +283,13 @@ public World(int[][][] terrainTypes) throws IllegalArgumentException {
 	/**
 	 * 
 	 * @param position
-	 * 			the position
+	 * 			the position to check
 	 * @return
 	 * 		whether the position is inside the game world
 	 */
 	@Raw
-	private boolean isValidPosition(int[] position) {
+	public boolean isValidPosition(int[] position) {
+		
 		int X = position[0];
 		int Y = position[1];
 		int Z = position[2];
@@ -270,6 +297,33 @@ public World(int[][][] terrainTypes) throws IllegalArgumentException {
 				0<=Y&&Y<=this.getNbCubesY()&&
 				0<=Z&&Z<=this.getNbCubesZ();	
 	}
+	/**
+	 * Returns whether the cube is solid or not
+	 * 
+	 * @param position
+	 * 			the position of the cube
+	 * @return
+	 * 		if the cube at the given position is rock or tree
+	 */
+	public boolean isSolidCube(int[] position){
+		int type = this.getcubeType(position);
+		return (type == TYPE_ROCK) || (type == TYPE_TREE);	
+	}
+	
+
+/**
+ * Initialize this new world with given TerrainChangeListener.
+ * 
+
+ * @throws IllegalArgumentException
+ *         This new world cannot have the given TerrainChangeListener as its TerrainChangeListener.
+ *       | ! canHaveAsTerrainChangeListener(this.getTerrainChangeListener())
+ */
+
+
+
+	
+	
 
 	
 	
