@@ -88,10 +88,6 @@ public class Unit {
 	 *___________________________________________________________________*/
 
 	/**
-	 * Variable registering the world of this unit.
-	 */
-	private World world;
-	/**
 	* Variable registering the Name of this Unit.
 	*/
 	private String name;
@@ -176,7 +172,7 @@ public class Unit {
 	 */
 	private double counterTillRest = 0.0;
 	/**
-	 * the time till default behaviour is activated
+	 * the time till default behavior is activated
 	 */
 	private double counterTillDefault = 0.0;
 	/**
@@ -188,9 +184,17 @@ public class Unit {
 	 */
 	private boolean hasDefaultBehaviorEnabled;
 	/**
-	 * inidicates if the unit is still moving to the center of the next cube
+	 * Indicates if the unit is still moving to the center of the next cube
 	 */
 	private boolean isMovingToNext;
+	/**
+	 * Variable registering the faction of this unit.
+	 */
+	private Faction faction;
+	/**
+	 * Variable registering the world of this unit.
+	 */
+	private World world;
 	
 /*___________________________________________________________________
  * __________________________________________________________________
@@ -217,8 +221,6 @@ public class Unit {
  *            The initial toughness of the unit
  * @param enableDefaultBehavior
  *            Whether the default behavior of the unit is enabled
- * @param  world
- *         The world for this new unit.
  * 
  * ____________________________________________________________
  * 
@@ -282,9 +284,6 @@ public class Unit {
  *	    |	new.hasDefaultBehavior() == true;
  *	    | else
  *		|	new.getCurrentActivity() == "none";
- * @post   The world of this new unit is equal to the given
- *         world.
- *       | new.getWorld() == world
  *       
  */
 public Unit(String name, int[] initialPosition, int weight, int agility,
@@ -391,30 +390,6 @@ private boolean isValidInitialWeight(int weight){
  *___________________________________________________________________*/
 
 //------------------------GETTERS
-
-/**
- * Check whether this unit can have the given world as its world.
- *  
- * @param  world
- *         The world to check.
- * @return 
- *       | result == true; 
-*/
-@Raw
-public boolean canHaveAsWorld(World world) {
-	//TODO:
-	//current position must be passable
-	//you have to stand on a solid cube or on z=0 level
-	return true;
-}
-
-/**
- * Return the world of this unit.
- */
-@Basic @Raw @Immutable
-public World getWorld() {
-	return this.world;
-}
 /**
  * Return the Name of this Unit.
  */
@@ -521,28 +496,6 @@ public Activity getNextActivity() {
  *       | ! isValidName(getName())
  */
 @Raw
-public void setWorld(World world) throws IllegalArgumentException {
-	if(this.getWorld() != null)
-		throw new IllegalArgumentException();	
-	this.world = world;
-}
-
-
-
-/**
- * Set the Name of this Unit to the given Name.
- * 
- * @param  name
- *         The new Name for this Unit.
- * @post   The Name of this new Unit is equal to
- *         the given Name.
- *       | new.getName() == name
- * @throws IllegalArgumentException
- *         The given Name is not a valid Name for any
- *         Unit.
- *       | ! isValidName(getName())
- */
-@Raw
 public void setName(String name) throws IllegalArgumentException {
 	if (! isValidName(name))
 		throw new IllegalArgumentException();
@@ -563,7 +516,7 @@ public void setName(String name) throws IllegalArgumentException {
  *       | ! isValidPosition(getPosition())
  */	
 @Raw
-public void setPosition(double[] position) throws IllegalArgumentException {
+public void setPosition( @Raw double[] position) throws IllegalArgumentException {
 	
 	if (! isValidPosition(position))
 		throw new IllegalArgumentException();
@@ -756,11 +709,13 @@ public static boolean isValidName(String name) {
  * @param  Position
  *         The Position to check.
  * @return 
- * 			The position needs to be inside the game world
- * 			| result == World.isValidPosition(getCubePosition(position))     
+ * 			The position needs to be inside the game world and must not be solid
+ * 			| result == world.isValidPosition(getCubePosition(position)) &&  
+ *   		| !world.isSolidCube(getCubePosition(position))
 */
 public boolean isValidPosition(double[] position) {
-	return world.isValidPosition(getCubePosition(position));
+	return world.isValidPosition(getCubePosition(position)) &&
+			!world.isSolidCube(getCubePosition(position));
 }
 
 /**
@@ -1920,11 +1875,65 @@ public boolean isAbleToAttack(Unit defender){
 
 /*_____________________________________________________________
  * ____________________________________________________________
+ *-------------------------WORLD-------------------------------
+ * ____________________________________________________________
+ *_____________________________________________________________
+ */
+
+/**
+ * Return the world of this unit.
+ */
+@Basic @Raw @Immutable
+public World getWorld() {
+	return this.world;
+}
+/**
+ * 
+ * @param world
+ * 			the new world for the unit
+ * @post the unit will have the world world as his new world
+ * 
+ */
+
+@Raw @Model
+private void setWorld(World world){
+	this.world = world;
+}
+
+/*_____________________________________________________________
+ * ____________________________________________________________
+ *-------------------------FACTION----------------------
+ * ____________________________________________________________
+ *_____________________________________________________________
+ */
+
+/**
+ * Return the faction of this unit.
+ */
+@Basic @Raw
+public Faction getFaction() {
+	return this.faction;
+}
+/**
+ * 
+ * @param faction
+ * 			the new faction of this unit
+ * @post the unit will have the faction faction as his new faction
+ * 
+ */
+
+@Raw @Model
+private void setFaction(Faction faction){
+	this.faction = faction;
+}
+
+/*_____________________________________________________________
+ * ____________________________________________________________
  *-------------------------HELPER METHODS----------------------
  * ____________________________________________________________
  *_____________________________________________________________
  */
-//TODO Testen
+//TODO testen
 /**
  * Checks whether two coordinates are identical.
  * 

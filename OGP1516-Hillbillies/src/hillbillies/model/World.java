@@ -1,5 +1,7 @@
 package hillbillies.model;
 
+import java.util.*;
+
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.part2.listener.TerrainChangeListener;
 
@@ -38,7 +40,6 @@ public class World {
 	
 	private static final int MAX_UNITS = 100;
 	private static final int MAX_FACTIONS = 5;
-	private static final int MAX_UNITS_IN_FACTION = 50;
 	
 	
 	
@@ -69,6 +70,32 @@ public class World {
 	 * Variable registering the TerrainChangeListener of this world.
 	 */
 	private final TerrainChangeListener modelListener;
+	/**
+	 * Variable referencing a set collecting all the units
+	 * of this world.
+	 * 
+	 * @invar  The referenced set is effective.
+	 *       | units != null
+	 * @invar  Each unit registered in the referenced list is
+	 *         effective and not yet terminated.
+	 *       | for each unit in units:
+	 *       |   ( (unit != null) &&
+	 *       |     (! unit.isTerminated()) )
+	 */
+	public Set<Unit> units = new HashSet<Unit>(MAX_UNITS);
+	/**
+	 * Variable referencing a set collecting all the factions
+	 * of this world.
+	 * 
+	 * @invar  The referenced set is effective.
+	 *       | factions != null
+	 * @invar  Each faction registered in the referenced list is
+	 *         effective and not yet terminated.
+	 *       | for each faction in factions:
+	 *       |   ( (faction != null) &&
+	 *       |     (! faction.isTerminated()) )
+	 */
+	public Set<Faction> factions = new HashSet<Faction>(MAX_FACTIONS);
 	
 		
 	
@@ -310,34 +337,93 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		return (type == TYPE_ROCK) || (type == TYPE_TREE);	
 	}
 	
+	
+	/*___________________________________________________________________
+	 *___________________________________________________________________
+	 * -----------------------FACTIONS-----------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	//------------------------GETTERS
+	
+	/**
+	 * Gives back the active factions of this world
+	 */
+	@Basic @Raw
+	public Set<Faction> getFactions(){
+		return this.factions;
+	}
+	
+	//------------------------SETTERS
+	
 
-/**
- * Initialize this new world with given TerrainChangeListener.
- * 
+	/**
+	 * Add the given faction to the set of factions of this world.
+	 * 
+	 * @param  faction
+	 *         The faction to be added.
+	 * @pre    The given faction is effective and already references
+	 *         this world.
+	 *       | (faction != null) && (faction.getWorld() == this)
+	 * @post   This world has the given faction as one of its factions.
+	 *       | new.hasAsFaction(faction)
+	 */
+	public void addFaction(@Raw Faction faction) {
+		assert (faction != null) && (faction.getWorld() == this);
+		factions.add(faction);
+	}
+	
+	//------------------------DESTRUCTORS
 
- * @throws IllegalArgumentException
- *         This new world cannot have the given TerrainChangeListener as its TerrainChangeListener.
- *       | ! canHaveAsTerrainChangeListener(this.getTerrainChangeListener())
- */
-
+	/**
+	 * Remove the given faction from the set of factions of this world.
+	 * 
+	 * @param  faction
+	 *         The faction to be removed.
+	 * @pre    This world has the given faction as one of
+	 *         its factions, and the given faction does not
+	 *         reference any world.
+	 *       | this.hasAsFaction(faction) &&
+	 *       | (faction.getWorld() == null)
+	 * @post   This world no longer has the given faction as
+	 *         one of its factions.
+	 *       | ! new.hasAsFaction(faction)
+	 */
+	@Raw
+	public void removeFaction(Faction faction) throws IllegalArgumentException, IllegalStateException {
+		if(faction.get)
+		assert this.hasAsFaction(faction) && (faction.getWorld() == null);
+		factions.remove(faction);
+	}
+	
 
 
 	
+	/*___________________________________________________________________
+	 *___________________________________________________________________
+	 * -----------------------UNITS-----------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	//------------------------GETTERS
+	
+	/**
+	 * Gives back the units of the world
+	 */
+	@Basic @Raw
+	public Set<Unit> getUnits() {
+		return this.units;
+	}
+	//------------------------SETTERS
+	
+	public void addUnit(Unit unit) throws IllegalArgumentException, IllegalStateException{
+		if(this.getUnits().size() == MAX_UNITS)
+			throw new IllegalStateException();
+		this.units.add(unit);
+		// this function should return illegalArgument when the unit is on a solid position or out of bounds
+		unit.setWorld(this);
+	}
+	//------------------------DESTRUCTORS
 	
 
-	
-	
-
-
-
-
-
-
-
-
-
-
-
-	
-	
 }
