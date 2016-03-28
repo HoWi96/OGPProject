@@ -58,8 +58,9 @@ import be.kuleuven.cs.som.annotate.*;
  * @invar  The targetPosition of each Unit must be a valid position for any
  *         Unit.
  *       | isValidPosition(getTargetPosition())
- * @invar  Each unit can have its world as world.
- *       | canHaveAsWorld(this.getWorld())
+ * @invar  Each unit will have a valid faction
+ * @invar  Each unit will have a valid world
+ * @invar  Each unit will have a valid state of living
  */            
 
 public class Unit { 
@@ -195,6 +196,10 @@ public class Unit {
 	 * Variable registering the world of this unit.
 	 */
 	private World world;
+	/**
+	 * Boolean indicating whether the unit is alive
+	 */
+	private boolean isAlive;
 	
 /*___________________________________________________________________
  * __________________________________________________________________
@@ -284,6 +289,8 @@ public class Unit {
  *	    |	new.hasDefaultBehavior() == true;
  *	    | else
  *		|	new.getCurrentActivity() == "none";
+ * @post the unit will be a living unit
+ * 		| this.isAlive() == true;
  *       
  */
 public Unit(String name, int[] initialPosition, int weight, int agility,
@@ -323,7 +330,28 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 		this.startDefaultBehavior();
 	else
 		this.stopDefaultBehaviour();
+	
+	this.isAlive = true;
 }
+
+/**
+ * Terminate this unit.
+ *
+ * @post   This unit is now dead.
+ *        | new.isDead()
+ */
+ public void die() {
+	 this.isAlive = false;
+	 //TODO connect world, faction, check hitpoints = 0
+ }
+ 
+ /**
+  * Returns a boolean indicating whether this unit is alive.
+  */
+ @Basic @Raw
+ public boolean isAlive() {
+	 return this.isAlive;
+ }
 
 /*
  * ------------------INITIAL CHECKERS-----------------------------
@@ -964,11 +992,11 @@ public void advanceTime(double dt) throws IllegalArgumentException {
     // if the unit gets a new task, he first have to move to the next position
     if((!this.isMoving() && !equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext())){
     	if(!this.isMovingToNext()){
-	    	this.setNextActivity(this.getCurrentActivity());
-	    	this.setCurrentActivity(Activity.MOVING);
+	    	this.setNextActivity(this.getActivity());
+	    	this.setActivity(Activity.MOVING);
 	    	this.setMovingToNext(true);
     	} else if(equals(this.getPosition(),this.getNextPosition())){
-    		this.setCurrentActivity(this.getNextActivity());
+    		this.setActivity(this.getNextActivity());
     		this.setMovingToNext(false);
     	}
     	
@@ -994,7 +1022,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			this.moveToTarget(getCubePosition(this.getTargetPosition()));
 	}
 	
-	if(this.hasDefaultBehavior() && this.getCurrentActivity()==Activity.NOTHING){
+	if(this.hasDefaultBehavior() && this.getActivity()==Activity.NOTHING){
 	
 			int randomActivity = (int) (Math.random()*3);
 			
@@ -1016,7 +1044,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	 * --------------------------HANDEL DIFFERENT ACTIVITIES-----------------------------
 	 */
 	
-	Activity activity =this.getCurrentActivity();
+	Activity activity =this.getActivity();
 	
 	switch(activity) {
 			
@@ -1039,7 +1067,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			
 			if(equals(cPosition,nPosition)){
 				if(tPosition == null || equals(cPosition, tPosition)){
-					this.setCurrentActivity(Activity.NOTHING);
+					this.setActivity(Activity.NOTHING);
 					counterTillDefault = 0;
 					this.stopSprinting();
 					this.setSpeed(0);
@@ -1069,7 +1097,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 		
 			this.setProgressTime((float)(this.getProgressTime()+dt));
 			if (this.getProgressTime() >= this.getWorkingTime()) {
-				this.setCurrentActivity(Activity.NOTHING);
+				this.setActivity(Activity.NOTHING);
 				counterTillDefault =0;
 			}
 			break;
@@ -1078,7 +1106,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 		
 			this.setProgressTime((float)(this.getProgressTime()+dt));
 			if (this.getProgressTime() >= this.getFightingTime()) {
-				this.setCurrentActivity(Activity.NOTHING);
+				this.setActivity(Activity.NOTHING);
 				counterTillDefault = 0;
 			}
 			break;
@@ -1086,7 +1114,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	case RESTING: 
 		
 			if (this.isFullyHealed()) {
-				this.setCurrentActivity(Activity.NOTHING);
+				this.setActivity(Activity.NOTHING);
 				counterTillDefault = 0;
 			} else {
 				this.setProgressTime((float)(this.getProgressTime()+dt));
@@ -1260,7 +1288,7 @@ public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalSta
 	if(!this.isAbleToMove())
 		throw new IllegalStateException();
 	
-	this.setCurrentActivity(Activity.MOVING);
+	this.setActivity(Activity.MOVING);
 	this.setNextPosition(this.getPosition());
 	this.setTargetPosition(getCubeCenter(cube));			
 }
@@ -1318,7 +1346,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 			this.setTargetPosition(nextPosition);
 		
 		this.setStep(new int[]{dx,dy,dz});
-		this.setCurrentActivity(Activity.MOVING);
+		this.setActivity(Activity.MOVING);
 		this.updateSpeed(dz);
 		this.setOrientation(getMovingOrientation(getVelocityVector(dx, dy, dz, this.getSpeed())));
 		this.setNextPosition(nextPosition);
@@ -1423,7 +1451,7 @@ private boolean isMovingToNext() {
  * Returns the activity this unit is doing.
  */
 @Basic @Model @Raw
-private Activity getCurrentActivity(){
+private Activity getActivity(){
 	return this.activity;
 }
 
@@ -1450,7 +1478,7 @@ private float getProgressTime(){
  * 			The given activity is not a valid activity.
  */
 @Model
-private void setCurrentActivity(Activity activity) throws IllegalArgumentException{
+private void setActivity(Activity activity) throws IllegalArgumentException{
 	this.activity = activity;
 }
 
@@ -1478,7 +1506,7 @@ private void setProgressTime(float time){
  * 		| result == (this.getCurrentActivity == "moving")
  */
 public boolean isMoving(){
-	return (this.getCurrentActivity()==Activity.MOVING);
+	return (this.getActivity()==Activity.MOVING);
 }
 /**
  * Tells whether the unit is currently working.
@@ -1487,7 +1515,7 @@ public boolean isMoving(){
  * 		| result == (this.getCurrentActivity == "working")
  */
 public  boolean isWorking(){
-	return (this.getCurrentActivity()==Activity.WORKING);	
+	return (this.getActivity()==Activity.WORKING);	
 }
 /**
  * Tells whether the unit is currently resting.
@@ -1496,7 +1524,7 @@ public  boolean isWorking(){
  * 		| result == (this.getCurrentActivity == "resting")
  */
 public boolean isResting(){
-	return (this.getCurrentActivity()==Activity.RESTING);
+	return (this.getActivity()==Activity.RESTING);
 }
 /**
  * Tells whether the unit is currently attacking.
@@ -1505,7 +1533,7 @@ public boolean isResting(){
  * 		| result == (this.getCurrentActivity == "attacking")
  */
 public boolean isAttacking(){
-	return (this.getCurrentActivity()==Activity.ATTACKING);
+	return (this.getActivity()==Activity.ATTACKING);
 }
 /**
  * Tells whether the unit is currently in default behavior.
@@ -1535,7 +1563,7 @@ public boolean isSprinting() {
 * 		| result == (this.getCurrentActivity() == Activity.NOTHING)
 */
 public boolean isDoingNothing(){
-	return (this.getCurrentActivity()==Activity.NOTHING);
+	return (this.getActivity()==Activity.NOTHING);
 }
 
 /*
@@ -1562,7 +1590,7 @@ public void work() throws IllegalStateException{
 	if (!this.isAbleToWork())
 			throw new IllegalStateException();
 	
-	this.setCurrentActivity(Activity.WORKING);
+	this.setActivity(Activity.WORKING);
 	this.setProgressTime(0);
 }
 
@@ -1586,7 +1614,7 @@ public void rest() throws IllegalStateException{
 	if(!this.isAbleToRest())
 		throw new IllegalStateException();
 	
-	this.setCurrentActivity(Activity.RESTING);	
+	this.setActivity(Activity.RESTING);	
 	this.setProgressTime(0);
 }
 //FIGHTING
@@ -1614,7 +1642,7 @@ public void attack(Unit defender) throws IllegalStateException{
 	defender.defend(this);
 	
 	updateOrientation(this, defender);
-	this.setCurrentActivity(Activity.ATTACKING);
+	this.setActivity(Activity.ATTACKING);
 	this.setProgressTime(0);
 }
 
@@ -1647,7 +1675,7 @@ public void attack(Unit defender) throws IllegalStateException{
 
 public void defend(Unit attacker){
 	
-	this.setCurrentActivity(Activity.NOTHING);
+	this.setActivity(Activity.NOTHING);
 	
 	//first Dodging
 	double probDodging = 0.2*this.getAgility()/attacker.getAgility();
@@ -1697,7 +1725,7 @@ public void defend(Unit attacker){
  */
 public void startDefaultBehavior() {
 		this.setProgressTime(0);
-		this.setCurrentActivity(Activity.NOTHING);
+		this.setActivity(Activity.NOTHING);
 		this.hasDefaultBehaviorEnabled = true; 
 }
 
@@ -1736,7 +1764,7 @@ public void startSprinting() throws IllegalStateException{
  * 
  */
 public void stopDefaultBehaviour() {
-	this.setCurrentActivity(Activity.NOTHING);
+	this.setActivity(Activity.NOTHING);
 	this.hasDefaultBehaviorEnabled = false;
 }
 
@@ -1814,7 +1842,7 @@ private final float getFightingTime(){
  * 			| result == this.getCurrentActivity()!=Activity.ATTACKING
  */
 public boolean isAbleToMove(){
-	return this.getCurrentActivity()!=Activity.ATTACKING ;
+	return this.getActivity()!=Activity.ATTACKING ;
 }
 
 /**
@@ -1824,7 +1852,7 @@ public boolean isAbleToMove(){
  * 			| result == this.getCurrentActivity()!=Activity.NOTHING
  */
 public boolean isAbleToMoveFurther(){
-	return this.getCurrentActivity()==Activity.NOTHING;
+	return this.getActivity()==Activity.NOTHING;
 }
 
 /**
@@ -1834,7 +1862,7 @@ public boolean isAbleToMoveFurther(){
  * 			| result == this.getCurrentActivity()!=Activity.ATTACKING && !this.isFullyHealed()
  */
 public boolean isAbleToRest(){
-	return this.getCurrentActivity()!=Activity.ATTACKING;
+	return this.getActivity()!=Activity.ATTACKING;
 }
 
 /**
@@ -1854,7 +1882,7 @@ public boolean isAbleToSprint(){
  * 			| result == this.getCurrentActivity() != Activity.ATTACKING
  */
 public boolean isAbleToWork(){
-	return this.getCurrentActivity() != Activity.ATTACKING;
+	return this.getActivity() != Activity.ATTACKING;
 }
 /**
  * Checks if this unit is currently able to attack.
@@ -1896,7 +1924,7 @@ public World getWorld() {
  */
 
 @Raw @Model
-private void setWorld(World world){
+protected void setWorld(World world){
 	this.world = world;
 }
 
@@ -1923,9 +1951,10 @@ public Faction getFaction() {
  */
 
 @Raw @Model
-private void setFaction(Faction faction){
+protected void setFaction(Faction faction){
 	this.faction = faction;
 }
+
 
 /*_____________________________________________________________
  * ____________________________________________________________

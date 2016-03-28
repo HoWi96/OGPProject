@@ -64,12 +64,9 @@ public class Faction {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalStateException
 	 */
-	public Faction(Unit unit, World world) throws IllegalArgumentException, IllegalStateException{
-		//FIRST UNIT
-		this.addUnit(unit);
+	public Faction(World world) throws IllegalArgumentException, IllegalStateException{
 		//ADD WORLD
 		this.world = world;
-		world.addFaction(this);
 		this.isTerminated = false;
 	}
 	/**
@@ -154,6 +151,13 @@ public class Faction {
 	}
 	
 	/**
+	 * @return the amount of units in the faction
+	 */
+	public int getNbUnits(){
+		return this.units.size();
+	}
+	
+	/**
 	 * Check whether this faction can have the given unit
 	 * as one of its units.
 	 * 
@@ -163,7 +167,15 @@ public class Faction {
 	 *         and if the faction can still get more units
 	 */
 	public boolean canHaveAsUnit(Unit unit) {
-		return (unit != null) && (this.getUnits().size() < MAX_UNITS_IN_FACTION);
+		return (unit != null) && (this.getNbUnits() < MAX_UNITS_IN_FACTION);
+	}
+	
+	/**
+	 * returns the world of the faction
+	 */
+	@Basic
+	public World getWorld() {
+		return world;
 	}
 	
 	

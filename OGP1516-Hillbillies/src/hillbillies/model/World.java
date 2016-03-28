@@ -354,6 +354,27 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		return this.factions;
 	}
 	
+
+	/**
+	 * Returns the faction with the least amount of units
+	 * 
+	 * @return the smallest faction
+	 * 
+	 */
+	@Raw @Model
+	private Faction getSmallestFaction(){
+		Faction smallestFaction = null;
+		int unitsInSmallest = 0;
+		for (Faction faction : factions) {
+			if (faction.getNbUnits() < unitsInSmallest){
+				smallestFaction = faction;
+				unitsInSmallest = faction.getNbUnits();
+			}
+		}
+		return smallestFaction;
+	}
+	
+	
 	//------------------------SETTERS
 	
 
@@ -368,9 +389,31 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @post   This world has the given faction as one of its factions.
 	 *       | new.hasAsFaction(faction)
 	 */
-	public void addFaction(@Raw Faction faction) {
+	@Raw @Model
+	private void addFaction(@Raw Faction faction) {
 		assert (faction != null) && (faction.getWorld() == this);
 		factions.add(faction);
+	}
+	/**
+	 * Adds a unit to a faction
+	 * 
+	 * @param unit
+	 * 			the unit who needing a faction
+	 * @post the unit will become part of the faction
+	 * @post the faction will have a new unit
+	 * @post the world will have a new faction if the max number of factions is not yet reached
+	 */
+	@Raw @Model
+	private void addUnitToFaction(Unit unit){
+		Faction faction;
+		if (this.getFactions().size()<MAX_FACTIONS){
+			faction = new Faction(this);
+			this.addFaction(faction);
+		}else{
+			faction = this.getSmallestFaction();
+		}
+		unit.setFaction(faction);
+		faction.addUnit(unit);
 	}
 	
 	//------------------------DESTRUCTORS
@@ -389,11 +432,37 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 *         one of its factions.
 	 *       | ! new.hasAsFaction(faction)
 	 */
-	@Raw
-	public void removeFaction(Faction faction) throws IllegalArgumentException, IllegalStateException {
-		if(faction.get)
+	@Raw @Model
+	private void removeFaction(Faction faction){
 		assert this.hasAsFaction(faction) && (faction.getWorld() == null);
 		factions.remove(faction);
+	}
+	
+	//------------------------INSPECTORS
+	
+	/**
+	 * Check whether this world has the given faction as one of its
+	 * factions.
+	 * 
+	 * @param  faction
+	 *         The faction to check.
+	 */
+	@Basic @Raw
+	public boolean hasAsFaction(@Raw Faction faction) {
+		return factions.contains(faction);
+	}
+	
+	/**
+	 * Check whether this world can have the given faction
+	 * as one of its factions.
+	 * 
+	 * @param  faction
+	 *         The faction to check.
+	 * @return True if and only if the given faction is effective
+	 */
+	@Raw
+	public boolean canHaveAsFaction(Faction faction) {
+		return faction != null;
 	}
 	
 
@@ -415,13 +484,13 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		return this.units;
 	}
 	//------------------------SETTERS
-	
-	public void addUnit(Unit unit) throws IllegalArgumentException, IllegalStateException{
-		if(this.getUnits().size() == MAX_UNITS)
-			throw new IllegalStateException();
-		this.units.add(unit);
+	//TODO add to faction, add to world, check if not dead
+	public void addUnit(Unit unit) throws IllegalArgumentException{
+		if(this.getUnits().size() < MAX_UNITS){
+			this.units.add(unit);
 		// this function should return illegalArgument when the unit is on a solid position or out of bounds
 		unit.setWorld(this);
+		}
 	}
 	//------------------------DESTRUCTORS
 	

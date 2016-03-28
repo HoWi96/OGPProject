@@ -306,8 +306,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean isAlive(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return unit.isAlive();
 	}
 
 	@Override
