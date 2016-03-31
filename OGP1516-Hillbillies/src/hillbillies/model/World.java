@@ -145,7 +145,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	this.nbCubesZ = terrainTypes[0][0].length;
 	//Connection to ConnectedToBorder
 	this.border = new ConnectedToBorder(this.getNbCubesX(),this.getNbCubesY(), this.getNbCubesZ());
-	
+	this.makeAllSolidsConnected();
 	//Connection with the GUI
 	if(modelListener==null)
 		throw new IllegalArgumentException();
@@ -361,48 +361,90 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	}
 	/*___________________________________________________________________
 	 *___________________________________________________________________
-	 * -----------------------TERRAIN CHANGES-----------------------------------
+	 * -----------------------TERRAIN CHANGES----------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 	
-	
-	
-	
-	
-	
-	
 	/**
-	 * Cave in the world on the specific position
+	 * Cave in the world on the specific position and control if there
+	 *  are, due to this change, cubes not connected anymore to the border
 	 * 
 	 * @param position
 	 * 			The position where a cave in will happen
 	 * 
 	 * @post The type of the position will be changed to TYPE_AIR
-	 * 
+	 * @effect the ConnectedToBorder will change his content due to the change
 	 * @effect The TerrainChangeListener will be notified
+	 * 
 	 * @effect A boulder will be spawned
 	 * @effect A log will be spawned
 	 * 
 	 */
 	private void caveIn(int[] position){
 		
-		//REPLACE CUBE
-		int type = this.getcubeType(position);
-		this.setcubeType(TYPE_AIR, position);
-		this.getTerrainChangeListener().notifyTerrainChanged(position[0], position[1], position[2]);
-		//SPAWN RAWMATERIAL
-		double probability = 0.25;
-		Random rand = new Random();
-		if (rand.nextDouble() <= probability){
-			if (type == TYPE_ROCK){
-				// spawn boulder
-				System.out.println("spawn boulder");
-			}else if(type == TYPE_TREE){
-				// spawn log
-				System.out.println("spawn log");
+		List<int[]> caveInList = this.getConnectedToBorder().changeSolidToPassable(
+				position[0], position[1], position[2]);
+		
+		for(int[] caveInPosition: caveInList){
+			
+			if(isSolidCube(caveInPosition)){
+				//REPLACE CUBE
+				int type = this.getcubeType(caveInPosition);
+				this.setcubeType(TYPE_AIR, caveInPosition);	
+				this.getTerrainChangeListener().notifyTerrainChanged(
+						caveInPosition[0], caveInPosition[1], caveInPosition[2]);
+				//SPAWN RAWMATERIAL
+				double probability = 0.25;
+				Random rand = new Random();
+				if (rand.nextDouble() <= probability){
+					if (type == TYPE_ROCK){
+						// spawn boulder
+						System.out.println("spawn boulder");
+					}else if(type == TYPE_TREE){
+						// spawn log
+						System.out.println("spawn log");
+					}
+				}
 			}
 		}
 	}
+	
+	/**
+	 * Makes all the solid cubes connected
+	 * 
+	 * @effect the solid cubes in the world which are not connected will cave in
+	 * 
+	 */
+	private void makeAllSolidsConnected(){
+		
+		for (int x=0; x<getNbCubesX(); x++) {
+			for (int y=0; y<getNbCubesY(); y++) {
+				for (int z=0; z<getNbCubesZ(); z++) {
+					// non solid cubes have to be notified if they are not already updated
+					if(!isSolidCube(new int[] {x,y,z}) && this.getConnectedToBorder().isSolidConnectedToBorder(x, y, z)){
+						this.caveIn(new int[] {x,y,z});
+					}	
+				}
+			}
+		}
+	}
+	
+	/*___________________________________________________________________
+	 *___________________________________________________________________
+	 * -----------------------ADVANCE TIME-------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	public void advanceTime(double dt) throws IllegalArgumentException{
+		if (!(0.0<=dt&&dt<=0.2))
+			throw new IllegalArgumentException();
+		//UNITS
+		for(Unit unit: this.getUnits()){
+			unit.advanceTime(dt);	
+		}
+	}
+	
+	
 	
 	
 	/*___________________________________________________________________
@@ -431,8 +473,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	@Raw @Model
 	private Faction getSmallestFaction(){
 		Faction smallestFaction = null;
-		int unitsInSmallest = 0;
-		for (Faction faction : factions) {
+		int unitsInSmallest = 50;
+		for (Faction faction : this.getFactions()) {
 			if (faction.getNbUnits() < unitsInSmallest){
 				smallestFaction = faction;
 				unitsInSmallest = faction.getNbUnits();
@@ -571,18 +613,24 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 			if the unit is dead or already belongs to a world
 	 */
 	public void addUnit(Unit unit) throws IllegalArgumentException{
-		if(!unit.isAlive() && unit.getWorld() != null)
+		
+		if(!unit.isAlive() || unit.getWorld() != null)
 			throw new IllegalArgumentException();
+		
 		if(this.getUnits().size() < MAX_UNITS){
 			
-			//ADDING WORLD
+			
+			//ADDING UNIT TO WORLD
+			System.out.println("Adding unit to world");
 			this.units.add(unit);
 			unit.setWorld(this);
 			
-			//ADDING FACTION
+			//ADDING UNIT TO FACTION
+			System.out.println("adding unit to faction");
 			Faction faction = this.getFactionForUnit(unit);
 			unit.setFaction(faction);
 			faction.addUnit(unit);
+			System.out.println("succesfully added unit");
 		
 		}
 	}
@@ -628,8 +676,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 			The type where the unit is located is non solid
 	 * 			The type where the unit is non solid or is ground level
 	 */
-	@Raw
-	public int[] getRandomPositionForUnit() {
+	@Raw @Model
+	private int[] getRandomPositionForUnit() {
 		
 		int nbX = this.getNbCubesX();
 		int nbY = this.getNbCubesY();
@@ -668,7 +716,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		int MIN = 25;
 		int MAX = 100;
 		
-		String name = "HillBilly "+rand.nextInt(MAX_UNITS+1);
+		
+		String name = "HillBilly"+(char)(this.getUnits().size()%26+'a');
 		
 		int[] position = this.getRandomPositionForUnit();
 		
@@ -678,7 +727,6 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		int toughness = rand.nextInt((MAX - MIN) + 1) + MIN;
 		
 		Unit unit = new Unit(name,position,weight,agility,strength,toughness, enableDefaultBehavior);
-		
 		return unit;
 	}
 	

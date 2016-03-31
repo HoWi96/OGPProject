@@ -252,7 +252,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public void advanceTime(World world, double dt) throws ModelException {
-		// TODO Auto-generated method stub
+		world.advanceTime(dt);
 		
 	}
 
@@ -271,20 +271,21 @@ public class Facade implements IFacade {
 
 	@Override
 	public boolean isSolidConnectedToBorder(World world, int x, int y, int z) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return world.getConnectedToBorder().isSolidConnectedToBorder(x, y, z);
 	}
 
 	@Override
 	public Unit spawnUnit(World world, boolean enableDefaultBehavior) throws ModelException {
 		Unit unit = world.getRandomUnit(enableDefaultBehavior);
 		world.addUnit(unit);
+		System.out.println("Spawn unit "+unit.getName());
 		return unit;
 		
 	}
 
 	@Override
 	public void addUnit(Unit unit, World world) throws ModelException {
+		System.out.println("add unit "+unit.getName());
 		world.addUnit(unit);
 		
 	}

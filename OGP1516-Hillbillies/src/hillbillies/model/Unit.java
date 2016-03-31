@@ -762,10 +762,14 @@ public static boolean isValidName(String name) {
  * 			The position needs to be inside the game world and must not be solid
  * 			| result == world.isValidPosition(getCubePosition(position)) &&  
  *   		| !world.isSolidCube(getCubePosition(position))
+ * @return 
+ * 			The unit is not yet attached to the world
+ * 			| this.getWorld() == null
 */
-public boolean isValidPosition(double[] position) {
-	return world.isValidPosition(getCubePosition(position)) &&
-			!world.isSolidCube(getCubePosition(position));
+@Raw
+public boolean isValidPosition(@Raw double[] position) {
+	return this.getWorld() == null || (world.isValidPosition(getCubePosition(position)) &&
+			!world.isSolidCube(getCubePosition(position)));
 }
 
 /**
@@ -1078,8 +1082,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				}else{
 					this.setStamina(0);
 					this.stopSprinting();
-				}
-				
+				}	
 			}
 			
 			double[] cPosition = this.getPosition();
@@ -1108,6 +1111,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 						nPosition = this.getNextPosition();
 				}}}
 			double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
+			
 			if(inBetween(cPosition, nPosition, iPosition))
 				this.setPosition(iPosition);
 			else
