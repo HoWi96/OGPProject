@@ -114,14 +114,16 @@ public class Faction {
 	 * 
 	 * @param  unit
 	 *         The unit to be added.
-	 * @pre    The given unit is effective and already references
-	 *         this faction.
-	 * 
+	 * @pre    The given unit is alive and
+	 * 				 is not yet connected to a faction
 	 * @post   This faction has the given unit as one of its units. 
+	 * @effect The unit will have this faction as faction
 	 */
 	public void addUnit(@Raw Unit unit) {
-		assert (unit != null) && (unit.getFaction() == this);
-		units.add(unit);
+		assert (unit.isAlive() && unit.getFaction() == null);
+		this.units.add(unit);
+		
+		
 	}
 
 	/**
@@ -137,9 +139,9 @@ public class Faction {
 	 *         one of its units.
 	 */
 	@Raw
-	public void removeUnit(Unit unit) {
+	public void removeAsUnit(Unit unit) {
 		assert this.hasAsUnit(unit) && (unit.getFaction() == null);
-		units.remove(unit);
+		this.units.remove(unit);
 	}
 	
 	/**

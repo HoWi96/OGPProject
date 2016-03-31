@@ -4,6 +4,7 @@ import java.util.*;
 
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.part2.listener.TerrainChangeListener;
+import hillbillies.util.ConnectedToBorder;
 
 /**
  * @invar  The TerrainTypes of each world must be a valid TerrainTypes for any
@@ -96,6 +97,10 @@ public class World {
 	 *       |     (! faction.isTerminated()) )
 	 */
 	public Set<Faction> factions = new HashSet<Faction>(MAX_FACTIONS);
+	/**
+	 * Variable registering the ConnectedToBorder class storing information about this world
+	 */
+	private final ConnectedToBorder border;
 	
 		
 	
@@ -124,7 +129,11 @@ public class World {
  * 
  * @post   The TerrainChangeListener of this new world is equal to the given
  *         TerrainChangeListener.
- *       | new.getTerrainChangeListener() == modelListener        
+ *       | new.getTerrainChangeListener() == modelListener  
+ *
+ * @post   The connectedToBorder of this new world is equal to the given
+ *         connectedToBorder.
+ *       | new.getConnectedToBorder() == border
  */
 public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws IllegalArgumentException {
 	
@@ -134,9 +143,15 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	this.nbCubesX = terrainTypes.length;
 	this.nbCubesY = terrainTypes[0].length;
 	this.nbCubesZ = terrainTypes[0][0].length;
+	//Connection to ConnectedToBorder
+	this.border = new ConnectedToBorder(this.getNbCubesX(),this.getNbCubesY(), this.getNbCubesZ());
+	
+	//Connection with the GUI
+	if(modelListener==null)
+		throw new IllegalArgumentException();
 	this.modelListener = modelListener;
 }
-	
+
 	/*___________________________________________________________________
 	 *___________________________________________________________________
 	 * -----------------------METHODS--------------------------------
@@ -205,6 +220,14 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	@Basic @Raw @Immutable
 	public TerrainChangeListener getTerrainChangeListener() {
 		return this.modelListener;
+	}
+	
+	/**
+	 * Return the connectedToBorder of this world.
+	 */
+	@Basic @Raw @Immutable
+	public ConnectedToBorder getConnectedToBorder() {
+		return this.border;
 	}
 	
 	//------------------------SETTERS
@@ -336,6 +359,50 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		int type = this.getcubeType(position);
 		return (type == TYPE_ROCK) || (type == TYPE_TREE);	
 	}
+	/*___________________________________________________________________
+	 *___________________________________________________________________
+	 * -----------------------TERRAIN CHANGES-----------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * Cave in the world on the specific position
+	 * 
+	 * @param position
+	 * 			The position where a cave in will happen
+	 * 
+	 * @post The type of the position will be changed to TYPE_AIR
+	 * 
+	 * @effect The TerrainChangeListener will be notified
+	 * @effect A boulder will be spawned
+	 * @effect A log will be spawned
+	 * 
+	 */
+	private void caveIn(int[] position){
+		
+		//REPLACE CUBE
+		int type = this.getcubeType(position);
+		this.setcubeType(TYPE_AIR, position);
+		this.getTerrainChangeListener().notifyTerrainChanged(position[0], position[1], position[2]);
+		//SPAWN RAWMATERIAL
+		double probability = 0.25;
+		Random rand = new Random();
+		if (rand.nextDouble() <= probability){
+			if (type == TYPE_ROCK){
+				// spawn boulder
+				System.out.println("spawn boulder");
+			}else if(type == TYPE_TREE){
+				// spawn log
+				System.out.println("spawn log");
+			}
+		}
+	}
 	
 	
 	/*___________________________________________________________________
@@ -374,6 +441,30 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		return smallestFaction;
 	}
 	
+	/**
+	 * Adds a unit to a faction
+	 * 
+	 * @param unit
+	 * 			the unit who is needing a faction
+	 * @post the world will have a new faction if the max number of factions is not yet reached
+	 * 
+	 * @return The new faction for the given unit
+	 * @return The smallest faction is returned
+	 * 
+	 */
+	@Raw @Model
+	private Faction getFactionForUnit(Unit unit){
+		Faction faction;
+		if (this.getFactions().size()<MAX_FACTIONS){
+			faction = new Faction(this);
+			this.addAsFaction(faction);
+		}else{
+			faction = this.getSmallestFaction();
+		}
+		return faction;
+		
+	}
+	
 	
 	//------------------------SETTERS
 	
@@ -390,31 +481,11 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 *       | new.hasAsFaction(faction)
 	 */
 	@Raw @Model
-	private void addFaction(@Raw Faction faction) {
+	private void addAsFaction(@Raw Faction faction) {
 		assert (faction != null) && (faction.getWorld() == this);
-		factions.add(faction);
+		this.factions.add(faction);
 	}
-	/**
-	 * Adds a unit to a faction
-	 * 
-	 * @param unit
-	 * 			the unit who needing a faction
-	 * @post the unit will become part of the faction
-	 * @post the faction will have a new unit
-	 * @post the world will have a new faction if the max number of factions is not yet reached
-	 */
-	@Raw @Model
-	private void addUnitToFaction(Unit unit){
-		Faction faction;
-		if (this.getFactions().size()<MAX_FACTIONS){
-			faction = new Faction(this);
-			this.addFaction(faction);
-		}else{
-			faction = this.getSmallestFaction();
-		}
-		unit.setFaction(faction);
-		faction.addUnit(unit);
-	}
+
 	
 	//------------------------DESTRUCTORS
 
@@ -433,7 +504,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 *       | ! new.hasAsFaction(faction)
 	 */
 	@Raw @Model
-	private void removeFaction(Faction faction){
+	private void removeAsFaction(@Raw Faction faction){
 		assert this.hasAsFaction(faction) && (faction.getWorld() == null);
 		factions.remove(faction);
 	}
@@ -484,15 +555,132 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		return this.units;
 	}
 	//------------------------SETTERS
-	//TODO add to faction, add to world, check if not dead
+	/**
+	 * Adds the unit to this world and gives the unit a faction
+	 * 
+	 * @param unit
+	 * 			a unit for this world
+	 * 
+	 * @post the unit will belong now to this world
+	 * @post the unit will belong now to his new faction
+	 * 
+	 * @effect The world will have this unit as member
+	 * @effect The faction will have the unit as member7
+	 * 
+	 * @throws IllegalArgumentException
+	 * 			if the unit is dead or already belongs to a world
+	 */
 	public void addUnit(Unit unit) throws IllegalArgumentException{
+		if(!unit.isAlive() && unit.getWorld() != null)
+			throw new IllegalArgumentException();
 		if(this.getUnits().size() < MAX_UNITS){
+			
+			//ADDING WORLD
 			this.units.add(unit);
-		// this function should return illegalArgument when the unit is on a solid position or out of bounds
-		unit.setWorld(this);
+			unit.setWorld(this);
+			
+			//ADDING FACTION
+			Faction faction = this.getFactionForUnit(unit);
+			unit.setFaction(faction);
+			faction.addUnit(unit);
+		
 		}
 	}
 	//------------------------DESTRUCTORS
+	/**
+	 * Remove the given Unit from the set of Units of this World.
+	 * 
+	 * @param  unit
+	 *         The Unit to be removed.
+	 * @pre    This World has the given Unit as one of
+	 *         its Units, and the given Unit does not
+	 *         reference any World.
+	 *       | this.hasAsUnit(unit) &&
+	 *       | (unit.getWorld() == null)
+	 * @post   This World no longer has the given Unit as
+	 *         one of its Units.
+	 *       | ! new.hasAsUnit(unit)
+	 */
+	@Raw
+	public void removeAsUnit(Unit unit) {
+		assert this.hasAsUnit(unit) && (unit.getWorld() == null);
+		units.remove(unit);
+	}
+	//------------------------INSPECTORS
+	/**
+	 * Check whether this World has the given Unit as one of its
+	 * Units.
+	 * 
+	 * @param  unit
+	 *         The Unit to check.
+	 */
+	@Raw
+	public boolean hasAsUnit(@Raw Unit unit) {
+		return units.contains(unit);
+	}
+	
+	//------------------------HELPERS
+	
+	/**
+	 * Gives back a random location for a unit
+	 * 
+	 * @return a random position for a unit inside the game world
+	 * 			The type where the unit is located is non solid
+	 * 			The type where the unit is non solid or is ground level
+	 */
+	@Raw
+	public int[] getRandomPositionForUnit() {
+		
+		int nbX = this.getNbCubesX();
+		int nbY = this.getNbCubesY();
+		int nbZ = this.getNbCubesZ();
+		
+		int X = (int) (Math.random()*nbX);
+		int Y = (int) (Math.random()*nbY);
+		int Z = (int) (Math.random()*nbZ);
+		
+		//get a random non solid location
+		while(isSolidCube(new int[]{X,Y,Z})){
+			X = (int) (Math.random()*nbX);
+			Y = (int) (Math.random()*nbY);
+			Z = (int) (Math.random()*nbZ);	
+		};
+		// go down till you hit ground or level 0
+		while(!isSolidCube(new int[]{X,Y,Z-1}) && Z ==0){
+			Z= Z-1;	
+		};
+		
+		return new int[] {X, Y, Z};
+	}
+	/**
+	 * 
+	 * @param enableDefaultBehavior
+	 * 		whether the default behavior should be enabled or not
+	 * @effect
+	 * 		A random unit will be created with random properties
+	 * @return
+	 * 		The random unit
+	 * 		
+	 */
+	public Unit getRandomUnit(boolean enableDefaultBehavior){
+		
+		Random rand = new Random();
+		int MIN = 25;
+		int MAX = 100;
+		
+		String name = "HillBilly "+rand.nextInt(MAX_UNITS+1);
+		
+		int[] position = this.getRandomPositionForUnit();
+		
+		int weight = rand.nextInt((MAX - MIN) + 1) + MIN;
+		int agility = rand.nextInt((MAX - MIN) + 1) + MIN;
+		int strength = rand.nextInt((MAX - MIN) + 1) + MIN;
+		int toughness = rand.nextInt((MAX - MIN) + 1) + MIN;
+		
+		Unit unit = new Unit(name,position,weight,agility,strength,toughness, enableDefaultBehavior);
+		
+		return unit;
+	}
 	
 
 }

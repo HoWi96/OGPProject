@@ -1,6 +1,5 @@
 package hillbillies.model;
 
-
 import be.kuleuven.cs.som.annotate.*;
 
 
@@ -335,14 +334,37 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 }
 
 /**
- * Terminate this unit.
- *
- * @post   This unit is now dead.
- *        | new.isDead()
+ * Terminates this unit
+ * 
+ * 
+ * @post The unit is now dead
+ * 		|!new.isAlive()
+ * @post The unit will no longer belong to a faction
+ * 		| new.getFaction == null;
+ * @post The unit will no longer belong to a world
+ * 		| new.getWorld == null;
+ * 
+ * @effect The unit will drop the item he is carrying
+ * 		|this.dropItem();
+ * 
+ * @effect The world of this unit will not have the unit as unit anymore
+ * 		| (new this.getWorld()).removeAsUnit(this)
+ * @effect The faction of this unit will not have the unit as unit anymor
+ * 		| (new this.getFaction()).removeAsUnit(this)
  */
  public void die() {
+	 //this.dropItem();
+	 
 	 this.isAlive = false;
-	 //TODO connect world, faction, check hitpoints = 0
+	 
+	 Faction faction = this.getFaction();
+	 this.setFaction(null);
+	 faction.removeAsUnit(this);
+		
+	 World world = this.getWorld();
+	 this.setWorld(null);
+	 world.removeAsUnit(this);
+	 
  }
  
  /**
@@ -1707,7 +1729,7 @@ public void defend(Unit attacker){
 	int damage = attacker.getStrength()/10;
 	int newHitpoints = this.getHitpoints()- damage;
 	if(newHitpoints<=0)
-		newHitpoints =0;
+		this.die();
 	this.setHitpoints(newHitpoints);
 	}
 
@@ -1927,6 +1949,7 @@ public World getWorld() {
 protected void setWorld(World world){
 	this.world = world;
 }
+
 
 /*_____________________________________________________________
  * ____________________________________________________________
