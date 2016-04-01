@@ -343,9 +343,9 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		int X = position[0];
 		int Y = position[1];
 		int Z = position[2];
-		return 0<=X&&X<=this.getNbCubesX()&&
-				0<=Y&&Y<=this.getNbCubesY()&&
-				0<=Z&&Z<=this.getNbCubesZ();	
+		return 0<=X&&X<this.getNbCubesX()&&
+				0<=Y&&Y<this.getNbCubesY()&&
+				0<=Z&&Z<this.getNbCubesZ();	
 	}
 	/**
 	 * Returns whether the cube is solid or not
@@ -361,6 +361,34 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	}
 	
 	/**
+	 * Gives back all the adjacent cubes
+	 * @param position
+	 * 			The position of the cube
+	 * @return
+	 * 		a List<int[]> with all the locations of the surrounding cubes
+	 */
+	public List<int[]> getAdjacentCubes(int[] position){
+		
+		List<int[]> adjacentCubes = new ArrayList<>();
+		
+		int x = position[0];
+		int y = position[1];
+		int z = position[2];
+		
+			for (int dx=-1; dx<=1;dx++){
+				for (int dy=-1; dy<=1;dy++){
+					for (int dz=-1; dz<=1;dz++){
+						int[] adjacentCube = new int[]{x+dx,y+dy,z+dz};
+						if(isValidPosition(adjacentCube) && !(dx==0&&dy==0&&dz==0)){
+							adjacentCubes.add(adjacentCube);
+						}	
+					}
+				}	
+			}
+			return adjacentCubes;
+	}
+	
+	/**
 	 * Checks whether there are solid cubes surrounding the given cube
 	 * 
 	 * @param position
@@ -370,13 +398,25 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 		
 	 */
 	public boolean hasSolidAdjacents(int[] position){
-		List<int[]> adjacentCubes = Utils.getAdjacentCubes(position);
+		List<int[]> adjacentCubes = getAdjacentCubes(position);
 		
 		for(int[] adjacentCube: adjacentCubes){
 			if(isSolidCube(adjacentCube))
 				return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Checks whether the cube under the give position is solid
+	 * 
+	 * @param position
+	 * 		the given position
+	 * @return
+	 * 		whether whether the cube under the give position is solid
+	 */
+	public boolean isSolidUnder(int[] position){
+		return isSolidCube(Utils.getPositionUnder(position));
 	}
 	
 	

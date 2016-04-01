@@ -146,7 +146,7 @@ public class UnitTest {
 	    public void testGetCubePosition(){
 	    	double[] position = {1.4, 2.3, 3.2};
 	    	int[] positionInt = {(int)position[0], (int)position[1], (int)position[2]};
-	    	int[] position2 = Unit.getCubePosition(position);
+	    	int[] position2 = Utils.getCubePosition(position);
 	    	assertTrue(position2[0] == positionInt[0]);
 	    	assertTrue(position2[1] == positionInt[1]);
 	    	assertTrue(position2[2] == positionInt[2]);
@@ -185,14 +185,14 @@ public class UnitTest {
 	    public void testGetTargetPosition(){
 	    	unit1.moveToTarget(targetPosition);
 	    	double[] target = unit1.getTargetPosition();
-	    	assertTrue(Unit.equals(target, Unit.getCubeCenter(targetPosition)));
+	    	assertTrue(Utils.equals(target, Utils.getCubeCenter(targetPosition)));
 	    }
 	    
 	    @Test
 	    public void testGetNextPosition(){
 	    	unit1.moveToAdjacent(1,1,1);
 	    	double[] next = unit1.getNextPosition();
-	    	assertTrue(Unit.equals(next, Unit.getCubeCenter(targetPosition)));
+	    	assertTrue(Utils.equals(next, Utils.getCubeCenter(targetPosition)));
 	    }
 	    
 	    @Test
@@ -318,7 +318,7 @@ public class UnitTest {
 	    	unit2.attack(unit3);
 	    	double[] postPosition = unit3.getPosition();
 	    	int postHitpoints = unit3.getHitpoints();
-	    	assertTrue(Unit.inBetween(new double[] {-1,-1,-1},new double[] {1,1,1},Unit.addPositionsFactor(prevPosition, postPosition, -1))
+	    	assertTrue(Utils.inBetween(new double[] {-1,-1,-1},new double[] {1,1,1},Utils.addPositionsFactor(prevPosition, postPosition, -1))
 	    			|| (prevHitpoints-postHitpoints == (int) unit2.getStrength()/10));
 	    }
 	    

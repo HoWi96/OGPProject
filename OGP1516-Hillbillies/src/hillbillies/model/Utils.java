@@ -1,7 +1,6 @@
 package hillbillies.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Random;
 
 public class Utils {
 	
@@ -15,6 +14,12 @@ public class Utils {
 	 * 						&& (position1[2] == position2[2])
 	 */
 	public static boolean equals(double[] position1, double[] position2) {
+		return (position1[0] == position2[0])&&
+				(position1[1] == position2[1])&&
+				(position1[2] == position2[2]);
+	}
+	
+	public static boolean equals(int[] position1, int[] position2) {
 		return (position1[0] == position2[0])&&
 				(position1[1] == position2[1])&&
 				(position1[2] == position2[2]);
@@ -99,33 +104,65 @@ public class Utils {
 		return finalPosition;
 	}
 	
-	/**
-	 * Gives back all the adjacent cubes
-	 * @param position
-	 * 			The position of the cube
-	 * @return
-	 * 		a List<int[]> with all the locations of the surrounding cubes
-	 */
-	public static List<int[]> getAdjacentCubes(int[] position){
-		
-		List<int[]> adjacentCubes = new ArrayList<>(26);
-		
-		int x = position[0];
-		int y = position[1];
-		int z = position[2];
-		
-			for (int dx=-1; dx<=1;dx++){
-				for (int dy=-1; dy<=1;dy++){
-					for (int dz=-1; dz<=1;dz++){
-						//the cube itself doesn't have to be part of the list
-						if(!(dx==0&&dy==0&&dz==0)){
-							adjacentCubes.add(new int[]{x+dx,y+dy,z+dz});
-						}	
-					}
-				}	
-			}
-			return adjacentCubes;
+	public static int[] addPositionsFactor(int[] position1, int[] position2, int factor){
+		int[] finalPosition = {position1[0] + position2[0]*factor,
+								  position1[1] + position2[1]*factor,
+								  position1[2] + position2[2]*factor
+		};
+		return finalPosition;
 	}
+	
+	
+
+	/**
+	 *  A method to generate random integers between 2 values 
+	 *  
+	 * @param max  
+	 * 		the upper limit
+	 * @param min  
+	 * 		the  lower limit 
+	 * 			
+	 * @return 
+	 * 		a random number between min and max (inclusive)
+	 */
+    public static int randInt(int min,int max) {
+    	
+        Random rand = new Random();
+        // nextInt is normally exclusive of the top value,
+        // so add 1 to make it inclusive
+        int randInt = rand.nextInt((max - min) + 1) + min;
+        
+        return randInt;
+    }
+    
+    /**
+     * Returns exactly the position under the given position
+     * @param position
+     * 			the given position
+     * @return
+     * 			the position under the given position
+     */
+    public static int[] getPositionUnder(int[] position) {
+    	return addPositionsFactor(position, new int[] {0,0,-1}, 1);
+    }
+    /**
+     * returns whether two positions are adjacent
+     * 
+     * @param position1
+     * 			the first position
+     * @param position2
+     * 			the second position
+     * @return
+     * 			whether they are adjacent
+     */
+    public static boolean areAdjacent(int[] position1, int[] position2){
+    	int[] difference = addPositionsFactor(position1, position2, -1);
+    	int dx = difference[0];
+    	int dy = difference[1];
+    	int dz = difference[2];
+    	return !(Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1);
+    }
+    
 
 
 

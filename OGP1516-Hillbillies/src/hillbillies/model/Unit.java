@@ -1,6 +1,11 @@
 package hillbillies.model;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 import be.kuleuven.cs.som.annotate.*;
+
 
 
 /**
@@ -57,6 +62,9 @@ import be.kuleuven.cs.som.annotate.*;
  * @invar  The targetPosition of each Unit must be a valid position for any
  *         Unit.
  *       | isValidPosition(getTargetPosition())
+ * @invar  The XP of each unit must be a valid XP for any
+ *         unit.
+ *       | isValidXP(getXP())      
  * @invar  Each unit will have a valid faction
  * @invar  Each unit will have a valid world
  * @invar  Each unit will have a valid state of living
@@ -139,7 +147,7 @@ public class Unit {
 	/**
 	 * The position where the unit is heading to
 	 */
-	private double[] targetPosition;
+	private double[] cube;
 
 	/**
 	 * The next position of the unit
@@ -197,6 +205,10 @@ public class Unit {
 	 * Boolean indicating whether the unit is alive
 	 */
 	private boolean isAlive;
+	/**
+	 * Variable registering the XP of this unit.
+	 */
+	private int XP;
 	
 /*___________________________________________________________________
  * __________________________________________________________________
@@ -245,7 +257,10 @@ public class Unit {
  * 		| this.setHitpoints(this.getMaxHitpoints))
  * 
  * @effect the stamina will be set to the maximal amount of stamina
- * 		| this.setStamina(this.getStamina))
+ * 		| this.setStamina(this.getMaxStamina))
+ * 
+ * @effect The XP of this new unit is set to 0 XP
+ *       | this.setXP(0)
  *       
  * 
  * @post   If the given Strength is a valid Strength for any Unit,
@@ -328,6 +343,8 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	else
 		this.stopDefaultBehaviour();
 	
+	this.setXP(0);
+	
 	this.isAlive = true;
 }
 
@@ -349,15 +366,24 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
  * 		| (new this.getWorld()).removeAsUnit(this)
  * @effect The faction of this unit will not have the unit as unit anymor
  * 		| (new this.getFaction()).removeAsUnit(this)
+ * @effect The unit hitpoints will be brought to 0
+ * 		|this.setHitpoints(0);
+ * @effect the units speed will be brought to 0
+ * 		|this.setSpeed(0);
+ * @effect The unit will stop sprinting
+ * 		|this.stopSprinting();
  */
  public void die() {
 	 //this.dropItem();
+	 this.setHitpoints(0);
+	 this.setSpeed(0);
+	 this.stopSprinting();
 	 
 	 this.isAlive = false;
 	 
 	 Faction faction = this.getFaction();
 	 this.setFaction(null);
-	 faction.removeAsUnit(this);
+	 faction.removeUnit(this);
 		
 	 World world = this.getWorld();
 	 this.setWorld(null);
@@ -436,6 +462,18 @@ private boolean isValidInitialWeight(int weight){
  * -----------------------PROPERTIES---------------------------------
  *___________________________________________________________________
  *___________________________________________________________________*/
+
+
+
+
+
+
+
+
+
+
+
+
 
 //------------------------GETTERS
 /**
@@ -525,6 +563,15 @@ public double getSpeed(){
 public Activity getNextActivity() {
 	return this.nextActivity;
 }
+
+/**
+ * Return the XP of this unit.
+ */
+@Basic @Raw
+public int getXP() {
+	return this.XP;
+}
+
 
 /*
  * ---------------------SETTERS 
@@ -729,6 +776,26 @@ private void setNextActivity(Activity nextActivity) {
 	this.nextActivity = nextActivity;
 }
 
+/**
+ * Set the XP of this unit to the given XP.
+ * 
+ * @param  XP
+ *         The new XP for this unit.
+ * @post   The XP of this new unit is equal to
+ *         the given XP.
+ *       | new.getXP() == XP
+ * @throws IllegalArgumentException
+ *         The given XP is not a valid XP for any
+ *         unit.
+ *       | ! isValidXP(getXP())
+ */
+@Raw
+public void setXP(int XP) throws IllegalArgumentException {
+	if (! isValidXP(XP))
+		throw new IllegalArgumentException();
+	this.XP = XP;
+}
+
 /*------------------------CHECKERS
 /**
  * Check whether the given Name is a valid Name for
@@ -866,6 +933,19 @@ public static boolean isValidOrientation(float orientation) {
 	return (0<=orientation && orientation<2*PI);
 }
 
+/**
+ * Check whether the given XP is a valid XP for
+ * any unit.
+ *  
+ * @param  XP
+ *         The XP to check.
+ * @return The XP should be a positive integer and smaller than 10
+ *       | result == 0<=XP&& XP<10;
+*/
+public static boolean isValidXP(int XP) {
+	return 0<=XP && XP<10;
+}
+
 
 /*--------------------HELPER METHODS
 //WEIGTH
@@ -993,6 +1073,45 @@ public void updateSpeed(int dz){
 	this.speed = realSpeed;
 }
 
+//XP
+/**
+ * The unit will update his XP and will be rewarded for every 10 XP
+ * @param XP
+ * 		The XP to be added
+ * @effect
+ * 		The units XP will be set to the current XP + the given XP modulo 10
+ * 		|this.setXP((this.getCurrentXP()+XP)%10);
+ * @effect
+ * 		Or the unit will be rewarded with extra strength
+ * 		| this.setStrength(this.getStrength()+1);
+ * 		Or the unit will be rewarded with extra agility
+ * 		| this.setAgility(this.getAgility()+1);
+ * 		Or the unit will be rewarded with extra toughness
+ * 		| this.setToughness(this.getToughness()+1);
+ * 	
+ * 		
+ */
+public void updateXP(int XP){
+	int currentXP = this.getXP();
+	int totalXP = currentXP+XP;
+	int newXP = totalXP%10;
+	this.setXP(newXP);
+	
+	int gains = (totalXP-newXP)/10;
+	
+	for(int i = 0; i<gains; i++){
+		int attribute = (int) (Math.random()*3);
+		
+		if(attribute == 0)
+			this.setStrength(this.getStrength()+1);
+		if(attribute == 1)
+			this.setAgility(this.getAgility()+1);
+		if(attribute == 2)
+			this.setToughness(this.getToughness()+1);
+		}
+	}
+	
+
 /*___________________________________________________________________
  * __________________________________________________________________
  * -----------------------ADVANCE TIME-------------------------------
@@ -1012,6 +1131,10 @@ public void advanceTime(double dt) throws IllegalArgumentException {
     	rest();
     	counterTillRest = 0.0;
     }
+    
+    //if the unit is not connected to solid cubes anymore, he needs to fall
+    if(this.getActivity()!=Activity.FALLING && !this.getWorld().hasSolidAdjacents(Utils.getCubePosition(this.getPosition())))
+    	this.fall();
     
     // if the unit gets a new task, he first have to move to the next position
     if((!this.isMoving() && !Utils.equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext())){
@@ -1061,7 +1184,29 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	Activity activity =this.getActivity();
 	
 	switch(activity) {
-			
+	
+	case FALLING:
+		
+		double[] cfPosition = this.getPosition();
+		double[] nfPosition = this.getNextPosition();
+		
+		if(Utils.equals(cfPosition,nfPosition)){
+			// if the unit is well landed
+			if(world.isSolidUnder(Utils.getCubePosition(cfPosition))|| cfPosition[2] ==0 ){
+				this.setActivity(Activity.NOTHING);
+			}else{
+				//else continue falling
+				this.fall();
+			}
+		} else {
+			double[] ifPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
+			if(Utils.inBetween(cfPosition, nfPosition, ifPosition))
+				this.setPosition(ifPosition);
+			else
+				this.setPosition(nfPosition);
+		}	
+		break;
+		
 	case MOVING: 
 		
 			if(this.isSprinting()){
@@ -1085,25 +1230,40 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 					this.stopSprinting();
 					this.setSpeed(0);
 				}else{
-					int[] step = new int[3];
-					//pathfinding algorithm
-					for(int i = 0; i<3; i++){
-						if (cPosition[i] == tPosition[i]){
-							step[i] = 0;
-						}else if(cPosition[i] < tPosition[i]){
-							step[i] = 1;
-						}else{
-							step[i] = -1;
+					int[] currentCube = Utils.getCubePosition(getPosition());
+					
+					if(queuePositions.contains(currentCube)){
+						int[] nextPosWithSequence = null;
+						for (int[] posWithSequence: queue){
+							int[] nextPos = {posWithSequence[0],posWithSequence[1],posWithSequence[2]};
+							int sequenceNumber = posWithSequence[3];
+							
+							if(Utils.areAdjacent(currentCube,nextPos))
+								if(nextPosWithSequence == null || nextPosWithSequence[3]>sequenceNumber)
+									nextPosWithSequence = posWithSequence;		
 						}
-						this.moveToAdjacent(step[0],step[1],step[2]);
+						if(nextPosWithSequence != null){
+							
+						int dx = nextPosWithSequence[0]-currentCube[0];
+						int dy = nextPosWithSequence[1]-currentCube[2];
+						int dz = nextPosWithSequence[1]-currentCube[2];
+						
+						moveToAdjacent(dx, dy, dz);
 						nPosition = this.getNextPosition();
-				}}}
-			double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
+						} else {
+							this.setTargetPosition(cPosition);
+						}
+					}
+				}	
+			}
 			
+			double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
+			//TO CENTER OF CUBE
 			if(Utils.inBetween(cPosition, nPosition, iPosition))
 				this.setPosition(iPosition);
 			else
 				this.setPosition(nPosition);
+				this.updateXP(1);
 			break;
 	
 	
@@ -1180,7 +1340,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
  */
 @Basic @Raw
 public double[] getTargetPosition() {
-	return this.targetPosition;
+	return this.cube;
 }
 
 /**
@@ -1216,7 +1376,7 @@ public int[] getStep(){
 private void setTargetPosition(double[] targetPosition) throws IllegalArgumentException  {
 	if (!isValidPosition(targetPosition))
 		throw new IllegalArgumentException();
-	this.targetPosition = targetPosition;
+	this.cube = targetPosition;
 }
 
 /**
@@ -1304,7 +1464,24 @@ public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalSta
 	
 	this.setActivity(Activity.MOVING);
 	this.setNextPosition(this.getPosition());
-	this.setTargetPosition(Utils.getCubeCenter(cube));			
+	this.setTargetPosition(Utils.getCubeCenter(cube));
+	
+	
+	//reset the queues
+	queue =  new LinkedList<int[]>();
+	queuePositions = new LinkedList<int[]>();
+	//load first elements
+	queue.add(new int[]{cube[0], cube[1],cube[2],0});
+	queuePositions.add(cube);
+	
+	int index = 0;
+	int[] nextPosWithSequence;
+	//Algorithm to find all path beginning from the current location
+	while(!queuePositions.contains(Utils.getCubePosition(getPosition()))&& queue.size()>index){
+		nextPosWithSequence = ((LinkedList<int[]>) queue).get(index);
+		search(nextPosWithSequence);
+		index++;
+	}
 }
 
 /**
@@ -1370,6 +1547,47 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 /*
  * ----------------------HELPER METHODS--------------------------
  */
+
+private Queue<int[]> queue =  new LinkedList<int[]>();
+private Queue<int[]> queuePositions = new LinkedList<int[]>();
+/**
+ * 
+ * @param array
+ * 		An int[] with a position and the position of that position
+ * @post 
+ * 		Adjacent cubes who are passable and have solid adjacent cubes
+ * 		 will be added to the queue if they are not already part of the queue.
+ * 		| queue.add(new int[] {adjacentCube[0],adjacentCube[1],adjacentCube[2],n+1});
+ */
+private void search(int[] array){
+	
+	int[] position = {array[0], array[1], array[2]};
+	int n = array[3];
+	
+	List<int[]> adjacentCubes = this.getWorld().getAdjacentCubes(position);
+	
+	// loop trough all adjacent cubes
+	for (int[] adjacentCube: adjacentCubes){
+
+		if(this.getWorld().hasSolidAdjacents(adjacentCube)
+				&& isPassable(adjacentCube)){
+			//A candidate cube
+			boolean toAdd = true;
+			for (int[] queueArray: queue){
+				//Already in queue?
+				if (queueArray[0] == adjacentCube[0] &&
+					queueArray[1] == adjacentCube[1] && 
+					queueArray[2] == adjacentCube[2] && 
+					queueArray[3]<n)
+					toAdd = false;
+			}
+			if (toAdd){
+				queuePositions.add(adjacentCube);
+				queue.add(new int[] {adjacentCube[0],adjacentCube[1],adjacentCube[2],n+1});
+			}
+		}
+	}
+}
 
 /**
  * 
@@ -1437,17 +1655,21 @@ private static double[] getVelocityVector(int dx, int dy, int dz, double speed){
  * 			difference in y direction
  * @param dz
  * 			difference in z direction
- * @return If the step goes to a neighbouring cube
+ * @return If the step goes to a neighboring cube
  * 		|result == Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1
  */
 @Model
 private static boolean isValidStep(int dx, int dy, int dz) {
 	return !(Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1);
 }
-
+/**
+ * Checks whether the unit is still moving to another cube
+ */
+@Basic @Model
 private boolean isMovingToNext() {
 	return this.isMovingToNext;
 }
+
 
 
 /**_____________________________________________________________
@@ -1697,8 +1919,12 @@ public void attack(Unit defender) throws IllegalStateException{
  * @post or the unit blocked the attack and nothing happens
  * 			| /
  * 
- * @post or the defender loses some hitpoints
+ * @post or the defender loses some hit points
  * 			| new.getHitpoints() == this.getHitpoints() - attacker.getStrength()/10
+ * @effect Successful dodging or blocking gives the defender 20 XP
+ * 			| this.updateXP(20)
+ * @effect Successful attacking gives the attacker 20XP
+ * 			| attackerupdateXP(20)
  */
 
 public void defend(Unit attacker){
@@ -1720,6 +1946,7 @@ public void defend(Unit attacker){
 		};
 		//may move instantaneous
 		this.setPosition(Utils.getCubeCenter(Utils.getCubePosition(nextPosition)));
+		this.updateXP(20);
 		return;
 	};
 	
@@ -1728,16 +1955,35 @@ public void defend(Unit attacker){
 			(attacker.getStrength()+attacker.getAgility());
 	
 	if(Math.random()<probBlocking){
+		this.updateXP(20);
 		return;
 	};
 	
 	//then taking damage
 	int damage = attacker.getStrength()/10;
-	int newHitpoints = this.getHitpoints()- damage;
-	if(newHitpoints<=0)
-		this.die();
-	this.setHitpoints(newHitpoints);
+	takeDamage(damage);
+	attacker.updateXP(20);
 	}
+/**
+ * The unit will lose an amount of hitpoints, reaching 0, the unit will die
+ * 
+ * @param damage
+ * 		the damage to be taken
+ * @effect the unit will have a new amount of hitpoints
+ * 		| this.setHitpoints(this.getHitpoints() - damage)
+ * @effect if the hitpoints of the unit reach 0, he will die
+ * 		| this.die()
+ * 		
+ */
+@Model
+private void takeDamage(int damage) {
+	int newHitpoints = this.getHitpoints()-damage;
+	if(newHitpoints<=0){
+		this.die();
+	} else {
+	this.setHitpoints(newHitpoints);
+	};
+}
 
 //DEFAULTBEHAVIOUR
 
@@ -1774,6 +2020,34 @@ public void startSprinting() throws IllegalStateException{
 		throw new IllegalStateException();
 	this.isSprinting = true;
 }
+
+//FALLING
+/**
+ * Let the unit fall one z coordinate
+ * 
+ * @effect The unit will suffer 10 damage
+ * 		|this.takeDamage(10);
+ * @effect the acivity will be set on falling
+ * 		| this.setActivity(Activity.FALLING);
+ * @effect the speed will be set on 3
+ * 		|this.setSpeed(3);
+ * @effect the next position will be set one z level lower
+ * 		| this.setNextPosition(Utils.getCubeCenter(Utils.getPositionUnder(currentCube))
+ */
+@Model
+private void fall(){
+	this.takeDamage(10);
+	this.setActivity(Activity.FALLING);
+	this.setSpeed(3);
+	this.setStep(new int[] {0,0,-1});
+	int[] currentCube = Utils.getCubePosition(this.getPosition());
+	double[] nextPosition = Utils.getCubeCenter(Utils.getPositionUnder(currentCube));
+	this.setNextPosition(nextPosition);
+}
+
+
+
+
 
 
 
@@ -1867,10 +2141,10 @@ private final float getFightingTime(){
  * Checks if this unit can move.
  * A unit can move if it is not attacking and if it is not working.
  * @return	true if unit is not attacking and not working.
- * 			| result == this.getCurrentActivity()!=Activity.ATTACKING
+ * 			| result == this.getCurrentActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING
  */
 public boolean isAbleToMove(){
-	return this.getActivity()!=Activity.ATTACKING ;
+	return this.getActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING ;
 }
 
 /**
@@ -1880,7 +2154,7 @@ public boolean isAbleToMove(){
  * 			| result == this.getCurrentActivity()!=Activity.NOTHING
  */
 public boolean isAbleToMoveFurther(){
-	return this.getActivity()==Activity.NOTHING;
+	return this.getActivity()==Activity.NOTHING && this.getActivity() != Activity.FALLING;
 }
 
 /**
@@ -1890,36 +2164,41 @@ public boolean isAbleToMoveFurther(){
  * 			| result == this.getCurrentActivity()!=Activity.ATTACKING && !this.isFullyHealed()
  */
 public boolean isAbleToRest(){
-	return this.getActivity()!=Activity.ATTACKING;
+	return this.getActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING;
 }
 
 /**
  * Checks if this unit is currently able to sprint.
  * A unit can sprint if its stamina is above 0 and if it is already moving.
  * @return	true if the unit is moving and its stamina is higher than 0.
- * 			| result == this.isMoving() && getStamina()>0
+ * 			| result == this.isMoving() && getStamina()>0 && this.getActivity() != Activity.FALLING
  */
 public boolean isAbleToSprint(){
-	return this.isMoving() && getStamina()>0;
+	return this.isMoving() && getStamina()>0 &&this.getActivity() != Activity.FALLING;
 }
 
 /**
  * Checks if this unit is currently able to work.
  * A unit can work if it is not attacking.
  * @return	true if this unit is not attacking.
- * 			| result == this.getCurrentActivity() != Activity.ATTACKING
+ * 			| result == this.getCurrentActivity() != Activity.ATTACKING&& 
+ * 						this.getActivity() != Activity.FALLING
  */
 public boolean isAbleToWork(){
-	return this.getActivity() != Activity.ATTACKING;
+	return this.getActivity() != Activity.ATTACKING 
+			&& this.getActivity() != Activity.FALLING;
 }
 /**
  * Checks if this unit is currently able to attack.
  * A unit can work if it is not attacking.
  * @return	true if this unit is not attacking.
- * 			| result == (Math.abs(dx)<=1&&Math.abs(dy)<=1&&Math.abs(dz)==0);
+ * 			| result == (Math.abs(dx)<=1&&Math.abs(dy)<=1&&Math.abs(dz)==0) &&this.getActivity() != Activity.FALLING;
  */
 @Immutable
 public boolean isAbleToAttack(Unit defender){
+	if(this.getActivity() != Activity.FALLING)
+		return false;
+	
 	int[] aPosition = Utils.getCubePosition(this.getPosition());
 	int[] dPosition = Utils.getCubePosition(defender.getPosition());
 	int dx = aPosition[0] - dPosition[0];
@@ -1954,6 +2233,19 @@ public World getWorld() {
 @Raw @Model
 protected void setWorld(World world){
 	this.world = world;
+}
+/**
+ * Returns whether the cube on the position is passable
+ * 
+ * @param position
+ * 		the position of the cube
+ * @return
+ * 		whether the cube is passable
+ */
+@Raw @Model
+protected boolean isPassable(int[] position){
+	return !this.getWorld().isSolidCube(position);
+	
 }
 
 

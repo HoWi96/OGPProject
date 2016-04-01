@@ -4,6 +4,10 @@ import java.util.*;
 
 import be.kuleuven.cs.som.annotate.*;
 
+/**
+ * @Invar Each faction must have proper units.
+ * 		| this.hasProperUnits()
+ */
 public class Faction {
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -52,27 +56,24 @@ public class Faction {
 	/**
 	 * Creates a new faction
 	 * 
-	 * @param unit
-	 * 			the first unit of the faction
 	 * @param world
 	 * 		the world the faction belongs to
 	 * 
-	 * @post the unit is now part of this faction
 	 * @post the faction belongs to the world world
 	 * @post the faction is not yet terminated
 	 * 
-	 * @throws IllegalArgumentException
-	 * @throws IllegalStateException
 	 */
-	public Faction(World world) throws IllegalArgumentException, IllegalStateException{
+	public Faction(World world){
 		//ADD WORLD
 		this.world = world;
 		this.isTerminated = false;
 	}
+	
 	/**
 	 * Terminates the faction
 	 * 
 	 * @post this faction is now terminated
+	 * 
 	 * @throws IllegalStateException
 	 * 		if there are still units part of this faction
 	 */
@@ -80,7 +81,6 @@ public class Faction {
 		if(!this.getUnits().isEmpty())
 			throw new IllegalStateException();
 		this.isTerminated = true;
-		this.units = null;
 	}
 	/**
 	 * Check whether this faction is terminated
@@ -98,17 +98,30 @@ public class Faction {
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 	
-	
+	//-----------------------GETTERS
 	/**
-	 * Check whether this faction has the given unit as one of its units.
-	 * 
-	 * @param  Unit, The unit to check.
+	 * Gives back the units of this faction
 	 */
-	@Basic @Raw
-	public boolean hasAsUnit(@Raw Unit unit) {
-		return units.contains(unit);
+	@Basic
+	public Set<Unit> getUnits() {
+		return this.units;
 	}
 	
+	/**
+	 * @return the amount of units in the faction
+	 */
+	public int getNbUnits(){
+		return this.units.size();
+	}
+
+	/**
+	 * returns the world of the faction
+	 */
+	@Basic
+	public World getWorld() {
+		return world;
+	}
+	//-----------------------SETTERS
 	/**
 	 * Add the given unit to the set of units of this faction.
 	 * 
@@ -121,9 +134,7 @@ public class Faction {
 	 */
 	public void addUnit(@Raw Unit unit) {
 		assert (unit.isAlive() && unit.getFaction() == null);
-		this.units.add(unit);
-		
-		
+		this.units.add(unit);	
 	}
 
 	/**
@@ -139,24 +150,20 @@ public class Faction {
 	 *         one of its units.
 	 */
 	@Raw
-	public void removeAsUnit(Unit unit) {
+	public void removeUnit(Unit unit) {
 		assert this.hasAsUnit(unit) && (unit.getFaction() == null);
 		this.units.remove(unit);
 	}
+	//-----------------------INSPECTORS
 	
 	/**
-	 * Gives back the units of this faction
+	 * Check whether this faction has the given unit as one of its units.
+	 * 
+	 * @param  Unit, The unit to check.
 	 */
-	@Basic
-	public Set<Unit> getUnits() {
-		return this.units;
-	}
-	
-	/**
-	 * @return the amount of units in the faction
-	 */
-	public int getNbUnits(){
-		return this.units.size();
+	@Basic @Raw
+	public boolean hasAsUnit(Unit unit) {
+		return this.getUnits().contains(unit);
 	}
 	
 	/**
@@ -171,14 +178,29 @@ public class Faction {
 	public boolean canHaveAsUnit(Unit unit) {
 		return (unit != null) && (this.getNbUnits() < MAX_UNITS_IN_FACTION);
 	}
-	
+
 	/**
-	 * returns the world of the faction
+	 * Check whether this faction has proper units attached to it.
+	 * 
+	 * @return True if and only if this faction can have each of the
+	 *         units attached to it as one of its units,
+	 *         and if each of these units references this faction as
+	 *         the faction to which they are attached.
 	 */
-	@Basic
-	public World getWorld() {
-		return world;
+	public boolean hasProperUnits() {
+		for (Unit unit : this.getUnits()) {
+			if (!canHaveAsUnit(unit))
+				return false;
+			if (unit.getFaction() != this)
+				return false;
+		}
+		return true;
 	}
+	
+	
+	
+	
+	
 	
 	
 
