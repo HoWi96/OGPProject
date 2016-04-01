@@ -6,6 +6,7 @@ import hillbillies.model.Boulder;
 import hillbillies.model.Faction;
 import hillbillies.model.Log;
 import hillbillies.model.Unit;
+import hillbillies.model.Utils;
 import hillbillies.model.World;
 import hillbillies.part2.listener.TerrainChangeListener;
 import ogp.framework.util.ModelException;
@@ -32,7 +33,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public int[] getCubeCoordinate(Unit unit) throws ModelException {
-		int[] cubeCoordinate = Unit.getCubePosition(unit.getPosition());
+		int[] cubeCoordinate = Utils.getCubePosition(unit.getPosition());
 		return cubeCoordinate;
 	}
 

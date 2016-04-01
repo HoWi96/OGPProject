@@ -359,6 +359,28 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		int type = this.getcubeType(position);
 		return (type == TYPE_ROCK) || (type == TYPE_TREE);	
 	}
+	
+	/**
+	 * Checks whether there are solid cubes surrounding the given cube
+	 * 
+	 * @param position
+	 * 		The position
+	 * @return
+	 * 		whether there are solid cubes surrounding the given cube
+	 * 		
+	 */
+	public boolean hasSolidAdjacents(int[] position){
+		List<int[]> adjacentCubes = Utils.getAdjacentCubes(position);
+		
+		for(int[] adjacentCube: adjacentCubes){
+			if(isSolidCube(adjacentCube))
+				return true;
+		}
+		return false;
+	}
+	
+	
+	
 	/*___________________________________________________________________
 	 *___________________________________________________________________
 	 * -----------------------TERRAIN CHANGES----------------------------
@@ -676,8 +698,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 			The type where the unit is located is non solid
 	 * 			The type where the unit is non solid or is ground level
 	 */
-	@Raw @Model
-	private int[] getRandomPositionForUnit() {
+	@Raw
+	public int[] getRandomPositionForUnit() {
 		
 		int nbX = this.getNbCubesX();
 		int nbY = this.getNbCubesY();

@@ -74,8 +74,6 @@ public class Unit {
 	
 	private static final String ALLOWED_NAME_PATTERN = "[a-zA-Z \"']+";
 	
-	private static final double CUBE_LENGTH = 1;
-	
 	private static final float PI = (float) Math.PI;
 
 	private static final double REST_INTERVAL = 60*3;
@@ -299,9 +297,9 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	
 	setName(name);
 	
-	setPosition(getCubeCenter(initialPosition));
+	setPosition(Utils.getCubeCenter(initialPosition));
 	
-	setNextPosition(getCubeCenter(initialPosition));
+	setNextPosition(Utils.getCubeCenter(initialPosition));
 	
 	if (!isValidInitialStrength(strength))
 		strength = 100;
@@ -768,8 +766,8 @@ public static boolean isValidName(String name) {
 */
 @Raw
 public boolean isValidPosition(@Raw double[] position) {
-	return this.getWorld() == null || (world.isValidPosition(getCubePosition(position)) &&
-			!world.isSolidCube(getCubePosition(position)));
+	return this.getWorld() == null || (world.isValidPosition(Utils.getCubePosition(position)) &&
+			!world.isSolidCube(Utils.getCubePosition(position)));
 }
 
 /**
@@ -1016,25 +1014,17 @@ public void advanceTime(double dt) throws IllegalArgumentException {
     }
     
     // if the unit gets a new task, he first have to move to the next position
-    if((!this.isMoving() && !equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext())){
+    if((!this.isMoving() && !Utils.equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext())){
     	if(!this.isMovingToNext()){
 	    	this.setNextActivity(this.getActivity());
 	    	this.setActivity(Activity.MOVING);
 	    	this.setMovingToNext(true);
-    	} else if(equals(this.getPosition(),this.getNextPosition())){
+    	} else if(Utils.equals(this.getPosition(),this.getNextPosition())){
     		this.setActivity(this.getNextActivity());
     		this.setMovingToNext(false);
     	}
     	
     }
-	
-	//if the unit stopped moving, we have to stop sprinting and stop the speed
-	if(!this.isMoving()){
-		if(!this.isSprinting())
-			this.stopSprinting();
-		if(this.getSpeed()>0)
-			this.setSpeed(0);
-	}
 	
 	//if the unit is in default mode, it can randomly start to sprint while moving
 	if(this.hasDefaultBehavior() && !this.isSprinting() && this.isMoving() && this.isAbleToSprint()){
@@ -1044,8 +1034,8 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	}
 	
 	// continue moving after you are again able to move
-	if((this.getTargetPosition()!= null) && !equals(this.getPosition(),this.getTargetPosition())&&this.isAbleToMoveFurther()){
-			this.moveToTarget(getCubePosition(this.getTargetPosition()));
+	if((this.getTargetPosition()!= null) && !Utils.equals(this.getPosition(),this.getTargetPosition())&&this.isAbleToMoveFurther()){
+			this.moveToTarget(Utils.getCubePosition(this.getTargetPosition()));
 	}
 	
 	if(this.hasDefaultBehavior() && this.getActivity()==Activity.NOTHING){
@@ -1053,9 +1043,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			int randomActivity = (int) (Math.random()*3);
 			
 			if (randomActivity == 0) {
-				// een unit kan enkel naar het centrum van een cube bewegen!
-				double[] randomPosition = new double[] {Math.random()*50, Math.random()*50, Math.random()*50};
-				int[] targetPosition = getCubePosition(randomPosition);
+				int[] targetPosition = this.getWorld().getRandomPositionForUnit();
 				this.moveToTarget(targetPosition);
 			}
 			if (randomActivity == 1) {
@@ -1090,8 +1078,8 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			double[] tPosition = this.getTargetPosition();
 			
 			
-			if(equals(cPosition,nPosition)){
-				if(tPosition == null || equals(cPosition, tPosition)){
+			if(Utils.equals(cPosition,nPosition)){
+				if(tPosition == null || Utils.equals(cPosition, tPosition)){
 					this.setActivity(Activity.NOTHING);
 					counterTillDefault = 0;
 					this.stopSprinting();
@@ -1112,7 +1100,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 				}}}
 			double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
 			
-			if(inBetween(cPosition, nPosition, iPosition))
+			if(Utils.inBetween(cPosition, nPosition, iPosition))
 				this.setPosition(iPosition);
 			else
 				this.setPosition(nPosition);
@@ -1308,7 +1296,7 @@ private void setMovingToNext(boolean b) {
  */
 public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalStateException{
 	
-	if(!isValidPosition(getCubeCenter(cube)))
+	if(!isValidPosition(Utils.getCubeCenter(cube)))
 		throw new IllegalArgumentException();
 	
 	if(!this.isAbleToMove())
@@ -1316,7 +1304,7 @@ public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalSta
 	
 	this.setActivity(Activity.MOVING);
 	this.setNextPosition(this.getPosition());
-	this.setTargetPosition(getCubeCenter(cube));			
+	this.setTargetPosition(Utils.getCubeCenter(cube));			
 }
 
 /**
@@ -1361,14 +1349,14 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		if(!this.isAbleToMove())
 			throw new IllegalStateException();
 
-		double[] cubeCenter = getCubeCenter(getCubePosition(this.getPosition()));
+		double[] cubeCenter = Utils.getCubeCenter(Utils.getCubePosition(this.getPosition()));
 		double[] nextPosition = new double[] {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
 		
 		if (!isValidPosition(nextPosition))
 			throw new IllegalArgumentException();
 
 		//when hitting only moveToAdjacent
-		if(this.getTargetPosition() != null && equals(this.getPosition(),this.getTargetPosition()))
+		if(this.getTargetPosition() != null && Utils.equals(this.getPosition(),this.getTargetPosition()))
 			this.setTargetPosition(nextPosition);
 		
 		this.setStep(new int[]{dx,dy,dz});
@@ -1500,12 +1488,26 @@ private float getProgressTime(){
  * 			The activity the unit will be performing.
  * @post	The activity of the unit will be the given activity.
  * 			| new.getCurrentActivity == activity
+ * 
+ * @effect If the unit is not moving anymore, he will stop sprinting
+ * 			| !new.isSprinting()
+ * @effect If the unit is not moving anymore, the speed will be set to 0
+ * 			| new.getSpeed() == 0
+ * 
  * @throws	IllegalArgumentException
  * 			The given activity is not a valid activity.
  */
 @Model
 private void setActivity(Activity activity) throws IllegalArgumentException{
 	this.activity = activity;
+	
+	//if the unit stopped moving, we have to stop sprinting and stop the speed
+		if(!this.isMoving()){
+			if(!this.isSprinting())
+				this.stopSprinting();
+			if(this.getSpeed()>0)
+				this.setSpeed(0);
+		}
 }
 
 /**
@@ -1717,7 +1719,7 @@ public void defend(Unit attacker){
 			nextPosition[1] = currentPosition[1] + step[1];
 		};
 		//may move instantaneous
-		this.setPosition(getCubeCenter(getCubePosition(nextPosition)));
+		this.setPosition(Utils.getCubeCenter(Utils.getCubePosition(nextPosition)));
 		return;
 	};
 	
@@ -1918,8 +1920,8 @@ public boolean isAbleToWork(){
  */
 @Immutable
 public boolean isAbleToAttack(Unit defender){
-	int[] aPosition = getCubePosition(this.getPosition());
-	int[] dPosition = getCubePosition(defender.getPosition());
+	int[] aPosition = Utils.getCubePosition(this.getPosition());
+	int[] dPosition = Utils.getCubePosition(defender.getPosition());
 	int dx = aPosition[0] - dPosition[0];
 	int dy = aPosition[1] - dPosition[1];
 	int dz = aPosition[2] - dPosition[2];
@@ -1990,98 +1992,5 @@ protected void setFaction(Faction faction){
  *_____________________________________________________________
  */
 //TODO testen
-/**
- * Checks whether two coordinates are identical.
- * 
- * @return	Returns true if the given positions are the same, false if they are not.
- * 			| result == (position[0] == position2[0]) && (position1[1] == position2[1])
- * 						&& (position1[2] == position2[2])
- */
-public static boolean equals(double[] position1, double[] position2) {
-	return (position1[0] == position2[0])&&
-			(position1[1] == position2[1])&&
-			(position1[2] == position2[2]);
-}
-
-/**
- * Checks whether a position is in between two positions.
- * 
- * @return	Returns true if the position is in between the other positions.
- * 			| result == (position2[0] <= positionInBetween[0] && positionInBetween[0] <= position1[0]) ||
- * 						(position2[0] >= positionInBetween[0] && positionInBetween[0] >= position1[0]) &&
- * 						(position2[1] <= positionInBetween[1] && positionInBetween[1] <= position1[1]) ||
- * 						(position2[1] >= positionInBetween[1] && positionInBetween[1] >= position1[1]) &&
- * 						
- */
-public static boolean inBetween(double[] position1, double[] position2, double[] positionInBetween) {
-	return (((position2[0]<=positionInBetween[0]&&positionInBetween[0]<=position1[0])||
-			(position2[0]>=positionInBetween[0]&&positionInBetween[0]>=position1[0]))&&
-			(position2[1]<=positionInBetween[1]&&positionInBetween[1]<=position1[1]||
-			position2[1]>=positionInBetween[1]&&positionInBetween[1]>=position1[1])&&
-			(position2[2]<=positionInBetween[2]&&positionInBetween[2]<=position1[2]||
-			position2[2]>=positionInBetween[2]&&positionInBetween[2]>=position1[2]));
-}
-
-/**
- * Gives back the position of the cube
- * 
- * @param position
- *			The position of this Unit
- *
- * @return The position of the cube where the Unit is located
- * 			| cubePosition[0] = (int) Math.floor(position[0]);
- *			| cubePosition[1] = (int) Math.floor(position[1]);
- *			| cubePosition[2] = (int) Math.floor(position[2]);
- */
-public static int[] getCubePosition(double[] position){
-	int[] cubePosition = new int[3];
-	cubePosition[0] = (int) Math.floor(position[0]);
-	cubePosition[1] = (int) Math.floor(position[1]);
-	cubePosition[2] = (int) Math.floor(position[2]);
-	return cubePosition;
-	}
-
-/**
- * Gives back the position of the center of the cube with the given position
- * 
- * @param cubePosition
- * 			the position of the cube
- * 
- * @return
- * 		The position of the center of the cube with given coordinates
- * 		| result == new double[] {
- * 		| 	(double)coordinates[0]+0.5,
- * 		|	(double)coordinates[1]+0.5,
- * 		| 	(double)coordinates[2]+0.5
- * 		| }
- */
-public static double[] getCubeCenter(int[] cubePosition) {
-	return new double[] {(double)(cubePosition[0]+CUBE_LENGTH/2),
-						 (double)(cubePosition[1]+CUBE_LENGTH/2),
-						 (double)(cubePosition[2]+CUBE_LENGTH/2)};
-}
-
-/**
- * 
- * @param position1
- * 		first position
- * @param position2
- * 		position to be added to position1
- * @param factor
- *  	factor to multiply position2 with
- * @return
- * 		result == {position1[0] + position2[0]*factor,
- *		position1[1] + position2[1]*factor,
- *		position1[2] + position2[2]*factor}
- */
-public static double[] addPositionsFactor(double[] position1, double[] position2, double factor){
-	double[] finalPosition = {position1[0] + position2[0]*factor,
-							  position1[1] + position2[1]*factor,
-							  position1[2] + position2[2]*factor
-	};
-	return finalPosition;
-}
-
-
 
 }
