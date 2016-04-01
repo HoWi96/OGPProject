@@ -1123,7 +1123,6 @@ public void updateXP(int XP){
 public void advanceTime(double dt) throws IllegalArgumentException {
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
-	
     counterTillRest += dt;
     
     //set counter to the moment the unit needs to rest
@@ -1133,8 +1132,8 @@ public void advanceTime(double dt) throws IllegalArgumentException {
     }
     
     //if the unit is not connected to solid cubes anymore, he needs to fall
-    if(this.getActivity()!=Activity.FALLING && !this.getWorld().hasSolidAdjacents(Utils.getCubePosition(this.getPosition())))
-    	this.fall();
+    //if(this.getActivity()!=Activity.FALLING && !this.getWorld().hasSolidAdjacents(Utils.getCubePosition(this.getPosition())))
+    //	this.fall();
     
     // if the unit gets a new task, he first have to move to the next position
     if((!this.isMoving() && !Utils.equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext())){
@@ -1224,46 +1223,59 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			
 			
 			if(Utils.equals(cPosition,nPosition)){
+				// CENTER OF CUBE
 				if(tPosition == null || Utils.equals(cPosition, tPosition)){
+					//TARGET REACHED
 					this.setActivity(Activity.NOTHING);
 					counterTillDefault = 0;
 					this.stopSprinting();
 					this.setSpeed(0);
 				}else{
-					int[] currentCube = Utils.getCubePosition(getPosition());
-					
-					if(queuePositions.contains(currentCube)){
-						int[] nextPosWithSequence = null;
-						for (int[] posWithSequence: queue){
-							int[] nextPos = {posWithSequence[0],posWithSequence[1],posWithSequence[2]};
-							int sequenceNumber = posWithSequence[3];
-							
-							if(Utils.areAdjacent(currentCube,nextPos))
-								if(nextPosWithSequence == null || nextPosWithSequence[3]>sequenceNumber)
-									nextPosWithSequence = posWithSequence;		
+					//TARGET NOT YET REACHED
+					int[] step = new int[3];
+					//pathfinding algorithm
+					for(int i = 0; i<3; i++){
+						if (cPosition[i] == tPosition[i]){
+							step[i] = 0;
+						}else if(cPosition[i] < tPosition[i]){
+							step[i] = 1;
+						}else{
+							step[i] = -1;
 						}
-						if(nextPosWithSequence != null){
-							
-						int dx = nextPosWithSequence[0]-currentCube[0];
-						int dy = nextPosWithSequence[1]-currentCube[2];
-						int dz = nextPosWithSequence[1]-currentCube[2];
-						
-						moveToAdjacent(dx, dy, dz);
+						this.moveToAdjacent(step[0],step[1],step[2]);
 						nPosition = this.getNextPosition();
-						} else {
-							this.setTargetPosition(cPosition);
-						}
-					}
-				}	
-			}
+					
+//					int[] currentCube = Utils.getCubePosition(getPosition());
+//					int[] nextPosWithSequence = null;
+//					
+//					for (int[] posWithSequence: queue){
+//						int[] nextPos = {posWithSequence[0],posWithSequence[1],posWithSequence[2]};
+//						int sequenceNumber = posWithSequence[3];
+//						
+//						if(Utils.areAdjacent(currentCube,nextPos))
+//							if(nextPosWithSequence == null || nextPosWithSequence[3]>sequenceNumber)
+//								nextPosWithSequence = posWithSequence;		
+//					}
+//					if(nextPosWithSequence != null){
+//						
+//					int dx = nextPosWithSequence[0]-currentCube[0];
+//					int dy = nextPosWithSequence[1]-currentCube[2];
+//					int dz = nextPosWithSequence[1]-currentCube[2];
+//					
+//					moveToAdjacent(dx, dy, dz);
+//					nPosition = this.getNextPosition();
+					} 
+				}
+			}	
 			
 			double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
 			//TO CENTER OF CUBE
-			if(Utils.inBetween(cPosition, nPosition, iPosition))
+			if(Utils.inBetween(cPosition, nPosition, iPosition)){
 				this.setPosition(iPosition);
-			else
+			}else{
 				this.setPosition(nPosition);
 				this.updateXP(1);
+			}
 			break;
 	
 	
@@ -1466,22 +1478,26 @@ public void moveToTarget(int[] cube) throws IllegalArgumentException, IllegalSta
 	this.setNextPosition(this.getPosition());
 	this.setTargetPosition(Utils.getCubeCenter(cube));
 	
-	
-	//reset the queues
-	queue =  new LinkedList<int[]>();
-	queuePositions = new LinkedList<int[]>();
-	//load first elements
-	queue.add(new int[]{cube[0], cube[1],cube[2],0});
-	queuePositions.add(cube);
-	
-	int index = 0;
-	int[] nextPosWithSequence;
-	//Algorithm to find all path beginning from the current location
-	while(!queuePositions.contains(Utils.getCubePosition(getPosition()))&& queue.size()>index){
-		nextPosWithSequence = ((LinkedList<int[]>) queue).get(index);
-		search(nextPosWithSequence);
-		index++;
-	}
+//	
+//	//reset the queues
+//	queue =  new LinkedList<int[]>();
+//	//load first elements
+//	queue.add(new int[]{cube[0], cube[1],cube[2],0});
+//	
+//	int index = 0;
+//	int[] nextPosWithSequence;
+//	//Algorithm to find all path beginning from the current location
+//	System.out.println("start looking for paths");
+//	while(!queue.contains(Utils.getCubePosition(getPosition())) && queue.size()>index){
+//		nextPosWithSequence = ((LinkedList<int[]>) queue).get(index);
+//		search(nextPosWithSequence);
+//		index++;
+//	}
+//	if(queue.size()>index){
+//		this.setTargetPosition(this.getNextPosition());
+//		System.out.println("path not found");
+//	}
+//	System.out.println("path found");
 }
 
 /**
@@ -1528,12 +1544,18 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 
 		double[] cubeCenter = Utils.getCubeCenter(Utils.getCubePosition(this.getPosition()));
 		double[] nextPosition = new double[] {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
+		if(!isValidPosition(nextPosition) && !Utils.equals(this.getTargetPosition(), this.getPosition())){
+			this.setTargetPosition(cubeCenter);
+			this.setNextPosition(cubeCenter);
+			return;
+		}
 		
 		if (!isValidPosition(nextPosition))
 			throw new IllegalArgumentException();
 
-		//when hitting only moveToAdjacent
-		if(this.getTargetPosition() != null && Utils.equals(this.getPosition(),this.getTargetPosition()))
+		// only when hitting moveToAdjacent
+		if(this.getTargetPosition() != null &&
+				Utils.equals(Utils.getCubePosition(getPosition()),Utils.getCubePosition(getTargetPosition())))
 			this.setTargetPosition(nextPosition);
 		
 		this.setStep(new int[]{dx,dy,dz});
@@ -1551,6 +1573,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 private Queue<int[]> queue =  new LinkedList<int[]>();
 private Queue<int[]> queuePositions = new LinkedList<int[]>();
 /**
+ * TODO fix pathfinding
  * 
  * @param array
  * 		An int[] with a position and the position of that position
@@ -1559,7 +1582,7 @@ private Queue<int[]> queuePositions = new LinkedList<int[]>();
  * 		 will be added to the queue if they are not already part of the queue.
  * 		| queue.add(new int[] {adjacentCube[0],adjacentCube[1],adjacentCube[2],n+1});
  */
-private void search(int[] array){
+public void search(int[] array){
 	
 	int[] position = {array[0], array[1], array[2]};
 	int n = array[3];
@@ -2192,11 +2215,13 @@ public boolean isAbleToWork(){
  * Checks if this unit is currently able to attack.
  * A unit can work if it is not attacking.
  * @return	true if this unit is not attacking.
- * 			| result == (Math.abs(dx)<=1&&Math.abs(dy)<=1&&Math.abs(dz)==0) &&this.getActivity() != Activity.FALLING;
+ * 			| result == (Math.abs(dx)<=1&&Math.abs(dy)<=1&&Math.abs(dz)==0) && 
+ * 			  this.getActivity() != Activity.FALLING ||
+ * 			  defender.getActivity() != Activity.FALLING;
  */
 @Immutable
 public boolean isAbleToAttack(Unit defender){
-	if(this.getActivity() != Activity.FALLING)
+	if(this.getActivity() != Activity.FALLING || defender.getActivity() != Activity.FALLING)
 		return false;
 	
 	int[] aPosition = Utils.getCubePosition(this.getPosition());

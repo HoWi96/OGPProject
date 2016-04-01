@@ -2,6 +2,11 @@ package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
 
+/**
+ * @author Holger
+ * @version 1.0
+ */
+
 public abstract class Item {
 	
 	/*___________________________________________________________________

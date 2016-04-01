@@ -315,8 +315,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public int getExperiencePoints(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return 0;
+		return unit.getXP();
 	}
 
 	@Override

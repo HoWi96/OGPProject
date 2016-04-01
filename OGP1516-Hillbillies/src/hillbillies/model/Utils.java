@@ -2,6 +2,11 @@ package hillbillies.model;
 
 import java.util.Random;
 
+/**
+ * @author Holger
+ * @version 1.0
+ */
+
 public class Utils {
 	
 	private static final double CUBE_LENGTH = 1;

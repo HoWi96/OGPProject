@@ -3,6 +3,11 @@ package hillbillies.model;
 import java.util.*;
 
 import be.kuleuven.cs.som.annotate.*;
+/**
+ * @author Holger
+ * @version 1.0
+ */
+
 
 /**
  * @Invar Each faction must have proper units.

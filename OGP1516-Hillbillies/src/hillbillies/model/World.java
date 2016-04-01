@@ -1,10 +1,14 @@
 package hillbillies.model;
 
 import java.util.*;
-
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.part2.listener.TerrainChangeListener;
 import hillbillies.util.ConnectedToBorder;
+
+/**
+ * @author Holger
+ * @version 1.0
+ */
 
 /**
  * @invar  The TerrainTypes of each world must be a valid TerrainTypes for any
