@@ -167,6 +167,27 @@ public class Utils {
     	int dz = difference[2];
     	return !(Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1);
     }
+    /**
+     * 
+     * @param step
+     * 		the step to be taken
+     * @param dt
+     * 		the time passing
+     * @param position
+     * 		the current position
+     * @param velocityVector
+     * 		the speed in all directions
+     * @return
+     * 		the reached position
+     */
+    public static double[] getIntermediatePosition(int[] step, double dt, double[] position, double[] velocityVector){
+    	double[] newPosition = new double[] {
+    			position[0]+velocityVector[0]*dt,
+    			position[1]+velocityVector[1]*dt,
+    			position[2]+velocityVector[2]*dt	
+    	};
+    	return newPosition;
+    }
     
 
 

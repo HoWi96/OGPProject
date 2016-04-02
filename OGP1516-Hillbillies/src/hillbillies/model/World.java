@@ -428,10 +428,12 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @param position
 	 * 		the given position
 	 * @return
-	 * 		whether whether the cube under the give position is solid
+	 * 		whether the cube under the give position is solid
+	 * 			 with the level under z=0 considerd as 0
 	 */
 	public boolean isSolidUnder(int[] position){
-		return isSolidCube(Utils.getPositionUnder(position));
+		return position[2] == 0 || 
+				isSolidCube(Utils.getPositionUnder(position));
 	}
 	
 	

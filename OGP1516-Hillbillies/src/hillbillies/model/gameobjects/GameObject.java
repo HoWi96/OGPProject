@@ -199,14 +199,13 @@ public abstract class GameObject {
 	 * -----------------------ADVANCE TIME---------------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
+	
 	/**
 	 * 
 	 * @param dt
-	 * 		The time for the game object
+	 * 		The time that proceeds for the game object
 	 * @throws IllegalArgumentException
 	 */
-	public void advanceTime(double dt) throws IllegalArgumentException{
-
-	}	
+	public abstract void advanceTime(double dt) throws IllegalArgumentException;	
 }
 

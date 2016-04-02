@@ -167,5 +167,48 @@ public abstract class RawMaterial extends GameObject {
 	 * Variable registering the unit of this Item.
 	 */
 	private Unit unit;
+	
+	
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------ADVANCE TIME-------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	@Override
+	public void advanceTime(double dt) throws IllegalArgumentException {
+		if(!this.getWorld().isSolidUnder(Utils.getCubePosition(this.getPosition())))
+			setFalling(true);
+		if(this.isFalling())
+			falling(dt);
 		
+	}
+	/**
+	 * Indicates whether the unit is falling
+	 */
+	public boolean isFalling() {
+		return isFalling;
+	}
+	/**
+	 * Set the behavior of falling
+	 * 
+	 * @param falling
+	 * 		if the unit is falling
+	 * @post
+	 * 		this.isFalling() == falling
+	 */
+	protected void setFalling(boolean falling) {
+		this.isFalling = falling;
+	}
+	
+	
+	protected void falling(double dt){
+		System.out.println("falling raw material");
+		//TODO
+	}
+
+	/**
+	 * boolean indicating whether the raw material is falling
+	 */
+	private boolean isFalling;
 }

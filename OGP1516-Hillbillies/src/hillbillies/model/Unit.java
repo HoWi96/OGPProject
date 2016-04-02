@@ -1200,7 +1200,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 		
 		if(Utils.equals(cfPosition,nfPosition)){
 			// if the unit is well landed
-			if(world.isSolidUnder(Utils.getCubePosition(cfPosition))|| cfPosition[2] ==0 ){
+			if(this.getWorld().isSolidUnder(Utils.getCubePosition(cfPosition))){
 				this.setActivity(Activity.NOTHING);
 			}else{
 				//else continue falling
@@ -1636,22 +1636,16 @@ public void search(int[] array){
  * 		time
  * @return the intermediate position of unit who is walking
  * 			 from his original position to his new position
- * 			| result == {this.position[0]+this.getVelocityVector[0]*dt,
- * 						this.position[1]+this.getVelocityVector[1]*dt,
- * 						this.position[2]+this.getVelocityVector[2]*dt}
- * 						
+ * 		|Utils.getIntermediatePosition(step, dt, position, velocityVector);
+ * 
  */
 public double[] getIntermediatePosition(int dx, int dy, int dz, double dt){
 	double[] position = this.getPosition();
 	double[] velocityVector = getVelocityVector(dx, dy, dz, this.getSpeed());
+	int[] step = new int[] {dx, dy, dz};
+	return Utils.getIntermediatePosition(step, dt, position, velocityVector);
+};
 
-	double[] newPosition = new double[] {
-			position[0]+velocityVector[0]*dt,
-			position[1]+velocityVector[1]*dt,
-			position[2]+velocityVector[2]*dt	
-	};
-	return newPosition;
-}
 
 /**
  * Get the velocity in the different directions of the unit
