@@ -87,7 +87,6 @@ public class Unit {
 	private static final double REST_INTERVAL = 60*3;
 	private static final double NOTHING_INTERVAL = 10;
 	
-	private static final int MAX_UNITS_IN_FACTION = 50;
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -379,7 +378,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
  * @effect The unit will stop sprinting
  * 		|this.stopSprinting();
  */
- public void die() {
+ public void terminate() {
 	 //this.dropItem();
 	 this.setHitpoints(0);
 	 this.setSpeed(0);
@@ -388,14 +387,18 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	 this.isAlive = false;
 	 
 	 Faction faction = this.getFaction();
-	 this.setFaction(null);
-	 faction.removeUnit(this);
-		
 	 World world = this.getWorld();
-	 this.setWorld(null);
-	 world.removeAsUnit(this);
 	 
+	 faction.removeUnit(this);
+	 world.removeUnit(this);
+	 
+	 //delete empty factions
+	 if(faction.getNbUnits()==0){
+		 faction.terminate();
+		 world.removeAsFaction(faction);
+	 }
  }
+
  
  /**
   * Returns a boolean indicating whether this unit is alive.
@@ -1550,6 +1553,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 
 		double[] cubeCenter = Utils.getCubeCenter(Utils.getCubePosition(this.getPosition()));
 		double[] nextPosition = new double[] {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
+		
 		if(!isValidPosition(nextPosition) && !Utils.equals(this.getTargetPosition(), this.getPosition())){
 			this.setTargetPosition(cubeCenter);
 			this.setNextPosition(cubeCenter);
@@ -1557,7 +1561,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		}
 		
 		if (!isValidPosition(nextPosition))
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Invalid next position");
 
 		// only when hitting moveToAdjacent
 		if(this.getTargetPosition() != null &&
@@ -2008,7 +2012,7 @@ public void defend(Unit attacker){
 private void takeDamage(int damage) {
 	int newHitpoints = this.getHitpoints()-damage;
 	if(newHitpoints<=0){
-		this.die();
+		this.terminate();
 	} else {
 	this.setHitpoints(newHitpoints);
 	};
@@ -2242,6 +2246,7 @@ public boolean isAbleToAttack(Unit defender){
 /*_____________________________________________________________
  * ____________________________________________________________
  *-------------------------WORLD-------------------------------
+ *-------------------NON CONTROLLING CLASS
  * ____________________________________________________________
  *_____________________________________________________________
  */

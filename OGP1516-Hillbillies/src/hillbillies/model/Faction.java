@@ -67,18 +67,26 @@ public class Faction {
 		this.isTerminated = false;
 	}
 	
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------DESTRUCTOR---------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
 	/**
 	 * Terminates the faction
 	 * 
 	 * @post this faction is now terminated
+	 * @post this faction references no units anymore
 	 * 
 	 * @throws IllegalStateException
 	 * 		if there are still units part of this faction
 	 */
 	public void terminate() throws IllegalStateException {
-		if(!this.getUnits().isEmpty())
+		if(this.getNbUnits()!=0)
 			throw new IllegalStateException();
 		this.isTerminated = true;
+		this.units = null;
 	}
 	/**
 	 * Check whether this faction is terminated
@@ -101,7 +109,7 @@ public class Faction {
 	 * Gives back the units of this faction
 	 */
 	@Basic
-	public Set<Unit> getUnits() {
+	public Set<Unit> getAllUnits() {
 		return this.units;
 	}
 	
@@ -154,6 +162,7 @@ public class Faction {
 		
 		this.units.remove(unit);
 		unit.setFaction(null);
+
 	}
 	//-----------------------INSPECTORS
 	
@@ -164,7 +173,7 @@ public class Faction {
 	 */
 	@Basic @Raw
 	public boolean hasAsUnit(Unit unit) {
-		return this.getUnits().contains(unit);
+		return this.units.contains(unit);
 	}
 	
 	/**
@@ -177,7 +186,7 @@ public class Faction {
 	 *         and if the unit is alive
 	 */
 	public boolean canHaveAsUnit(Unit unit) {
-		return (unit != null) && unit.isAlive();
+		return unit != null && unit.isAlive();
 	}
 
 	/**
@@ -187,15 +196,18 @@ public class Faction {
 	 *         units attached to it as one of its units,
 	 *         and if each of these units references this faction as
 	 *         the faction to which they are attached.
+	 *         And if the amount of units does not exceed the max amount
 	 */
 	public boolean hasProperUnits() {
-		for (Unit unit : this.getUnits()) {
-			if (!canHaveAsUnit(unit))
-				return false;
-			if (unit.getFaction() != this)
+		
+		if (this.getNbUnits()<=MAX_UNITS_IN_FACTION)
+			return false;
+		
+		for (Unit unit : this.units) {
+			if (!canHaveAsUnit(unit) || unit.getFaction() != this )
 				return false;
 		}
-		return this.getNbUnits()<=MAX_UNITS_IN_FACTION;
+		return true;
 	}
 	
 	

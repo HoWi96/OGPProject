@@ -22,7 +22,16 @@ import hillbillies.util.ConnectedToBorder;
  *       | canHaveAsDimension(this.getNbCubesZ())
  * @invar  The cubeType of each world must be a valid cubeType for any
  *         world.
- *       | isValidcubeType(getcubeType())      
+ *       | isValidcubeType(getcubeType())  
+ *       
+ * @Invar Each world must have proper units.
+ * 		| this.hasProperUnits()
+ * @Invar Each world must have proper factions.
+ * 		| this.hasProperFactions()
+ * @Invar Each world must have proper logs.
+ * 		| this.hasProperLogs()
+ * @Invar Each world must have proper boulders.
+ * 		| this.hasProperBoulders()
  *       
  *       
  */
@@ -505,7 +514,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		if (!(0.0<=dt&&dt<=0.2))
 			throw new IllegalArgumentException();
 		//UNITS
-		for(Unit unit: this.getUnits()){
+		for(Unit unit: this.units){
 			unit.advanceTime(dt);	
 		}
 	}
@@ -527,6 +536,13 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	@Basic @Raw
 	public Set<Faction> getFactions(){
 		return this.factions;
+	}
+	
+	/**
+	 * @return the amount of factions in the world
+	 */
+	public int getNbFactions(){
+		return this.factions.size();
 	}
 	
 
@@ -566,9 +582,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	private Faction getFactionForUnit(Unit unit){
 		Faction faction;
 		if (this.getFactions().size()<MAX_FACTIONS){
-			//add faction of unit
-			
-			this.addAsFaction(faction);
+			//take the faction for the unit
+			faction = unit.getFaction();
 		}else{
 			//give unit a place in the smallest faction
 			faction = this.getSmallestFaction();
@@ -586,15 +601,14 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 
 	 * @param  faction
 	 *         The faction to be added.
-	 * @pre    The given faction is effective and already references
-	 *         this world.
-	 *       | (faction != null)
+	 * @pre   The world can have the faction as faction and the number of factions doesn't exceed the max amount of faction
+	 *
 	 * @post   This world has the given faction as one of its factions.
-	 *       | new.hasAsFaction(faction)
+	 *       
 	 */
 	@Raw @Model
 	private void addAsFaction(@Raw Faction faction) {
-		assert (faction != null);
+		assert canHaveAsFaction(faction) && this.factions.size()<MAX_FACTIONS;
 		this.factions.add(faction);
 	}
 
@@ -603,17 +617,17 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 
 	 * @param  faction
 	 *         The faction to be removed.
+	 *         
 	 * @pre    This world has the given faction as one of
 	 *         its factions, and the given faction does not
 	 *         reference any world.
-	 *       | this.hasAsFaction(faction) &&
-	 *       | (faction.getWorld() == null)
+	 *       
 	 * @post   This world no longer has the given faction as
 	 *         one of its factions.
-	 *       | ! new.hasAsFaction(faction)
+	 *       
 	 */
-	@Raw @Model
-	private void removeAsFaction(@Raw Faction faction){
+	@Raw
+	public void removeAsFaction(@Raw Faction faction){
 		assert this.hasAsFaction(faction);
 		factions.remove(faction);
 	}
@@ -657,8 +671,15 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * Gives back the units of the world
 	 */
 	@Basic @Raw
-	public Set<Unit> getUnits() {
+	public Set<Unit> getAllUnits() {
 		return this.units;
+	}
+	
+	/**
+	 * @return the amount of units in the world
+	 */
+	public int getNbUnits(){
+		return this.units.size();
 	}
 	//------------------------SETTERS
 	/**
@@ -671,19 +692,19 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @post the unit will belong now to his new faction
 	 * 
 	 * @effect The world will have this unit as member
-	 * @effect The faction will have the unit as member7
+	 * @effect The unit will leave his old faction
+	 * @effect The unit will have a new faction assigned
 	 * 
 	 * @throws IllegalArgumentException
 	 * 			if the unit is dead or already belongs to a world
 	 */
 	public void addUnit(Unit unit) throws IllegalArgumentException{
 		
-		if(!unit.isAlive() || unit.getWorld() != null)
+		if(!this.canHaveAsUnit(unit) || unit.getWorld() == this)
 			throw new IllegalArgumentException();
 		
-		if(this.getUnits().size() < MAX_UNITS){
-			
-			
+		//silently reject extra units
+		if(this.units.size() < MAX_UNITS){
 			//ADDING UNIT TO WORLD
 			System.out.println("Adding unit to world");
 			this.units.add(unit);
@@ -692,15 +713,15 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 			//ADDING UNIT TO FACTION
 			System.out.println("adding unit to faction");
 			Faction faction = this.getFactionForUnit(unit);
-			unit.setFaction(faction);
+			//Leaving old faction
+			unit.getFaction().removeUnit(unit);
 			faction.addUnit(unit);
 			System.out.println("succesfully added unit");
-		
 		}
 	}
-	//------------------------DESTRUCTORS
+
 	/**
-	 * Remove the given Unit from the set of Units of this World.
+	 * Handles the bidirectional association given Unit from the set of Units of this World.
 	 * 
 	 * @param  unit
 	 *         The Unit to be removed.
@@ -712,11 +733,14 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @post   This World no longer has the given Unit as
 	 *         one of its Units.
 	 *       | ! new.hasAsUnit(unit)
+	 * @effect The unit has no longer this world as world
 	 */
 	@Raw
-	public void removeAsUnit(Unit unit) {
-		assert this.hasAsUnit(unit) && (unit.getWorld() == null);
+	public void removeUnit(Unit unit) {
+		assert this.hasAsUnit(unit) && unit.getWorld() == this;
 		units.remove(unit);
+		unit.setWorld(null);
+
 	}
 	//------------------------INSPECTORS
 	/**
@@ -730,6 +754,41 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	public boolean hasAsUnit(@Raw Unit unit) {
 		return units.contains(unit);
 	}
+	/**
+	 * Check whether this world can have the given unit
+	 * as one of its units.
+	 * 
+	 * @param  Unit
+	 *         The unit to check.
+	 * @return True if and only if the given unit is effective
+	 *         and if the unit is alive
+	 */
+	@Raw
+	public boolean canHaveAsUnit(Unit unit){
+		return unit != null && unit.isAlive();
+	}
+	/**
+	 * Check whether this world has proper units attached to it.
+	 * 
+	 * @return True if and only if this world can have each of the
+	 *         units attached to it as one of its units,
+	 *         and if each of these units references this faction as
+	 *         the faction to which they are attached.
+	 *         And if the amount of units does not exceed the max amount
+	 */
+	public boolean hasProperUnits() {
+		
+		if (this.getNbUnits()>MAX_UNITS)
+			return false;
+	
+		for (Unit unit : this.units) {
+			if (!canHaveAsUnit(unit) || unit.getWorld() != this)
+				return false;
+		}
+		return true;
+	}
+	
+	
 	
 	//------------------------HELPERS
 	
@@ -781,7 +840,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		int MAX = 100;
 		
 		
-		String name = "HillBilly"+(char)(this.getUnits().size()%26+'a');
+		String name = "HillBilly"+(char)(this.getNbUnits()%26+'a');
 		
 		int[] position = this.getRandomPositionForUnit();
 		

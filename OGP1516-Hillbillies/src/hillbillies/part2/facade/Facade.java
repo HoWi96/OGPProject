@@ -293,7 +293,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public Set<Unit> getUnits(World world) throws ModelException {
-		return world.getUnits();
+		return world.getAllUnits();
 	}
 
 	@Override
@@ -331,7 +331,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public Set<Unit> getUnitsOfFaction(Faction faction) throws ModelException {
-		return faction.getUnits();
+		return faction.getAllUnits();
 	}
 
 	@Override
