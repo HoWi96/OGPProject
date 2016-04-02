@@ -61,6 +61,7 @@ public class Faction {
 	 * 		the world the faction belongs to
 	 * 
 	 * @post the faction is enot yet terminated
+	 * @post the faction does not contain any units yet
 	 * 
 	 */
 	public Faction(){

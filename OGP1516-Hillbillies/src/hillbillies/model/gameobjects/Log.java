@@ -1,4 +1,4 @@
-package hillbillies.model;
+package hillbillies.model.gameobjects;
 
 /**
  * @author Holger

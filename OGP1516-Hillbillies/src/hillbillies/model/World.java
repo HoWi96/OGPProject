@@ -147,6 +147,8 @@ public class World {
  * @post   The connectedToBorder of this new world is equal to the given
  *         connectedToBorder.
  *       | new.getConnectedToBorder() == border
+ * @post No factions belong to this new world
+ * @post No units belong to this new world
  */
 public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws IllegalArgumentException {
 	
