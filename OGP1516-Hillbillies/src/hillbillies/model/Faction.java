@@ -60,7 +60,7 @@ public class Faction {
 	 * @param world
 	 * 		the world the faction belongs to
 	 * 
-	 * @post the faction is not yet terminated
+	 * @post the faction is enot yet terminated
 	 * 
 	 */
 	public Faction(){
@@ -118,14 +118,19 @@ public class Faction {
 	 * 
 	 * @param  unit
 	 *         The unit to be added.
+	 *         
 	 * @pre    The given unit is alive and
-	 * 				 is not yet connected to a faction
+	 * 			 the given unit does not reference any faction.
+	 * 
 	 * @post   This faction has the given unit as one of its units. 
+	 * 
 	 * @effect The unit will have this faction as faction
 	 */
 	public void addUnit(@Raw Unit unit) {
-		assert (unit.isAlive() && unit.getFaction() == null);
-		this.units.add(unit);	
+		assert this.canHaveAsUnit(unit)&& unit.getFaction() == null && this.getNbUnits() < MAX_UNITS_IN_FACTION;
+		
+		this.units.add(unit);
+		unit.setFaction(this);
 	}
 
 	/**
@@ -133,17 +138,22 @@ public class Faction {
 	 * 
 	 * @param  unit
 	 *         The unit to be removed.
+	 *         
 	 * @pre    This faction has the given unit as one of
-	 *         its units, and the given unit does not
-	 *         reference any faction.
+	 *         its units, and the given unit does 
+	 *         reference this faction.
 	 *      
 	 * @post   This faction no longer has the given unit as
 	 *         one of its units.
+	 *         
+	 * @effect The unit will no longer have this faction as faction  
 	 */
 	@Raw
 	public void removeUnit(Unit unit) {
-		assert this.hasAsUnit(unit) && (unit.getFaction() == null);
+		assert this.hasAsUnit(unit) && unit.getFaction() == this;
+		
 		this.units.remove(unit);
+		unit.setFaction(null);
 	}
 	//-----------------------INSPECTORS
 	
@@ -164,10 +174,10 @@ public class Faction {
 	 * @param  Unit
 	 *         The unit to check.
 	 * @return True if and only if the given unit is effective
-	 *         and if the faction can still get more units
+	 *         and if the unit is alive
 	 */
 	public boolean canHaveAsUnit(Unit unit) {
-		return (unit != null) && (this.getNbUnits() < MAX_UNITS_IN_FACTION);
+		return (unit != null) && unit.isAlive();
 	}
 
 	/**
@@ -185,7 +195,7 @@ public class Faction {
 			if (unit.getFaction() != this)
 				return false;
 		}
-		return true;
+		return this.getNbUnits()<=MAX_UNITS_IN_FACTION;
 	}
 	
 	

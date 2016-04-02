@@ -550,6 +550,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	}
 	
 	/**
+	 * TODO
+	 * 
 	 * Adds a unit to a faction
 	 * 
 	 * @param unit
@@ -564,9 +566,11 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	private Faction getFactionForUnit(Unit unit){
 		Faction faction;
 		if (this.getFactions().size()<MAX_FACTIONS){
-			faction = new Faction();
+			//add faction of unit
+			
 			this.addAsFaction(faction);
 		}else{
+			//give unit a place in the smallest faction
 			faction = this.getSmallestFaction();
 		}
 		return faction;

@@ -87,6 +87,8 @@ public class Unit {
 	private static final double REST_INTERVAL = 60*3;
 	private static final double NOTHING_INTERVAL = 10;
 	
+	private static final int MAX_UNITS_IN_FACTION = 50;
+	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
  * -----------------------VARIABLES---------------------------------
@@ -344,6 +346,10 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 		this.stopDefaultBehaviour();
 	
 	this.setXP(0);
+	
+	//A unit must always belong to a faction
+	Faction faction = new Faction();
+	this.setFaction(faction);
 	
 	this.isAlive = true;
 }
@@ -2276,7 +2282,8 @@ protected boolean isPassable(int[] position){
 
 /*_____________________________________________________________
  * ____________________________________________________________
- *-------------------------FACTION----------------------
+ *-------------------------FACTION-----------------------------
+ *---------------------NON CONTROLLING CLASS-------------------
  * ____________________________________________________________
  *_____________________________________________________________
  */
@@ -2288,16 +2295,17 @@ protected boolean isPassable(int[] position){
 public Faction getFaction() {
 	return this.faction;
 }
+
 /**
+ * Set the given faction as faction
  * 
  * @param faction
  * 			the new faction of this unit
  * @post the unit will have the faction faction as his new faction
- * 
+ * 		| this.getFaction == faction
  */
-
-@Raw @Model
-protected void setFaction(Faction faction){
+@Raw
+public void setFaction(Faction faction) throws IllegalArgumentException{
 	this.faction = faction;
 }
 
