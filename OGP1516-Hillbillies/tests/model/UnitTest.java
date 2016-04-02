@@ -1,5 +1,5 @@
 
-package hillbillies.model;
+package model;
 
 import static org.junit.Assert.*;
 
@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hillbillies.model.Unit;
+import hillbillies.model.Utils;
 import ogp.framework.util.Util;
 
 public class UnitTest {
