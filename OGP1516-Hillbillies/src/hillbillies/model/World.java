@@ -564,7 +564,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	private Faction getFactionForUnit(Unit unit){
 		Faction faction;
 		if (this.getFactions().size()<MAX_FACTIONS){
-			faction = new Faction(this);
+			faction = new Faction();
 			this.addAsFaction(faction);
 		}else{
 			faction = this.getSmallestFaction();
@@ -584,18 +584,15 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 *         The faction to be added.
 	 * @pre    The given faction is effective and already references
 	 *         this world.
-	 *       | (faction != null) && (faction.getWorld() == this)
+	 *       | (faction != null)
 	 * @post   This world has the given faction as one of its factions.
 	 *       | new.hasAsFaction(faction)
 	 */
 	@Raw @Model
 	private void addAsFaction(@Raw Faction faction) {
-		assert (faction != null) && (faction.getWorld() == this);
+		assert (faction != null);
 		this.factions.add(faction);
 	}
-
-	
-	//------------------------DESTRUCTORS
 
 	/**
 	 * Remove the given faction from the set of factions of this world.
@@ -613,7 +610,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 */
 	@Raw @Model
 	private void removeAsFaction(@Raw Faction faction){
-		assert this.hasAsFaction(faction) && (faction.getWorld() == null);
+		assert this.hasAsFaction(faction);
 		factions.remove(faction);
 	}
 	
@@ -643,10 +640,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	public boolean canHaveAsFaction(Faction faction) {
 		return faction != null;
 	}
-	
 
-
-	
 	/*___________________________________________________________________
 	 *___________________________________________________________________
 	 * -----------------------UNITS-----------------------------------

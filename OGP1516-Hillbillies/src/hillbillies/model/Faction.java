@@ -44,10 +44,6 @@ public class Faction {
 	 */
 	private Set<Unit> units = new HashSet<Unit>(MAX_UNITS_IN_FACTION);
 	/**
-	 * variable registering the world of the faction
-	 */
-	private final World world;
-	/**
 	 * variable registering whether the faction is terminated
 	 */
 	private boolean isTerminated;
@@ -64,13 +60,10 @@ public class Faction {
 	 * @param world
 	 * 		the world the faction belongs to
 	 * 
-	 * @post the faction belongs to the world world
 	 * @post the faction is not yet terminated
 	 * 
 	 */
-	public Faction(World world){
-		//ADD WORLD
-		this.world = world;
+	public Faction(){
 		this.isTerminated = false;
 	}
 	
@@ -119,13 +112,6 @@ public class Faction {
 		return this.units.size();
 	}
 
-	/**
-	 * returns the world of the faction
-	 */
-	@Basic
-	public World getWorld() {
-		return world;
-	}
 	//-----------------------SETTERS
 	/**
 	 * Add the given unit to the set of units of this faction.
