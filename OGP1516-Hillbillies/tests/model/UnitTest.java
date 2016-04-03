@@ -43,7 +43,7 @@ public class UnitTest {
 		unit2 = new Unit("UnitStrong",position, 100,100,100,100, false);
 		unit3 = new Unit("UnitWeak",position, 25, 25, 25 ,25, false);
 		int[][][] types = new int[5][5][5];
-		World world = new World(types, new DefaultTerrainChangeListener());
+		world = new World(types, new DefaultTerrainChangeListener());
 		world.addUnit(unit1);
 		world.addUnit(unit2);
 		world.addUnit(unit3);

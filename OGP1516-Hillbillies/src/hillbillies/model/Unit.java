@@ -1284,7 +1284,8 @@ private void startRandomActivity() throws IllegalArgumentException, IllegalState
 	}
 	if (randomActivity == 1) {
 		System.out.println("random work");
-		workAt(Utils.getCubePosition(this.getPosition()));
+		int[] randomWorkingPosition = this.getWorld().getAdjacentCubes(Utils.getCubePosition(this.getPosition())).get(5);
+		workAt(randomWorkingPosition);
 	}
 	if (randomActivity == 2) {
 		System.out.println("random rest");
@@ -2643,7 +2644,7 @@ public boolean canHaveAsFaction(Faction faction){
  	* 		result == item.getUnit() == null || item.getUnit() == this
  	*/
 	@Raw @Model
-	private boolean canHaveAsItem(Item item){
+	public boolean canHaveAsItem(Item item){
 		return item.getUnit() == null || item.getUnit() == this;
 	}
 	
@@ -2663,7 +2664,7 @@ public boolean canHaveAsFaction(Faction faction){
 	 * 		The world will add this item
 	 * 		|world.addItem(item);
 	 */
-	private void dropItem(Item item, double[] position){
+	public void dropItem(Item item, double[] position){
 		if(item != null){
 		
 			item.setPosition(position);
@@ -2687,10 +2688,11 @@ public boolean canHaveAsFaction(Faction faction){
 	 * 		The world will remove this item
 	 * 		|world.removeItem(item);
 	 */
-	private void pickUpItem(Item item) {
+	public void pickUpItem(Item item) {
 		if (item != null && canHaveAsItem(item) && !hasItem()){
-			addItem(item);
+			
 			this.getWorld().removeItem(item);
+			addItem(item);
 			
 			this.setWeight(this.getWeight()+item.getWeight());
 		}

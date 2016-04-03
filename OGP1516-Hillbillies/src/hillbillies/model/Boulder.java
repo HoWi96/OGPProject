@@ -7,7 +7,7 @@ package hillbillies.model;
 
 public class Boulder extends RawMaterial {
 	
-	public Boulder(double[] position, World world) {
+	public Boulder(int[] position, World world) {
 		super(position, world);
 	}
 

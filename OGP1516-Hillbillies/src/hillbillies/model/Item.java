@@ -113,7 +113,7 @@ public abstract class Item {
 	 *       The position is inside the game world and is non solid
 	 *       or the item is not attached to a world
 	*/
-	public boolean isValidPosition(double[] position) {
+	protected boolean isValidPosition(double[] position) {
 		return !this.hasWorld() || (this.getWorld().isValidPosition(Utils.getCubePosition(position))
 				&&!this.getWorld().isSolidCube(Utils.getCubePosition(position)));
 	}
@@ -132,7 +132,7 @@ public abstract class Item {
 	 *       | ! isValidPosition(getPosition())
 	 */
 	@Raw
-	public void setPosition(double[] position) throws IllegalArgumentException {
+	protected void setPosition(double[] position) throws IllegalArgumentException {
 		if (!isValidPosition(position))
 			throw new IllegalArgumentException();
 		this.position = position;
@@ -309,11 +309,11 @@ public abstract class Item {
 	 * @param  weight
 	 *         The weight to check.
 	 * @return 
-	 *       | result == MIN_WEIGHT<weight && weight<MAX_WEIGHT 
+	 *       | result == MIN_WEIGHT<=weight && weight<=MAX_WEIGHT 
 	 */
 	@Raw
 	public static boolean isValidWeight(int weight) {
-		return (MIN_WEIGHT<weight && weight<MAX_WEIGHT);
+		return (MIN_WEIGHT<=weight && weight<=MAX_WEIGHT);
 	}
 	
 	/**

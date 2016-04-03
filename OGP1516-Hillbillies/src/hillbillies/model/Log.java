@@ -7,7 +7,7 @@ package hillbillies.model;
 
 public class Log extends RawMaterial{
 	
-	public Log(double[] position, World world) {
+	public Log(int[] position, World world) {
 		super(position, world);
 	}
 

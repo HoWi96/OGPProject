@@ -472,14 +472,13 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 				Random rand = new Random();
 				
 				if (rand.nextDouble() <= probability){
-					double[] spawnPosition = Utils.getCubeCenter(caveInPosition);
 					
 					if (type == TYPE_ROCK){
-						this.createBoulder(spawnPosition);
+						this.createBoulder(caveInPosition);
 						System.out.println("spawn boulder");
 						
 					}else if(type == TYPE_TREE){
-						this.createLog(spawnPosition);
+						this.createLog(caveInPosition);
 						System.out.println("spawn log");
 					}
 				}
@@ -1102,7 +1101,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @param position
 	 * 		the position for the boulder
 	 */
-	public void createBoulder(double[] position) {
+	public void createBoulder(int[] position) {
 		new Boulder(position, this);
 	}
 	
@@ -1149,7 +1148,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @param position
 	 * 		the position for the log
 	 */
-	public void createLog(double[] position) {
+	public void createLog(int[] position) {
 		new Log(position, this);	
 	}
 

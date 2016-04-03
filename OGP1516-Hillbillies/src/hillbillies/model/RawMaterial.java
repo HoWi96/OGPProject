@@ -32,10 +32,10 @@ public abstract class RawMaterial extends Item {
 	 * 
 	 * 
 	 */
-	public RawMaterial(double[] position, World world) throws IllegalArgumentException {
+	public RawMaterial(int[] position, World world) throws IllegalArgumentException {
 		super();
 		world.addItem(this);
-		this.setPosition(position);
+		this.setPosition(Utils.getCubeCenter(position));
 		
 
 	}
