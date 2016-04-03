@@ -358,7 +358,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public Set<Faction> getActiveFactions(World world) throws ModelException {
-		return world.getFactions();
+		return world.getAllFactions();
 	}
 
 	@Override

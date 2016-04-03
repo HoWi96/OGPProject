@@ -8,6 +8,7 @@ import org.junit.Before;
 //import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hillbillies.model.Unit;
 import hillbillies.model.World;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
 
@@ -19,6 +20,7 @@ public class WorldTest {
 	private static final int TYPE_WORKSHOP = 3;
 
 	private World world1;
+	private Unit unit1;
 
 	@Before
 	public void setUp() throws Exception {
@@ -27,6 +29,7 @@ public class WorldTest {
 		types[1][1][1] = TYPE_TREE;
 		types[1][1][2] = TYPE_WORKSHOP;
 		world1 = new World(types, new DefaultTerrainChangeListener());
+		unit1 = new Unit("Test", new int[] { 0, 0, 0 }, 50, 50, 50, 50, true);
 		
 	}
 
@@ -53,6 +56,21 @@ public class WorldTest {
 		assertEquals(TYPE_AIR, world1.getCubeType(position));
 		assertTrue(!world1.isSolidCube(position));
 	}
+	
+	@Test
+	public void testInitialCaveIn(){
+		int[][][] types = new int[4][4][4];
+		types[1][1][1] = TYPE_ROCK;
+		types[2][2][2] = TYPE_TREE;
+		types[1][1][2] = TYPE_ROCK;
+		
+		World world1 = new World(types, new DefaultTerrainChangeListener());
+		assertEquals(TYPE_AIR, world1.getCubeType(new int[]{1,1,1}));
+		assertEquals(TYPE_AIR, world1.getCubeType(new int[]{1,1,2}));
+		assertEquals(TYPE_AIR, world1.getCubeType(new int[]{2,2,2}));
+	}
+	
+	
 
 	@Test
 	public void test1() {	

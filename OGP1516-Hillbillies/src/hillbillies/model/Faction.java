@@ -37,7 +37,7 @@ public class Faction {
 	 *       |   ( (Unit != null) &&
 	 *       |     (! Unit.isTerminated()) )
 	 */
-	private Set<Unit> units = new HashSet<Unit>(MAX_UNITS_IN_FACTION);
+	private Set<Unit> units;
 	/**
 	 * variable registering whether the faction is terminated
 	 */
@@ -61,6 +61,7 @@ public class Faction {
 	 */
 	public Faction(){
 		this.isTerminated = false;
+		units = new HashSet<Unit>(MAX_UNITS_IN_FACTION);
 	}
 	
 	/*___________________________________________________________________
@@ -130,8 +131,9 @@ public class Faction {
 	 * 
 	 * @effect The unit will have this faction as faction
 	 */
-	public void addUnit(@Raw Unit unit) {
-		assert this.canHaveAsUnit(unit)&& unit.getFaction() == null && this.getNbUnits() < MAX_UNITS_IN_FACTION;
+	public void addUnit(Unit unit) throws IllegalArgumentException {
+		if (!(this.canHaveAsUnit(unit) &&  unit.getFaction() == null && this.getNbUnits() < MAX_UNITS_IN_FACTION))
+			throw new IllegalArgumentException();
 		
 		this.units.add(unit);
 		unit.setFaction(this);
@@ -153,8 +155,9 @@ public class Faction {
 	 * @effect The unit will no longer have this faction as faction  
 	 */
 	@Raw
-	public void removeUnit(Unit unit) {
-		assert this.hasAsUnit(unit) && unit.getFaction() == this;
+	public void removeUnit(Unit unit) throws IllegalArgumentException{
+		if(!this.hasAsUnit(unit) || unit.getFaction() != this)
+			throw new IllegalArgumentException();
 		
 		this.units.remove(unit);
 		unit.setFaction(null);

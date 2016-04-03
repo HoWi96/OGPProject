@@ -58,18 +58,20 @@ public abstract class Item {
 	/**
 	 * Terminates the game object
 	 * 
-	 * @post The game object is terminated
+	 * @post The item is terminated
 	 * 
-	 * @throws IllegalStateException
-	 * 			if the GameObject is still connected to a world
-	 * @throws IllegalStateException
-	 * 		If the raw material is still connected to a unit
+	 * @effect if the item has still a world
+	 * 		the item will be removed from the world
+	 * @effect if the item has still a world 
+	 * 		the item will be removed from the unit
 	 */
-	public void terminate() throws IllegalStateException{
+	public void terminate(){
+		
 		if(this.hasWorld())
 			this.getWorld().removeItem(this);
 		if(this.hasUnit())
 			this.getUnit().removeItem(this);
+		
 		this.isTerminated = true;
 	}
 	
@@ -109,10 +111,11 @@ public abstract class Item {
 	 *         The position to check.
 	 * @return 
 	 *       The position is inside the game world and is non solid
+	 *       or the item is not attached to a world
 	*/
 	public boolean isValidPosition(double[] position) {
-		return this.getWorld().isValidPosition(Utils.getCubePosition(position))
-				&&!this.getWorld().isSolidCube(Utils.getCubePosition(position));
+		return !this.hasWorld() || (this.getWorld().isValidPosition(Utils.getCubePosition(position))
+				&&!this.getWorld().isSolidCube(Utils.getCubePosition(position)));
 	}
 	
 	/**

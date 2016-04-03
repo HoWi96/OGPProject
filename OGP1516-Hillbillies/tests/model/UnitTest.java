@@ -11,16 +11,20 @@ import org.junit.Test;
 
 import hillbillies.model.Unit;
 import hillbillies.model.Utils;
+import hillbillies.model.World;
+import hillbillies.part2.listener.DefaultTerrainChangeListener;
 import ogp.framework.util.Util;
 
 public class UnitTest {
 	private Unit unit1;
 	private Unit unit2;
 	private Unit unit3;
+	private Unit defender;
+	private World world;
 
 	static int[] position = {1, 2, 3};
 	static int[] targetPosition = {2, 3, 4};
-	static int[] targetPosition2 = {49,49,49};
+	static int[] targetPosition2 = {4,4,4};
 	static double[] targetPositionDouble = {3, 4, 5};
 	
 	
@@ -38,6 +42,16 @@ public class UnitTest {
 		unit1 = new Unit("Baba 'O Reily", position, 50, 50, 50, 50, false);
 		unit2 = new Unit("UnitStrong",position, 100,100,100,100, false);
 		unit3 = new Unit("UnitWeak",position, 25, 25, 25 ,25, false);
+		int[][][] types = new int[5][5][5];
+		World world = new World(types, new DefaultTerrainChangeListener());
+		world.addUnit(unit1);
+		world.addUnit(unit2);
+		world.addUnit(unit3);
+		
+    	Unit defender = new Unit("Baba 'O Reil", new int[]{50,50,50}, 50, 50, 50, 50, true);
+ 	   
+    	world.addUnit(defender);
+		System.out.println(" Nb Units in world "+world.getNbUnits());
 		
     }
 
@@ -59,10 +73,10 @@ public class UnitTest {
 	 @Test
 	    public void testIsValidPosition(){
 		 	assertTrue(unit1.isValidPosition(new double[]{0,0,0}));
-	        assertTrue(unit1.isValidPosition(new double[]{50,50,50}));
+	        assertTrue(unit1.isValidPosition(new double[]{4,4,4}));
 	        
-	        assertFalse(unit1.isValidPosition(new double[]{-1,-10,-5}));
-	        assertFalse(unit1.isValidPosition(new double[]{51,51,51}));   
+	        assertFalse(unit1.isValidPosition(new double[]{-1,0,0}));
+	        assertFalse(unit1.isValidPosition(new double[]{5,5,5}));   
 	    }
 	 
 	 @Test
@@ -421,8 +435,7 @@ public class UnitTest {
 	    
 	    @Test(expected = IllegalArgumentException.class)
 	    public void testMoveToAdjecentIllegalArgumentException2(){
-	    	Unit defender = new Unit("Baba 'O Reil", new int[]{50,50,50}, 50, 50, 50, 50, true);
-	    	defender.moveToAdjacent(1, 1, 1);
+	    	defender.moveToAdjacent(-1, -1, -1);
 	    }
 	    
 	    @Test(expected = IllegalStateException.class)

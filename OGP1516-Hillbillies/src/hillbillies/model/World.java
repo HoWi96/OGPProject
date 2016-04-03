@@ -133,6 +133,11 @@ public class World {
  */
 public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws IllegalArgumentException {
 	
+	//Connection with the GUI
+		if(modelListener==null)
+			throw new IllegalArgumentException();
+		this.modelListener = modelListener;
+
 	this.setTerrainTypes(terrainTypes);
 	
 	//Initialize immutable attributes
@@ -149,10 +154,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	this.border = new ConnectedToBorder(this.getNbCubesX(),this.getNbCubesY(), this.getNbCubesZ());
 	this.makeAllSolidsConnected();
 	
-	//Connection with the GUI
-	if(modelListener==null)
-		throw new IllegalArgumentException();
-	this.modelListener = modelListener;
+	
 
 }
 
@@ -464,8 +466,6 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 				//REPLACE CUBE BY AIR
 				int type = this.getCubeType(caveInPosition);
 				this.setcubeType(TYPE_AIR, caveInPosition);	
-				this.getTerrainChangeListener().notifyTerrainChanged(
-						caveInPosition[0], caveInPosition[1], caveInPosition[2]);
 				
 				//SPAWN RAWMATERIAL
 				double probability = 0.25;
@@ -569,8 +569,9 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * Gives back the active factions of this world
 	 */
 	@Basic @Raw
-	public Set<Faction> getFactions(){
-		return this.factions;
+	public Set<Faction> getAllFactions(){
+		Set<Faction> allFactions = new HashSet<>(factions);
+		return allFactions;
 	}
 	
 	/**
@@ -591,7 +592,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	private Faction getSmallestFaction(){
 		Faction smallestFaction = null;
 		int unitsInSmallest = 50;
-		for (Faction faction : this.getFactions()) {
+		for (Faction faction : this.getAllFactions()) {
 			if (faction.getNbUnits() < unitsInSmallest){
 				smallestFaction = faction;
 				unitsInSmallest = faction.getNbUnits();
@@ -616,9 +617,10 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	@Raw @Model
 	private Faction getFactionForUnit(Unit unit){
 		Faction faction;
-		if (this.getFactions().size()<MAX_FACTIONS){
+		if (this.getAllFactions().size()<MAX_FACTIONS){
 			//take the faction for the unit
 			faction = unit.getFaction();
+			this.addAsFaction(faction);
 		}else{
 			//give unit a place in the smallest faction
 			faction = this.getSmallestFaction();
@@ -632,18 +634,23 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	
 
 	/**
+	 * 
 	 * Add the given faction to the set of factions of this world.
 	 * 
 	 * @param  faction
 	 *         The faction to be added.
-	 * @pre   The world can have the faction as faction and the number of factions doesn't exceed the max amount of faction
-	 *
+	 * 
 	 * @post   This world has the given faction as one of its factions.
+	 * 
+	 * @throws IllegalArgumentException
+	 * 		|!canHaveAsFaction(faction) || this.factions.size()>=MAX_FACTIONS
+	 * 		
 	 *       
 	 */
 	@Raw @Model
-	private void addAsFaction(@Raw Faction faction) {
-		assert canHaveAsFaction(faction) && this.factions.size()<MAX_FACTIONS;
+	private void addAsFaction(@Raw Faction faction) throws IllegalArgumentException {
+		if(!canHaveAsFaction(faction) || this.factions.size()>=MAX_FACTIONS)
+			throw new IllegalArgumentException();
 		this.factions.add(faction);
 	}
 
@@ -652,18 +659,19 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 
 	 * @param  faction
 	 *         The faction to be removed.
-	 *         
-	 * @pre    This world has the given faction as one of
-	 *         its factions, and the given faction does not
-	 *         reference any world.
 	 *       
 	 * @post   This world no longer has the given faction as
 	 *         one of its factions.
+	 *         
+	 * @throws IllegalArgumentException
+	 * 		|!this.hasAsFaction(faction)
+	 * 
 	 *       
 	 */
 	@Raw
-	public void removeAsFaction(@Raw Faction faction){
-		assert this.hasAsFaction(faction);
+	public void removeAsFaction(@Raw Faction faction) throws IllegalArgumentException{
+		if(!this.hasAsFaction(faction))
+			throw new IllegalArgumentException();
 		factions.remove(faction);
 	}
 	
@@ -719,7 +727,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 */
 	@Basic @Raw
 	public Set<Unit> getAllUnits() {
-		return this.units;
+		Set<Unit> AllUnits = new HashSet<>(units);
+		return AllUnits;
 	}
 	
 	/**
@@ -750,20 +759,24 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		if(!this.canHaveAsUnit(unit) || unit.getWorld() == this)
 			throw new IllegalArgumentException();
 		
-		//silently reject extra units
+		//INAPROPRIATE POSITION
+		if(!isValidPosition(Utils.getCubePosition(unit.getPosition())) 
+				|| isSolidCube(Utils.getCubePosition(unit.getPosition())))
+				unit.setPosition(Utils.getCubeCenter(getRandomPositionForUnit()));
+		
+		// SILENTLY REJECT UNIT
 		if(this.units.size() < MAX_UNITS){
+			
 			//ADDING UNIT TO WORLD
-			System.out.println("Adding unit to this world");
 			this.units.add(unit);
 			unit.setWorld(this);
 			
 			//ADDING UNIT TO FACTION
-			System.out.println("Adding unit to a new faction");
-			Faction faction = this.getFactionForUnit(unit);
-			//Leaving old faction
+			Faction faction = this.getFactionForUnit(unit);	
 			unit.getFaction().removeUnit(unit);
 			faction.addUnit(unit);
-			System.out.println("Succesfully added unit");
+			
+			System.out.println("Succesfully added unit: " + unit.getName());
 		}
 	}
 
@@ -1018,10 +1031,12 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	//---------------------ADDITIONAL INSPECTORS
 	
 	/**
-	 * return the set of Items that belong to this world
+	 * return  a clone of the set of Items that belong to this world
 	 */
-	protected Set<Item> getAllItems(){
-		return this.items;
+	@Basic
+	public Set<Item> getAllItems(){
+		Set<Item> allItems = new HashSet<>(items);
+		return allItems;
 	}
 	
 	/**

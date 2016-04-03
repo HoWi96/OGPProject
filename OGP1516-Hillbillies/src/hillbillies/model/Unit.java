@@ -313,6 +313,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 			int strength, int toughness, boolean enableDefaultBehavior)
 			throws IllegalArgumentException {
 	
+	this.isAlive = true;
 	
 	setName(name);
 	
@@ -349,11 +350,13 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	
 	this.setXP(0);
 	
+	
+	
 	//A unit must always belong to a faction
 	Faction faction = new Faction();
-	this.setFaction(faction);
+	faction.addUnit(this);
 	
-	this.isAlive = true;
+	
 }
 
 /*___________________________________________________________________
@@ -396,9 +399,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	 this.setHitpoints(0);
 	 this.setSpeed(0);
 	 this.stopSprinting();
-	 
-	 this.isAlive = false;
-	 
+	  
 	 Faction faction = this.getFaction();
 	 World world = this.getWorld();
 	 
@@ -410,6 +411,8 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 		 faction.terminate();
 		 world.removeAsFaction(faction);
 	 }
+	 
+	 this.isAlive = false;
  }
 
  
@@ -1049,11 +1052,29 @@ private static float getMovingOrientation(double[] velocityVector){
 private static void updateOrientation(Unit attacker, Unit defender){ 
 	double[] aPosition = attacker.getPosition();
 	double[] dPosition = defender.getPosition();
-	float aOrientation = (float) Math.atan2(dPosition[1]-aPosition[1], dPosition[0]-aPosition[0]);
-	float dOrientation = (float) Math.atan2(aPosition[1]-dPosition[1], aPosition[0]-dPosition[0]);
+	float aOrientation = getOrientation(aPosition,dPosition);
+	float dOrientation = getOrientation(dPosition,aPosition);
 	attacker.setOrientation(aOrientation);
 	defender.setOrientation(dOrientation);
 }
+
+/**
+ * Get orientation between to positions
+ * @param fromPosition
+ * 		The position where you start from
+ * 
+ * @param toPosition
+ * 		The position where you will look at
+ *
+ * @return The orientation that suits the given positions
+ * 			| result == (float) Math.atan2(toPosition[1]-fromPosition[1], toPosition[0]-fromPosition[0])	
+ */
+@Model
+private static float getOrientation(double[] fromPosition,double[] toPosition){ 
+	float orientation = (float) Math.atan2(toPosition[1]-fromPosition[1], toPosition[0]-fromPosition[0]);
+	return orientation;
+}
+
 
 //SPEED
 
@@ -1140,11 +1161,7 @@ public void updateXP(int XP){
 //TODO further optimize advanceTime
 
 public void advanceTime(double dt) throws IllegalArgumentException, IllegalStateException {
-	
-	System.out.println("advance time for unit" + dt);
-	System.out.println("default behavior?"+ this.hasDefaultBehavior());
-	System.out.println("current activity =");
-	
+
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
 	
@@ -1160,6 +1177,7 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
     	counterTillRest = 0.0;
     }
     
+    //TODO implement falling after move to is completed
     //if the unit is not connected to solid cubes anymore, he needs to fall
     //if(this.getActivity()!=Activity.FALLING && !this.getWorld().hasSolidAdjacents(Utils.getCubePosition(this.getPosition())))
     //	this.fall();
@@ -1167,10 +1185,12 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
     // if the unit gets a new task, he first have to move to the next position
     if(!this.isMoving() && this.getActivity() != Activity.FALLING && 
     		!Utils.equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext()){
+    	
     	if(!this.isMovingToNext()){
 	    	this.setNextActivity(this.getActivity());
 	    	this.setActivity(Activity.MOVING);
 	    	this.setMovingToNext(true);
+	    	
     	} else if(Utils.equals(this.getPosition(),this.getNextPosition())){
     		this.setActivity(this.getNextActivity());
     		this.setMovingToNext(false);
@@ -1191,78 +1211,131 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 	}
 	
 	if(this.hasDefaultBehavior() && this.getActivity()==Activity.NOTHING){
-	
-			int randomActivity = (int) (Math.random()*3);
-			
-			if (randomActivity == 0) {
-				System.out.println("random position");
-				int[] targetPosition = this.getWorld().getRandomPositionForUnit();
-				this.moveToTarget(targetPosition);
-			}
-			if (randomActivity == 1) {
-				System.out.println("random work");
-				workAt(Utils.getCubePosition(this.getPosition()));
-			}
-			if (randomActivity == 2) {
-				System.out.println("random rest");
-				rest();
-			}
+			startRandomActivity();
 	}
 	
 	/*
-	 * --------------------------HANDEL DIFFERENT ACTIVITIES-----------------------------
+	 * HANDEL DIFFERENT ACTIVITIES
 	 */
 	
-	Activity activity =this.getActivity();
-	
-	switch(activity) {
+	switch(getActivity()) {
 	
 	case FALLING:
-		System.out.println("falling");
-		
 		falling(dt);
 		break;
 		
 	case MOVING: 
-			System.out.println("moving");
-		
-			if(this.isSprinting()){
-				if(this.getStamina()>=10*dt){
-					this.setStamina((this.getStamina()-10*dt));
+		moving(dt);
+		break;
+	
+	case WORKING:
+		working(dt);
+		break;
+	
+	case ATTACKING: 
+		attacking(dt);
+		break;
+	
+	case RESTING: 
+		resting(dt);
+		break;
+	
+	case NOTHING: 
+		nothing(dt);
+		break;
+	}
+}
+
+/**
+ * @param dt
+ */
+private void nothing(double dt) {
+	counterTillDefault = counterTillDefault+dt;
+	if(counterTillDefault >= NOTHING_INTERVAL){
+		counterTillDefault = 0.0;
+		this.startDefaultBehavior();
+		this.setProgressTime(0);	
+	}
+}
+
+/**
+ * @param dt
+ * @throws IllegalArgumentException
+ */
+private void attacking(double dt) throws IllegalArgumentException {
+	this.setProgressTime((float)(this.getProgressTime()+dt));
+	if (this.getProgressTime() >= this.getFightingTime()) {
+		this.setActivity(Activity.NOTHING);
+		counterTillDefault = 0;
+	}
+}
+
+/**
+ * @throws IllegalArgumentException
+ * @throws IllegalStateException
+ */
+private void startRandomActivity() throws IllegalArgumentException, IllegalStateException {
+	int randomActivity = (int) (Math.random()*3);
+	
+	if (randomActivity == 0) {
+		System.out.println("random position");
+		int[] targetPosition = this.getWorld().getRandomPositionForUnit();
+		this.moveToTarget(targetPosition);
+	}
+	if (randomActivity == 1) {
+		System.out.println("random work");
+		workAt(Utils.getCubePosition(this.getPosition()));
+	}
+	if (randomActivity == 2) {
+		System.out.println("random rest");
+		rest();
+	}
+}
+
+/**
+ * @param dt
+ * @throws IllegalArgumentException
+ * @throws IllegalStateException
+ */
+private void moving(double dt) throws IllegalArgumentException, IllegalStateException {
+	if(this.isSprinting()){
+		if(this.getStamina()>=10*dt){
+			this.setStamina((this.getStamina()-10*dt));
+		}else{
+			this.setStamina(0);
+			this.stopSprinting();
+		}	
+	}
+	
+	double[] cPosition = this.getPosition();
+	double[] nPosition = this.getNextPosition();
+	double[] tPosition = this.getTargetPosition();
+	
+	
+	if(Utils.equals(cPosition,nPosition)){
+		// CENTER OF CUBE
+		if(tPosition == null || Utils.equals(cPosition, tPosition)){
+			//TARGET REACHED
+			this.setActivity(Activity.NOTHING);
+			counterTillDefault = 0;
+			this.stopSprinting();
+			this.setSpeed(0);
+			this.setTargetPosition(null);
+		}else{
+			//TARGET NOT YET REACHED
+			int[] step = new int[3];
+			//pathfinding algorithm
+			for(int i = 0; i<3; i++){
+				if (cPosition[i] == tPosition[i]){
+					step[i] = 0;
+				}else if(cPosition[i] < tPosition[i]){
+					step[i] = 1;
 				}else{
-					this.setStamina(0);
-					this.stopSprinting();
-				}	
-			}
+					step[i] = -1;
+				}
+				this.moveToAdjacent(step[0],step[1],step[2]);
+				nPosition = this.getNextPosition();
 			
-			double[] cPosition = this.getPosition();
-			double[] nPosition = this.getNextPosition();
-			double[] tPosition = this.getTargetPosition();
-			
-			
-			if(Utils.equals(cPosition,nPosition)){
-				// CENTER OF CUBE
-				if(tPosition == null || Utils.equals(cPosition, tPosition)){
-					//TARGET REACHED
-					this.setActivity(Activity.NOTHING);
-					counterTillDefault = 0;
-					this.stopSprinting();
-					this.setSpeed(0);
-				}else{
-					//TARGET NOT YET REACHED
-					int[] step = new int[3];
-					//pathfinding algorithm
-					for(int i = 0; i<3; i++){
-						if (cPosition[i] == tPosition[i]){
-							step[i] = 0;
-						}else if(cPosition[i] < tPosition[i]){
-							step[i] = 1;
-						}else{
-							step[i] = -1;
-						}
-						this.moveToAdjacent(step[0],step[1],step[2]);
-						nPosition = this.getNextPosition();
-					
 //					int[] currentCube = Utils.getCubePosition(getPosition());
 //					int[] nextPosWithSequence = null;
 //					
@@ -1282,74 +1355,49 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 //					
 //					moveToAdjacent(dx, dy, dz);
 //					nPosition = this.getNextPosition();
-					} 
-				}
-			}
-			//Hier moet een oplossing voor gevonden worden!
-			if(this.getStep() != null){
-			
-				double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
-				//TO CENTER OF CUBE
-				if(Utils.inBetween(cPosition, nPosition, iPosition)){
-					this.setPosition(iPosition);
-				}else{
-					this.setPosition(nPosition);
-					this.updateXP(1);
-				}
-			}
-			break;
-	
-	
-	case WORKING:
-		System.out.println("working");
-		working(dt);
-			break;
-	
-	case ATTACKING: 
-		
-			this.setProgressTime((float)(this.getProgressTime()+dt));
-			if (this.getProgressTime() >= this.getFightingTime()) {
-				this.setActivity(Activity.NOTHING);
-				counterTillDefault = 0;
-			}
-			break;
-	
-	case RESTING: 
-		System.out.println("resting");
-			if (this.isFullyHealed()) {
-				this.setActivity(Activity.NOTHING);
-				counterTillDefault = 0;
-			} else {
-				this.setProgressTime((float)(this.getProgressTime()+dt));
-				
-					if(this.getProgressTime()>this.getMinimalHitpointTime() && 
-							this.getHitpoints()<getMaxHitpoints()){
-						
-						this.setHitpoints(this.getHitpoints()+1);
-						this.setProgressTime(this.getProgressTime()-this.getMinimalStaminaTime());
-
-					}else if (this.getProgressTime()>this.getMinimalHitpointTime() && 
-							this.getStamina()<getMaxStamina()){
-						
-						this.setStamina((int)this.getStamina()+1);
-						this.setProgressTime(this.getProgressTime()-this.getMinimalStaminaTime());
-					}	
-				}
-			break;
-				
-			
-			
-	case NOTHING: 
-		System.out.println("nothing");
-		
-			counterTillDefault = counterTillDefault+dt;
-			if(counterTillDefault >= NOTHING_INTERVAL){
-				counterTillDefault = 0.0;
-				this.startDefaultBehavior();
-				this.setProgressTime(0);	
-			}
-			break;
+			} 
+		}
 	}
+	//Hier moet een oplossing voor gevonden worden!
+	if(this.getStep() != null){
+	
+		double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
+		//TO CENTER OF CUBE
+		if(Utils.inBetween(cPosition, nPosition, iPosition)){
+			this.setPosition(iPosition);
+		}else{
+			this.setPosition(nPosition);
+			this.updateXP(1);
+		}
+	}
+}
+
+/**
+ * @param dt
+ * 		the time the unit will rest
+ * @throws IllegalArgumentException
+ * 		as an effect of called methods
+ */
+private void resting(double dt) throws IllegalArgumentException {
+	if (this.isFullyHealed()) {
+		this.setActivity(Activity.NOTHING);
+		counterTillDefault = 0;
+	} else {
+		this.setProgressTime((float)(this.getProgressTime()+dt));
+		
+			if(this.getProgressTime()>this.getMinimalHitpointTime() && 
+					this.getHitpoints()<getMaxHitpoints()){
+				
+				this.setHitpoints(this.getHitpoints()+1);
+				this.setProgressTime(this.getProgressTime()-this.getMinimalStaminaTime());
+
+			}else if (this.getProgressTime()>this.getMinimalHitpointTime() && 
+					this.getStamina()<getMaxStamina()){
+				
+				this.setStamina((int)this.getStamina()+1);
+				this.setProgressTime(this.getProgressTime()-this.getMinimalStaminaTime());
+			}	
+		}
 }
 
 /**
@@ -1363,6 +1411,7 @@ private void working(double dt) {
 	this.setProgressTime((float)(this.getProgressTime()+dt));
 	
 	if (this.getProgressTime() >= this.getWorkingTime()) {
+		//Finished working
 		
 		int[] workingPosition = this.getWorkingPosition();
 		int cubeType = this.getWorld().getCubeType(workingPosition);
@@ -1375,6 +1424,7 @@ private void working(double dt) {
 		
 		if(hasItem()){
 			//drop item
+			System.out.println("unit drops item");
 			dropItem(this.getItem(), Utils.getCubeCenter(workingPosition));
 		}else if(item != null){
 			if(cubeType == World.TYPE_WORKSHOP){
@@ -1643,20 +1693,19 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		double[] nextPosition = new double[] {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
 		double[] targetPosition = this.getTargetPosition();
 		
-		if(!isValidPosition(nextPosition) && (targetPosition != null)){
-			this.setTargetPosition(cubeCenter);
-			this.setNextPosition(cubeCenter);
-			return;
+		
+		if(!isValidPosition(nextPosition)){
+			if(targetPosition == null){ 
+				//only hitting moveToAdjacent
+				throw new IllegalArgumentException("Invalid next position");
+			} else {
+				// wrong path
+				this.setTargetPosition(null);
+				this.setNextPosition(cubeCenter);
+				return;
+			}
 		}
-		
-		if (!isValidPosition(nextPosition))
-			throw new IllegalArgumentException("Invalid next position");
 
-		// only when hitting moveToAdjacent
-		if(this.getTargetPosition() != null &&
-				Utils.equals(Utils.getCubePosition(getPosition()),Utils.getCubePosition(targetPosition)))
-			this.setTargetPosition(nextPosition);
-		
 		this.setStep(new int[]{dx,dy,dz});
 		this.setActivity(Activity.MOVING);
 		this.updateSpeed(dz);
@@ -1951,19 +2000,23 @@ public boolean isDoingNothing(){
  * 		|this.setProgressTime(0);
  * @effect the workingPosition will be set to the given position
  * 		| this.setWorkingPosition(position);
+ * @effect The position will be updated appropriate to the workingposition
+ * 		|this.setOrientation(getOrientation(getPosition(),Utils.getCubeCenter(position)))
  * 
  * @throws IllegalStateException
 *         the given unit is not able to work or is in default behavior.
 *       | ! isAbleToWork()
  */
-public void workAt(int[] position) throws IllegalStateException, IllegalArgumentException{
+public void workAt(int[] workingPosition) throws IllegalStateException, IllegalArgumentException{
 	if (!this.isAbleToWork())
 			throw new IllegalStateException();
 	
 	this.setActivity(Activity.WORKING);
 	this.setProgressTime(0);
-	this.setWorkingPosition(position);
+	this.setWorkingPosition(workingPosition);
+	this.setOrientation(getOrientation(getPosition(),Utils.getCubeCenter(workingPosition)));
 }
+
 
 
 
@@ -2369,12 +2422,12 @@ public boolean isAbleToWork(){
  * A unit can work if it is not attacking.
  * @return	true if this unit is not attacking.
  * 			| result == (Math.abs(dx)<=1&&Math.abs(dy)<=1&&Math.abs(dz)==0) && 
- * 			  this.getActivity() != Activity.FALLING ||
- * 			  defender.getActivity() != Activity.FALLING;
+ * 			  this.getActivity() == Activity.FALLING ||
+ * 			  defender.getActivity() == Activity.FALLING;
  */
 @Immutable
 public boolean isAbleToAttack(Unit defender){
-	if(this.getActivity() != Activity.FALLING || defender.getActivity() != Activity.FALLING)
+	if(this.getActivity() == Activity.FALLING || this.getActivity() == Activity.ATTACKING || defender.getActivity() == Activity.FALLING)
 		return false;
 	
 	int[] aPosition = Utils.getCubePosition(this.getPosition());
@@ -2575,7 +2628,7 @@ public boolean canHaveAsFaction(Faction faction){
 	public void removeItem(Item item) throws IllegalArgumentException {
 		if (item.getUnit() != this && this.getItem() == item)
 			throw new IllegalArgumentException();
-		//Break down association
+
 		item.setUnit(null);
 		this.item = null;
 	}
