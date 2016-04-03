@@ -2,9 +2,10 @@ package hillbillies.model;
 
 import java.util.*;
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.gameobjects.Boulder;
-import hillbillies.model.gameobjects.Log;
-import hillbillies.model.gameobjects.RawMaterial;
+import hillbillies.model.items.Item;
+import hillbillies.model.items.rawmaterials.Boulder;
+import hillbillies.model.items.rawmaterials.Log;
+import hillbillies.model.items.rawmaterials.RawMaterial;
 import hillbillies.part2.listener.TerrainChangeListener;
 import hillbillies.util.ConnectedToBorder;
 
@@ -865,19 +866,124 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * -----------------------RAW MATERIALS------------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
-	
-	//-------------------BOULDERS
 	/**
-	 * Variable referencing a set collecting all the boulders
-	 * of this world.
+	 * Variable referencing a set collecting all the Items
+	 * of this World.
 	 * 
 	 * @Invar  The referenced set is effective.
-	 *       
-	 * @Invar  Each boulder registered in the referenced list is
+	 *       | items != null
+	 * @Invar  Each Item registered in the referenced list is
 	 *         effective and not yet terminated.
-	 *         
+	 *       | for each item in items:
+	 *       |   ( (item != null) &&
+	 *       |     (! item.isTerminated()) )
 	 */
-	private final Set<Boulder> boulders;
+	private final Set<Item> items = new HashSet<>();
+	
+	/**
+	 * Check whether this World has the given Item as one of its
+	 * Items.
+	 * 
+	 * @param  item
+	 *         The Item to check.
+	 */
+	@Basic
+	@Raw
+	public boolean hasAsItem(@Raw Item item) {
+		return items.contains(item);
+	}
+	
+	/**
+	 * Check whether this World can have the given Item
+	 * as one of its Items.
+	 * 
+	 * @param  item
+	 *         The Item to check.
+	 * @return True if and only if the given Item is effective
+	 *         and that Item is a valid Item for this World.
+	 *       | result == (item != null) && (item.canHaveAsWorld(this))
+	 */
+	@Raw
+	public boolean canHaveAsItem(Item item) {
+		return (item != null) && (item.canHaveAsWorld(this));
+	}
+	
+
+	/**
+	 * Check whether this World has proper Items attached to it.
+	 * 
+	 * @return True if and only if this World can have each of the
+	 *         items attached to it as one of its Items,
+	 *         and if each of these Items references this World as
+	 *         the World to which they are attached.
+	 *       | for each item in items:
+	 *       |   if (hasAsItem(item))
+	 *       |     then canHaveAsItem(item) &&
+	 *       |          (item.getWorld() == this)
+	 */
+	public boolean hasProperItems() {
+		for (Item item : this.items) {
+			if (!canHaveAsItem(item) || item.getWorld() != this)
+				return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Return the number of Items associated with this World.
+	 *
+	 * @return  The total number of Items collected in this World.
+	 */
+	public int getNbItems() {
+		return items.size();
+	}
+	
+	/**
+	 * Add the given Item to the set of Items of this World.
+	 * 
+	 * @param  item
+	 *         The Item to be added.
+	 * @pre    The world can have this item as item 
+	 * 				and the item does not yet reference any world
+	 * @post   This World has the given Item as one of its items.
+	 * @effect the item has this world as its world
+	 */
+	public void addItem(@Raw Item item) {
+		assert this.canHaveAsItem(item) && item.getWorld() == this;
+		items.add(item);
+		item.setWorld(this);
+	}
+	
+	/**
+	 * Remove the given Item from the set of Items of this World.
+	 * 
+	 * @param  item
+	 *         The Item to be removed.
+	 * @pre    This World has the given Item as one of
+	 *         its items, and the given Item does not
+	 *         reference any World.
+	 *       | this.hasAsItem(item) &&
+	 *       | (item.getWorld() == null)
+	 * @post   This World no longer has the given Item as
+	 *         one of its items.
+	 *       | ! new.hasAsItem(item)
+	 */
+	@Raw
+	public void removeItem(Item item) {
+		assert this.hasAsItem(item) && (item.getWorld() == this);
+		items.remove(item);
+		item.setWorld(null);
+	}
+	
+	/**
+	 * return the set of Items that belong to this world
+	 */
+	protected Set<Item> getAllItems(){
+		return this.items;
+	}
+	
+	//-------------------BOULDERS
+	
 	
 	/**
 	 * Creates a new Boulder in this World, on the position given.
@@ -888,29 +994,53 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	public void createBoulder(double[] position) {
 		new Boulder(position, this);
 	}
+	
+	/**
+	 * Gives back all Boulders in this World.
+	 * 
+	 * @return
+	 * 		A Set of all Boulders in this World. 
+	 */
+	public Set<Boulder> getAllBoulders() {
+		Set<Boulder> allBoulders = new HashSet<Boulder>();
+		
+		for (Item item : this.items) {
+			if (item instanceof Boulder) {
+				allBoulders.add((Boulder)item);
+			}
+		}
+		return allBoulders;
+	}
+
 
 	
 	//--------------------LOGS
-	/**
-	 * Variable referencing a set collecting all the logs
-	 * of this world.
-	 * 
-	 * @Invar  The referenced set is effective.
-	 *       
-	 * @Invar  Each log registered in the referenced list is
-	 *         effective and not yet terminated.
-	 *         
-	 */
-	private final Set<Log> logs;
 	
 	/**
-	 * Creates a new Log in this World, on the position given.
+	 * Gives back all Logs in this World.
+	 * @return
+	 * 		A new (Hash)Set of all Logs in this World. That makes this a
+	 * 		shallow copy.
+	 */
+	public Set<Log> listAllLogs() {
+		Set<Log> result = new HashSet<Log>();
+		for (Item item : this.items) {
+			if (item instanceof Log) {
+				result.add((Log)item);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Creates a new Log in this World, on the given position
 	 * 
 	 * @param position
 	 * 		the position for the log
 	 */
 	public void createLog(double[] position) {
-		new Log(position, this);
+		Log log = new Log(position, this);
+		this.items.add(log);
 	}
 
 	

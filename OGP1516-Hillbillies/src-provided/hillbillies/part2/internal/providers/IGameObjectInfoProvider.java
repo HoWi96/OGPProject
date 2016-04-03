@@ -3,8 +3,8 @@ package hillbillies.part2.internal.providers;
 import hillbillies.common.internal.providers.UnitInfoProvider;
 import hillbillies.model.Faction;
 import hillbillies.model.Unit;
-import hillbillies.model.gameobjects.Boulder;
-import hillbillies.model.gameobjects.Log;
+import hillbillies.model.items.rawmaterials.Boulder;
+import hillbillies.model.items.rawmaterials.Log;
 
 public interface IGameObjectInfoProvider extends UnitInfoProvider {
 

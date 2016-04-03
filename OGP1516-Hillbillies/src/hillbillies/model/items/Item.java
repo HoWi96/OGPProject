@@ -1,4 +1,4 @@
-package hillbillies.model.gameobjects;
+package hillbillies.model.items;
 
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.Unit;
@@ -58,9 +58,9 @@ public abstract class Item {
 	 */
 	public void terminate() throws IllegalStateException{
 		if(this.hasWorld())
-			throw new IllegalStateException("still connected to a world");
+			this.getWorld().removeItem(this);
 		if(this.hasUnit())
-			throw new IllegalStateException("still connected to a unit");
+			this.getUnit().removeItem(this);
 		this.isTerminated = true;
 	}
 	
@@ -161,10 +161,10 @@ public abstract class Item {
 	 * @param  World
 	 *         The World to check.
 	 * @return 
-	 *       | result == true
+	 *       | result == world == null || this.getWorld() == world
 	*/
-	public static boolean canHaveAsWorld(World world) {
-		return true;
+	public boolean canHaveAsWorld(World world) {
+		return world == null || this.getWorld() == world;
 	}
 	
 	/**
@@ -220,10 +220,10 @@ public abstract class Item {
 	 * @param  unit
 	 *         The unit to check.
 	 * @return 
-	 *       | result == true;
+	 *       | result == unit == null || this.getUnit() == unit
 	*/
-	public static boolean canHaveAsUnit(Unit unit) {
-		return true;
+	public boolean canHaveAsUnit(Unit unit) {
+		return unit == null || this.getUnit() == unit;
 	}
 	
 	/**

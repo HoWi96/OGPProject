@@ -1,4 +1,4 @@
-package hillbillies.model.gameobjects;
+package hillbillies.model.items.rawmaterials;
 
 import hillbillies.model.World;
 

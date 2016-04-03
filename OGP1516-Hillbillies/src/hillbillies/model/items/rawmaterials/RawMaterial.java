@@ -1,8 +1,9 @@
-package hillbillies.model.gameobjects;
+package hillbillies.model.items.rawmaterials;
 
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.Utils;
 import hillbillies.model.World;
+import hillbillies.model.items.Item;
 
 /**
  * @author Holger
@@ -13,7 +14,7 @@ import hillbillies.model.World;
  *       | canHaveAsWeight(this.getWeight())
  *       
  */
-public class RawMaterial extends Item {
+public abstract class RawMaterial extends Item {
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -50,7 +51,7 @@ public class RawMaterial extends Item {
 	public RawMaterial(double[] position, World world) throws IllegalArgumentException {
 		super();
 		this.setPosition(position);
-		this.setWorld(world);
+		world.addItem(this);
 		this.weight = Utils.randInt(MIN_WEIGHT, MAX_WEIGHT);
 		
 	}

@@ -4,8 +4,8 @@ import java.util.function.Consumer;
 
 import hillbillies.model.Faction;
 import hillbillies.model.Unit;
-import hillbillies.model.gameobjects.Boulder;
-import hillbillies.model.gameobjects.Log;
+import hillbillies.model.items.rawmaterials.Boulder;
+import hillbillies.model.items.rawmaterials.Log;
 import hillbillies.part1.internal.controller.UnitInfoProviderPart1;
 import hillbillies.part2.facade.IFacade;
 import hillbillies.part2.internal.providers.IGameObjectInfoProvider;
