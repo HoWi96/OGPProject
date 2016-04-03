@@ -43,14 +43,14 @@ public class WorldTest {
 	@Test
 	public void testCorrectTypes() {
 		int[] position = new int[] {1,1,0};
-		assertEquals(TYPE_ROCK, world1.getcubeType(position));
-		assertEquals(TYPE_TREE, world1.getcubeType(new int[]{1,1,1}));
-		assertEquals(TYPE_WORKSHOP, world1.getcubeType(new int[]{1,1,2}));
-		assertEquals(TYPE_AIR, world1.getcubeType(new int[]{0,0,0}));
+		assertEquals(TYPE_ROCK, world1.getCubeType(position));
+		assertEquals(TYPE_TREE, world1.getCubeType(new int[]{1,1,1}));
+		assertEquals(TYPE_WORKSHOP, world1.getCubeType(new int[]{1,1,2}));
+		assertEquals(TYPE_AIR, world1.getCubeType(new int[]{0,0,0}));
 		
 		assertTrue(world1.isSolidCube(position));
 		world1.setcubeType(TYPE_AIR,position);
-		assertEquals(TYPE_AIR, world1.getcubeType(position));
+		assertEquals(TYPE_AIR, world1.getCubeType(position));
 		assertTrue(!world1.isSolidCube(position));
 	}
 

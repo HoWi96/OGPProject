@@ -37,8 +37,9 @@ public abstract class RawMaterial extends Item {
 	 */
 	public RawMaterial(double[] position, World world) throws IllegalArgumentException {
 		super();
-		this.setPosition(position);
 		world.addItem(this);
+		this.setPosition(position);
+		
 
 	}
 	

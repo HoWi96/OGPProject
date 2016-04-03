@@ -48,13 +48,14 @@ public class World {
 	 *___________________________________________________________________*/
 	
 	
+	//PUBLIC
+	public static final int TYPE_AIR = 0;
+	public static final int TYPE_ROCK = 1;
+	public static final int TYPE_TREE = 2;
+	public static final int TYPE_WORKSHOP = 3;
+	public static final int[] VALID_CUBE_TYPES = {TYPE_AIR,TYPE_ROCK,TYPE_TREE,TYPE_WORKSHOP};
 	
-	private static final int TYPE_AIR = 0;
-	private static final int TYPE_ROCK = 1;
-	private static final int TYPE_TREE = 2;
-	private static final int TYPE_WORKSHOP = 3;
-	private static final int[] VALID_CUBE_TYPES = {TYPE_AIR,TYPE_ROCK,TYPE_TREE,TYPE_WORKSHOP};
-	
+	//PRIVATE
 	private static final int MAX_UNITS = 100;
 	private static final int MAX_FACTIONS = 5;
 	
@@ -208,7 +209,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 			if the position is out of bounds
 	 */
 	@Raw
-	public int getcubeType(int[] position) throws IllegalArgumentException {
+	public int getCubeType(int[] position) throws IllegalArgumentException {
 		if (!isValidPosition(position))
 			throw new IllegalArgumentException();
 		
@@ -362,7 +363,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 		if the cube at the given position is rock or tree
 	 */
 	public boolean isSolidCube(int[] position){
-		int type = this.getcubeType(position);
+		int type = this.getCubeType(position);
 		return (type == TYPE_ROCK) || (type == TYPE_TREE);	
 	}
 	
@@ -450,17 +451,21 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @effect A log will be spawned
 	 * 
 	 */
-	private void caveIn(int[] position){
+	public void caveIn(int[] position) throws IllegalArgumentException{
+		
+		if(!isSolidCube(position) && !isValidPosition(position))
+			throw new IllegalArgumentException("The cube is not solid or is on an invalid location");
 		
 		List<int[]> caveInList = this.getConnectedToBorder().changeSolidToPassable(
 				position[0], position[1], position[2]);
+		caveInList.add(position);
 		
 		for(int[] caveInPosition: caveInList){
 			
 			if(isSolidCube(caveInPosition)){
 				
 				//REPLACE CUBE BY AIR
-				int type = this.getcubeType(caveInPosition);
+				int type = this.getCubeType(caveInPosition);
 				this.setcubeType(TYPE_AIR, caveInPosition);	
 				this.getTerrainChangeListener().notifyTerrainChanged(
 						caveInPosition[0], caveInPosition[1], caveInPosition[2]);
@@ -522,7 +527,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @effect The time will advance for all units
 	 * @effect The time will advance for all items
 	 */
-	public void advanceTime(double dt) throws IllegalArgumentException{
+	public void advanceTime(double dt) throws IllegalArgumentException, IllegalStateException{
+		
 		if (!(0.0<=dt&&dt<=0.2))
 			throw new IllegalArgumentException();
 		
@@ -750,17 +756,17 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		//silently reject extra units
 		if(this.units.size() < MAX_UNITS){
 			//ADDING UNIT TO WORLD
-			System.out.println("Adding unit to world");
+			System.out.println("Adding unit to this world");
 			this.units.add(unit);
 			unit.setWorld(this);
 			
 			//ADDING UNIT TO FACTION
-			System.out.println("adding unit to faction");
+			System.out.println("Adding unit to a new faction");
 			Faction faction = this.getFactionForUnit(unit);
 			//Leaving old faction
 			unit.getFaction().removeUnit(unit);
 			faction.addUnit(unit);
-			System.out.println("succesfully added unit");
+			System.out.println("Succesfully added unit");
 		}
 	}
 
@@ -861,7 +867,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 			Z = (int) (Math.random()*nbZ);	
 		};
 		// go down till you hit ground or level 0
-		while(!isSolidCube(new int[]{X,Y,Z-1}) && Z ==0){
+		while( Z != 0 && !isSolidCube(new int[]{X,Y,Z-1})){
 			Z= Z-1;	
 		};
 		
@@ -1012,12 +1018,68 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		item.setWorld(null);
 	}
 	
+	//---------------------ADDITIONAL INSPECTORS
+	
 	/**
 	 * return the set of Items that belong to this world
 	 */
 	protected Set<Item> getAllItems(){
 		return this.items;
 	}
+	
+	/**
+	 * Returns all items located on the cube, if any.
+	 * 
+	 * @param position
+	 * 		The position of the cube
+	 * 
+	 * @return
+	 * 		A new ArrayList of all items with positions located on the cube.
+	 */
+	@Raw
+	public List<Item> getAllItemsOnPosition(int[] position) throws IllegalArgumentException {
+		
+		if (!isValidPosition(position)) {
+			throw new IllegalArgumentException("Given position is invalid");
+		}
+		
+		List<Item> AllItems = new ArrayList<Item>();
+		
+		for (Item item : this.items) {
+			if (Utils.equals(position, Utils.getCubePosition(item.getPosition()))) {
+				AllItems.add(item);
+			}
+		}
+		
+		return AllItems;
+	}
+	
+	/**
+	 * Returns a random item on the give position or null
+	 * 
+	 * @param position
+	 * 		The position of the cube
+	 * 
+	 * @return
+	 * 		A random item or null
+	 * 
+	 * @effect
+	 * 		| getAllItemsOnPosition(position)
+	 * 		
+	 * 		
+	 */
+	@Raw 
+	public Item getItemOnPosition(int[] position) throws IllegalArgumentException{
+		List<Item> AllItems = getAllItemsOnPosition(position);
+		
+		if(AllItems.isEmpty())
+			return null;
+		else
+			return AllItems.get(0);
+	
+	}
+
+	
 	
 	//-------------------BOULDERS
 	

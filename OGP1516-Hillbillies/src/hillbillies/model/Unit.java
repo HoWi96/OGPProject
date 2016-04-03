@@ -8,7 +8,6 @@ import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.items.Item;
 import hillbillies.model.items.rawmaterials.Boulder;
 import hillbillies.model.items.rawmaterials.Log;
-import hillbillies.model.items.rawmaterials.RawMaterial;
 
 
 
@@ -395,7 +394,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
  public void terminate() {
 	 
 	 if (hasItem())
-		 this.dropItem(this.getItem());
+		 this.dropItem(this.getItem(),this.getPosition());
 	 
 	 this.setHitpoints(0);
 	 this.setSpeed(0);
@@ -1145,11 +1144,16 @@ public void updateXP(int XP){
 
 public void advanceTime(double dt) throws IllegalArgumentException, IllegalStateException {
 	
+	System.out.println("advance time for unit" + dt);
+	System.out.println("default behavior?"+ this.hasDefaultBehavior());
+	System.out.println("current activity =");
+	
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
 	
 	if(!this.isAlive())
 		throw new IllegalStateException();
+	
 	
     counterTillRest += dt;
     
@@ -1194,13 +1198,16 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 			int randomActivity = (int) (Math.random()*3);
 			
 			if (randomActivity == 0) {
+				System.out.println("random position");
 				int[] targetPosition = this.getWorld().getRandomPositionForUnit();
 				this.moveToTarget(targetPosition);
 			}
 			if (randomActivity == 1) {
-				work();
+				System.out.println("random work");
+				workAt(Utils.getCubePosition(this.getPosition()));
 			}
 			if (randomActivity == 2) {
+				System.out.println("random rest");
 				rest();
 			}
 	}
@@ -1214,11 +1221,13 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 	switch(activity) {
 	
 	case FALLING:
+		System.out.println("falling");
 		
 		falling(dt);
 		break;
 		
 	case MOVING: 
+			System.out.println("moving");
 		
 			if(this.isSprinting()){
 				if(this.getStamina()>=10*dt){
@@ -1278,26 +1287,25 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 //					nPosition = this.getNextPosition();
 					} 
 				}
-			}	
+			}
+			//Hier moet een oplossing voor gevonden worden!
+			if(this.getStep() != null){
 			
-			double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
-			//TO CENTER OF CUBE
-			if(Utils.inBetween(cPosition, nPosition, iPosition)){
-				this.setPosition(iPosition);
-			}else{
-				this.setPosition(nPosition);
-				this.updateXP(1);
+				double[] iPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
+				//TO CENTER OF CUBE
+				if(Utils.inBetween(cPosition, nPosition, iPosition)){
+					this.setPosition(iPosition);
+				}else{
+					this.setPosition(nPosition);
+					this.updateXP(1);
+				}
 			}
 			break;
 	
 	
-	case WORKING: 
-		
-			this.setProgressTime((float)(this.getProgressTime()+dt));
-			if (this.getProgressTime() >= this.getWorkingTime()) {
-				this.setActivity(Activity.NOTHING);
-				counterTillDefault =0;
-			}
+	case WORKING:
+		System.out.println("working");
+		working(dt);
 			break;
 	
 	case ATTACKING: 
@@ -1310,7 +1318,7 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 			break;
 	
 	case RESTING: 
-		
+		System.out.println("resting");
 			if (this.isFullyHealed()) {
 				this.setActivity(Activity.NOTHING);
 				counterTillDefault = 0;
@@ -1328,25 +1336,74 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 						
 						this.setStamina((int)this.getStamina()+1);
 						this.setProgressTime(this.getProgressTime()-this.getMinimalStaminaTime());
-					}
-					
+					}	
 				}
 			break;
 				
 			
 			
 	case NOTHING: 
+		System.out.println("nothing");
 		
 			counterTillDefault = counterTillDefault+dt;
 			if(counterTillDefault >= NOTHING_INTERVAL){
 				counterTillDefault = 0.0;
 				this.startDefaultBehavior();
-				this.setProgressTime(0);
-				
+				this.setProgressTime(0);	
 			}
 			break;
 	}
+}
+
+/**
+ * The unit is working
+ * 
+ * @param dt
+ * 		The time the unit proceeds working
+ */
+private void working(double dt) {
 	
+	this.setProgressTime((float)(this.getProgressTime()+dt));
+	
+	if (this.getProgressTime() >= this.getWorkingTime()) {
+		
+		int[] workingPosition = this.getWorkingPosition();
+		int cubeType = this.getWorld().getCubeType(workingPosition);
+		boolean solidCube = this.getWorld().isSolidCube(workingPosition);
+		Item item = this.getWorld().getItemOnPosition(workingPosition);
+		
+		System.out.println("completed working");
+		System.out.println("On cube type: " + cubeType );
+		System.out.println();
+		
+		if(hasItem()){
+			//drop item
+			dropItem(this.getItem(), Utils.getCubeCenter(workingPosition));
+		}else if(item != null){
+			if(cubeType == World.TYPE_WORKSHOP){
+				//consume item
+				item.terminate();
+				//Receive update equipment
+				this.setToughness(this.getToughness()+1);
+				this.setWeight(this.getWeight()+1);
+
+			} else {
+				//pick up item
+				pickUpItem(item);
+			}	
+		}else if(solidCube){
+			// cave in
+			
+			this.getWorld().caveIn(workingPosition);
+			System.out.println("Cave in happened");
+		}
+		
+		
+		
+		this.updateXP(10);
+		this.setActivity(Activity.NOTHING);
+		counterTillDefault =0;
+	}
 }
 
 /**
@@ -1587,8 +1644,9 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 
 		double[] cubeCenter = Utils.getCubeCenter(Utils.getCubePosition(this.getPosition()));
 		double[] nextPosition = new double[] {cubeCenter[0]+dx,cubeCenter[1]+dy,cubeCenter[2]+dz};
+		double[] targetPosition = this.getTargetPosition();
 		
-		if(!isValidPosition(nextPosition) && !Utils.equals(this.getTargetPosition(), this.getPosition())){
+		if(!isValidPosition(nextPosition) && (targetPosition != null)){
 			this.setTargetPosition(cubeCenter);
 			this.setNextPosition(cubeCenter);
 			return;
@@ -1599,7 +1657,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 
 		// only when hitting moveToAdjacent
 		if(this.getTargetPosition() != null &&
-				Utils.equals(Utils.getCubePosition(getPosition()),Utils.getCubePosition(getTargetPosition())))
+				Utils.equals(Utils.getCubePosition(getPosition()),Utils.getCubePosition(targetPosition)))
 			this.setTargetPosition(nextPosition);
 		
 		this.setStep(new int[]{dx,dy,dz});
@@ -1887,23 +1945,83 @@ public boolean isDoingNothing(){
  * 
  * The unit starts working
  * 
- * @post the progress time will be set to 0
- * 		| new.getProgressTime = 0
+ * @param position
+ * 		The position where the unit should conduct labor
  * 
- * @post the activity of the unit is switched off to nothing
- * 		 | new.getCurrentAcivity() == Activity.WORKING
+ * @effect The activity will be set to working
+ * 		|this.setActivity(Activity.WORKING);
+ * @effect The progressTime will be set to 0
+ * 		|this.setProgressTime(0);
+ * @effect the workingPosition will be set to the given position
+ * 		| this.setWorkingPosition(position);
  * 
  * @throws IllegalStateException
 *         the given unit is not able to work or is in default behavior.
-*       | ! isAbleToWork()&&!hasDefaultBehavior())
+*       | ! isAbleToWork()
  */
-public void work() throws IllegalStateException{
+public void workAt(int[] position) throws IllegalStateException, IllegalArgumentException{
 	if (!this.isAbleToWork())
 			throw new IllegalStateException();
 	
 	this.setActivity(Activity.WORKING);
 	this.setProgressTime(0);
+	this.setWorkingPosition(position);
 }
+
+
+
+/**
+ * Return the workingPosition of this Unit.
+ */
+@Basic @Raw @Model
+private int[] getWorkingPosition() {
+	return this.workingPosition;
+}
+
+/**
+ * Check whether the given workingPosition is a valid workingPosition for
+ * any Unit.
+ *  
+ * @param  workingPosition
+ *         The workingPosition to check.
+ * @return 
+ *       | result == this.getWorld().isValidPosition(workingPosition) 
+ *		&& (Utils.areAdjacent(Utils.getCubePosition(getPosition()), workingPosition)
+ *		|| Utils.equals(Utils.getCubePosition(getPosition()), workingPosition)
+*/
+@Model
+private boolean canHaveAsWorkingPosition(int[] workingPosition) {
+	return this.getWorld().isValidPosition(workingPosition) 
+			&& (Utils.areAdjacent(Utils.getCubePosition(getPosition()), workingPosition)
+			|| Utils.equals(Utils.getCubePosition(getPosition()), workingPosition));
+}
+
+/**
+ * Set the workingPosition of this Unit to the given workingPosition.
+ * 
+ * @param  workingPosition
+ *         The new workingPosition for this Unit.
+ * @post   The workingPosition of this new Unit is equal to
+ *         the given workingPosition.
+ *       | new.getWorkingPosition() == workingPosition
+ * @throws IllegalArgumentException
+ *         The given workingPosition is not a valid workingPosition for any
+ *         Unit.
+ *       | ! isValidWorkingPosition(getWorkingPosition())
+ */
+@Raw @Model
+private void setWorkingPosition(int[] workingPosition) throws IllegalArgumentException {
+	if (! canHaveAsWorkingPosition(workingPosition))
+		throw new IllegalArgumentException();
+	this.workingPosition = workingPosition;
+}
+
+/**
+ * Variable registering the workingPosition of this Unit.
+ */
+private int[] workingPosition;
+
+
 
 //RESTING
 
@@ -2495,10 +2613,10 @@ public boolean canHaveAsFaction(Faction faction){
 	 * 		The world will add this item
 	 * 		|world.addItem(item);
 	 */
-	private void dropItem(Item item){
+	private void dropItem(Item item, double[] position){
 		if(item != null){
 		
-			item.setPosition(this.getPosition());
+			item.setPosition(position);
 			removeItem(item);
 			this.getWorld().addItem(item);
 			

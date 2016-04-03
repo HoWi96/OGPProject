@@ -283,7 +283,7 @@ public class UnitTest {
 	    @Test
 	    public void testIsWorking(){
 	    	assertFalse(unit1.isWorking());
-	    	unit1.work();
+	    	unit1.workAt(Utils.getCubePosition(unit1.getPosition()));
 	    	assertTrue(unit1.isWorking());
 	    }
 	    
@@ -429,7 +429,7 @@ public class UnitTest {
 	    public void testWorkException(){
 	    	Unit defender = new Unit("Baba 'O Reil", position, 50, 50, 50, 50, true);
 	    	unit1.attack(defender);
-	    	unit1.work();
+	    	unit1.workAt(Utils.getCubePosition(unit1.getPosition()));
 	    }
 	    
 	    @Test(expected = IllegalStateException.class)

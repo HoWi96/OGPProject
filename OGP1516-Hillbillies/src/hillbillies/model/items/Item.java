@@ -137,7 +137,7 @@ public abstract class Item {
 	 */
 	@Raw
 	public void setPosition(double[] position) throws IllegalArgumentException {
-		if (! isValidPosition(position))
+		if (!isValidPosition(position))
 			throw new IllegalArgumentException();
 		this.position = position;
 	}
@@ -177,10 +177,10 @@ public abstract class Item {
 	 * @param  World
 	 *         The World to check.
 	 * @return 
-	 *       | result == world == null || this.getWorld() == world
+	 *       | result == true;
 	*/
 	public boolean canHaveAsWorld(World world) {
-		return world == null || this.getWorld() == world;
+		return true;
 	}
 	
 	/**
@@ -198,7 +198,7 @@ public abstract class Item {
 	 */
 	@Raw
 	public void setWorld(World world) throws IllegalArgumentException {
-		if (! canHaveAsWorld(world))
+		if (!canHaveAsWorld(world))
 			throw new IllegalArgumentException();
 		this.world = world;
 	}
@@ -236,10 +236,10 @@ public abstract class Item {
 	 * @param  unit
 	 *         The unit to check.
 	 * @return 
-	 *       | result == unit == null || this.getUnit() == unit
+	 *       | result == true;
 	*/
 	public boolean canHaveAsUnit(Unit unit) {
-		return unit == null || this.getUnit() == unit;
+		return true;
 	}
 	
 	/**

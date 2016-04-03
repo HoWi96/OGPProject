@@ -178,7 +178,7 @@ public class Facade implements IFacade{
 	@Override
 	public void work(Unit unit) throws ModelException {
 		try {
-			unit.work();
+			unit.workAt(Utils.getCubePosition(unit.getPosition()));
 		} catch (IllegalStateException e) {
 			throw new ModelException();
 		}

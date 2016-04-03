@@ -232,8 +232,12 @@ public class Facade implements IFacade {
 
 	@Override
 	public World createWorld(int[][][] terrainTypes, TerrainChangeListener modelListener) throws ModelException {
-		World world = new World(terrainTypes,modelListener);
-		return world;
+		try {
+			World world = new World(terrainTypes,modelListener);
+			return world;
+		} catch (IllegalArgumentException e) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
@@ -253,20 +257,32 @@ public class Facade implements IFacade {
 
 	@Override
 	public void advanceTime(World world, double dt) throws ModelException {
-		world.advanceTime(dt);
+		try {
+			world.advanceTime(dt);
+		} catch (Exception e) {
+			throw new ModelException();
+		}
 		
 	}
 
 	@Override
 	public int getCubeType(World world, int x, int y, int z) throws ModelException {
-		int[] position = {x,y,z};
-		return world.getcubeType(position);
+		try {
+			int[] position = {x,y,z};
+			return world.getCubeType(position);
+		} catch (IllegalArgumentException e) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
 	public void setCubeType(World world, int x, int y, int z, int value) throws ModelException {
-		int[] position = {x,y,z};
-		world.setcubeType(value, position);
+		try {
+			int[] position = {x,y,z};
+			world.setcubeType(value, position);
+		} catch (IllegalArgumentException e) {
+			throw new ModelException();
+		}
 		
 	}
 
@@ -286,8 +302,12 @@ public class Facade implements IFacade {
 
 	@Override
 	public void addUnit(Unit unit, World world) throws ModelException {
-		System.out.println("add unit "+unit.getName());
-		world.addUnit(unit);
+		try {
+			System.out.println("add unit "+unit.getName());
+			world.addUnit(unit);
+		} catch (IllegalArgumentException e) {
+			throw new ModelException();
+		}
 		
 	}
 
@@ -318,8 +338,12 @@ public class Facade implements IFacade {
 
 	@Override
 	public void workAt(Unit unit, int x, int y, int z) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		try {
+			int[] position = new int[]{x, y, z};
+			unit.workAt(position);
+		} catch (Exception e) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
