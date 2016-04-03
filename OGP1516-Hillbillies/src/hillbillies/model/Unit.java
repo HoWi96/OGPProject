@@ -498,7 +498,7 @@ public String getName() {
  */
 @Basic @Raw
 public double[] getPosition() {
-	return this.position;
+	return this.position.clone();
 }
 
 /**
@@ -1145,7 +1145,8 @@ public void advanceTime(double dt) throws IllegalArgumentException {
     //	this.fall();
     
     // if the unit gets a new task, he first have to move to the next position
-    if((!this.isMoving() && !Utils.equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext())){
+    if(!this.isMoving() && this.getActivity() != Activity.FALLING && 
+    		!Utils.equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext()){
     	if(!this.isMovingToNext()){
 	    	this.setNextActivity(this.getActivity());
 	    	this.setActivity(Activity.MOVING);
@@ -1195,24 +1196,7 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 	
 	case FALLING:
 		
-		double[] cfPosition = this.getPosition();
-		double[] nfPosition = this.getNextPosition();
-		
-		if(Utils.equals(cfPosition,nfPosition)){
-			// if the unit is well landed
-			if(this.getWorld().isSolidUnder(Utils.getCubePosition(cfPosition))){
-				this.setActivity(Activity.NOTHING);
-			}else{
-				//else continue falling
-				this.fall();
-			}
-		} else {
-			double[] ifPosition = this.getIntermediatePosition(this.getStep()[0],this.getStep()[1],this.getStep()[2], dt);
-			if(Utils.inBetween(cfPosition, nfPosition, ifPosition))
-				this.setPosition(ifPosition);
-			else
-				this.setPosition(nfPosition);
-		}	
+		falling(dt);
 		break;
 		
 	case MOVING: 
@@ -1344,6 +1328,37 @@ public void advanceTime(double dt) throws IllegalArgumentException {
 			break;
 	}
 	
+}
+
+/**
+ * The unit is falling
+ * 
+ * @param dt
+ * 		the time the unit will fall
+ * 
+ * @post the position will be updated
+ * @post if the ground is reached, 
+ * 				its next position will be set to the current cube center
+ * 				it will suffer damage according to the height
+ * 				its activity will be set to nothing
+ */
+private void falling(double dt) {
+	//FALLING
+	double[] currentFallingPosition = this.getPosition();
+	currentFallingPosition[2] = currentFallingPosition[2]-3.0*dt;
+	this.setPosition(currentFallingPosition);
+	
+	//IF SOLID UNDER CURRENT NEW POSITION
+	if(this.getWorld().isSolidUnder(Utils.getCubePosition(currentFallingPosition))){
+		
+		double[] startedFallingPosition = this.getNextPosition();
+		int heightFalled = (int) Math.floor(startedFallingPosition[2]-currentFallingPosition[2]);
+		double[] nextPosition = Utils.getCubeCenter(Utils.getCubePosition(currentFallingPosition));
+		
+		this.setNextPosition(nextPosition);
+		this.setActivity(Activity.NOTHING);
+		this.takeDamage(heightFalled*10);
+	}
 }
 
 

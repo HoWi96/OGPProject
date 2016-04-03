@@ -13,7 +13,7 @@ import hillbillies.model.World;
  *       | canHaveAsWeight(this.getWeight())
  *       
  */
-public abstract class RawMaterial extends Item {
+public class RawMaterial extends Item {
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -37,14 +37,20 @@ public abstract class RawMaterial extends Item {
 	 *         The position for this new RawMaterial.
 	 * @param  world
 	 *         The world for this new RawMaterial.
-	 * @effect The rawMaterial is initialized as a GameObject with given values
-	 * 			super(position, world)
+	 * @effect The rawMaterial is initialized as a GameObject
+	 *         
+	 * @effect The position of this new raw material is set to
+	 *         the given position.
+	 * @effect The world of of this new raw material is set to
+	 *         the given world.
+	 * 
 	 * @post The raw material gets a random weight between 10 and 50 (inclusive)
-	 * @post There is no unit assigned to the raw material
 	 * 
 	 */
 	public RawMaterial(double[] position, World world) throws IllegalArgumentException {
-		super(position, world);
+		super();
+		this.setPosition(position);
+		this.setWorld(world);
 		this.weight = Utils.randInt(MIN_WEIGHT, MAX_WEIGHT);
 		
 	}

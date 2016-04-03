@@ -11,7 +11,6 @@ import hillbillies.model.World;
 
 /** 
  * 
- * 
  * @invar  The position of each GameObject must be a valid position for any
  *         GameObject.
  *       | isValidPosition(getPosition())
@@ -22,7 +21,7 @@ import hillbillies.model.World;
  *         Item.
  *       | canHaveAs(getUnit())
  */
-public class Item {
+public abstract class Item {
 
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -32,22 +31,12 @@ public class Item {
 		
 	/**
 	 * Initialize this new GameObject with given position.
-	 *
-	 * @param  position
-	 *         The position for this new GameObject.
-	 * @param  world
-	 *         The world for this new GameObject.
-	 *         
-	 * @effect The position of this new GameObject is set to
-	 *         the given position.
-	 * @effect The world of of this new GameObject is set to
-	 *         the given world.
 	 *         
 	 * @post The game object is not terminated
+	 * @post There is no unit assigned to the item
+	 * @post There is no unit assigned to the raw item
 	 */
-	public Item(double[] position, World world)throws IllegalArgumentException {
-		this.setPosition(position);
-		this.setWorld(world);
+	public Item()throws IllegalArgumentException {
 		this.isTerminated = false;
 	}
 	
@@ -61,6 +50,7 @@ public class Item {
 	 * Terminates the game object
 	 * 
 	 * @post The game object is terminated
+	 * 
 	 * @throws IllegalStateException
 	 * 			if the GameObject is still connected to a world
 	 * @throws IllegalStateException
@@ -99,7 +89,7 @@ public class Item {
 	 */
 	@Basic @Raw
 	public double[] getPosition() {
-		return this.position;
+		return this.position.clone();
 	}
 	
 	/**
@@ -267,40 +257,25 @@ public class Item {
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 	
+	/**
+	 * Let the time progress for this item
+	 * 
+	 * @param dt
+	 * 		the time to progress
+	 * 
+	 * @effect if the object is not directly above ground it will falling
+	 */
 	public void advanceTime(double dt) throws IllegalArgumentException {
 		if(!this.getWorld().isSolidUnder(Utils.getCubePosition(this.getPosition())))
-			setFalling(true);
-		if(this.isFalling())
 			falling(dt);
-		
-	}
-	/**
-	 * Indicates whether the unit is falling
-	 */
-	public boolean isFalling() {
-		return isFalling;
-	}
-	/**
-	 * Set the behavior of falling
-	 * 
-	 * @param falling
-	 * 		if the unit is falling
-	 * @post
-	 * 		this.isFalling() == falling
-	 */
-	protected void setFalling(boolean falling) {
-		this.isFalling = falling;
-	}
-	
-	
-	protected void falling(double dt){
-		System.out.println("falling raw material");
-		//TODO
 	}
 
-	/**
-	 * boolean indicating whether the raw material is falling
-	 */
-	private boolean isFalling;	
+	protected void falling(double dt){
+		double[] position = this.getPosition();
+		position[2] = position[2]-3.0*dt;
+		this.setPosition(position);
+	}
+		
+
 }
 
