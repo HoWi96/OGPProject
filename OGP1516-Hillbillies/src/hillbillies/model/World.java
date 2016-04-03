@@ -5,7 +5,6 @@ import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.items.Item;
 import hillbillies.model.items.rawmaterials.Boulder;
 import hillbillies.model.items.rawmaterials.Log;
-import hillbillies.model.items.rawmaterials.RawMaterial;
 import hillbillies.part2.listener.TerrainChangeListener;
 import hillbillies.util.ConnectedToBorder;
 
@@ -89,32 +88,6 @@ public class World {
 	 */
 	private final TerrainChangeListener modelListener;
 	/**
-	 * Variable referencing a set collecting all the units
-	 * of this world.
-	 * 
-	 * @invar  The referenced set is effective.
-	 *       | units != null
-	 * @invar  Each unit registered in the referenced list is
-	 *         effective and not yet terminated.
-	 *       | for each unit in units:
-	 *       |   ( (unit != null) &&
-	 *       |     (! unit.isTerminated()) )
-	 */
-	public Set<Unit> units = new HashSet<Unit>(MAX_UNITS);
-	/**
-	 * Variable referencing a set collecting all the factions
-	 * of this world.
-	 * 
-	 * @invar  The referenced set is effective.
-	 *       | factions != null
-	 * @invar  Each faction registered in the referenced list is
-	 *         effective and not yet terminated.
-	 *       | for each faction in factions:
-	 *       |   ( (faction != null) &&
-	 *       |     (! faction.isTerminated()) )
-	 */
-	public Set<Faction> factions = new HashSet<Faction>(MAX_FACTIONS);
-	/**
 	 * Variable registering the ConnectedToBorder class storing information about this world
 	 */
 	private final ConnectedToBorder border;
@@ -151,24 +124,38 @@ public class World {
  * @post   The connectedToBorder of this new world is equal to the given
  *         connectedToBorder.
  *       | new.getConnectedToBorder() == border
+ *       
  * @post No factions belong to this new world
  * @post No units belong to this new world
+ * 
+ * @post No items belong to this world, unless there are some spawned by
+ * 		| this.makeAllSolidsConnected();
+ * @effect Let all solids be connected to the border of the game world
+ * 		| this.makeAllSolidsConnected();
  */
 public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws IllegalArgumentException {
 	
 	this.setTerrainTypes(terrainTypes);
 	
-	//Immutable Variables
+	//Initialize immutable attributes
 	this.nbCubesX = terrainTypes.length;
 	this.nbCubesY = terrainTypes[0].length;
 	this.nbCubesZ = terrainTypes[0][0].length;
+	
+	//Initialize associations
+	this.units = new HashSet<Unit>(MAX_UNITS);
+	this.factions = new HashSet<Faction>(MAX_FACTIONS);
+	this.items = new HashSet<Item>();
+	
 	//Connection to ConnectedToBorder
 	this.border = new ConnectedToBorder(this.getNbCubesX(),this.getNbCubesY(), this.getNbCubesZ());
 	this.makeAllSolidsConnected();
+	
 	//Connection with the GUI
 	if(modelListener==null)
 		throw new IllegalArgumentException();
 	this.modelListener = modelListener;
+
 }
 
 	/*___________________________________________________________________
@@ -471,20 +458,26 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		for(int[] caveInPosition: caveInList){
 			
 			if(isSolidCube(caveInPosition)){
-				//REPLACE CUBE
+				
+				//REPLACE CUBE BY AIR
 				int type = this.getcubeType(caveInPosition);
 				this.setcubeType(TYPE_AIR, caveInPosition);	
 				this.getTerrainChangeListener().notifyTerrainChanged(
 						caveInPosition[0], caveInPosition[1], caveInPosition[2]);
+				
 				//SPAWN RAWMATERIAL
 				double probability = 0.25;
 				Random rand = new Random();
+				
 				if (rand.nextDouble() <= probability){
+					double[] spawnPosition = Utils.getCubeCenter(caveInPosition);
+					
 					if (type == TYPE_ROCK){
-						// spawn boulder
+						this.createBoulder(spawnPosition);
 						System.out.println("spawn boulder");
+						
 					}else if(type == TYPE_TREE){
-						// spawn log
+						this.createLog(spawnPosition);
 						System.out.println("spawn log");
 					}
 				}
@@ -518,13 +511,30 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 	
+	
+	/**
+	 * Invokes the advanceTime method on all objects present in this World.
+	 * This are alle units and all items
+	 * 
+	 * @param dt
+	 * 		The time by which to advance, expressed in seconds.
+	 * 
+	 * @effect The time will advance for all units
+	 * @effect The time will advance for all items
+	 */
 	public void advanceTime(double dt) throws IllegalArgumentException{
 		if (!(0.0<=dt&&dt<=0.2))
 			throw new IllegalArgumentException();
+		
 		//UNITS
 		for(Unit unit: this.units){
 			unit.advanceTime(dt);	
 		}
+		//ITEMS
+		for(Item item: this.items){
+			item.advanceTime(dt);
+		}
+		
 	}
 	
 	
@@ -534,7 +544,21 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 *___________________________________________________________________
 	 * -----------------------FACTIONS-----------------------------------
 	 *___________________________________________________________________
-	 *___________________________________________________________________*/
+
+	/**
+	 * Variable referencing a set collecting all the factions
+	 * of this world.
+	 * 
+	 * @invar  The referenced set is effective.
+	 *       | factions != null
+	 * @invar  Each faction registered in the referenced list is
+	 *         effective and not yet terminated.
+	 *       | for each faction in factions:
+	 *       |   ( (faction != null) &&
+	 *       |     (! faction.isTerminated()) )
+	 */
+	public Set<Faction> factions;
+	
 	
 	//------------------------GETTERS
 	
@@ -672,7 +696,19 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * -----------------------UNITS-----------------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
-	
+	 /**
+	 * Variable referencing a set collecting all the units
+	 * of this world.
+	 * 
+	 * @invar  The referenced set is effective.
+	 *       | units != null
+	 * @invar  Each unit registered in the referenced list is
+	 *         effective and not yet terminated.
+	 *       | for each unit in units:
+	 *       |   ( (unit != null) &&
+	 *       |     (! unit.isTerminated()) )
+	 */
+	public Set<Unit> units;
 	//------------------------GETTERS
 	
 	/**
@@ -863,7 +899,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	
 	/*___________________________________________________________________
 	 *___________________________________________________________________
-	 * -----------------------RAW MATERIALS------------------------------
+	 * -----------------------ITEMS--------------------------------------
+	 * --------------------CONTROLLING CLASS-----------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 	/**
@@ -878,7 +915,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 *       |   ( (item != null) &&
 	 *       |     (! item.isTerminated()) )
 	 */
-	private final Set<Item> items = new HashSet<>();
+	private Set<Item> items;
 	
 	/**
 	 * Check whether this World has the given Item as one of its
@@ -1022,7 +1059,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 		A new (Hash)Set of all Logs in this World. That makes this a
 	 * 		shallow copy.
 	 */
-	public Set<Log> listAllLogs() {
+	public Set<Log> getAllLogs() {
 		Set<Log> result = new HashSet<Log>();
 		for (Item item : this.items) {
 			if (item instanceof Log) {
@@ -1039,18 +1076,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 		the position for the log
 	 */
 	public void createLog(double[] position) {
-		Log log = new Log(position, this);
-		this.items.add(log);
+		new Log(position, this);	
 	}
 
-	
-	
-	
-	
-
-	
-	
-	
-	
 
 }

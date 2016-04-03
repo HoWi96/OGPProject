@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Queue;
 
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.items.Item;
+import hillbillies.model.items.rawmaterials.Boulder;
+import hillbillies.model.items.rawmaterials.Log;
+import hillbillies.model.items.rawmaterials.RawMaterial;
 
 
 
@@ -65,9 +69,12 @@ import be.kuleuven.cs.som.annotate.*;
  * @invar  The XP of each unit must be a valid XP for any
  *         unit.
  *       | isValidXP(getXP())      
- * @invar  Each unit will have a valid faction
- * @invar  Each unit will have a valid world
- * @invar  Each unit will have a valid state of living
+ * @invar  Each unit can have the faction as faction
+ * 		 | canHaveAsFacion(getFaction())
+ * @invar  Each unit can have his world as world
+ * 		| canHaveAsWorld(getWorld())
+ * @invar Each unit can have his item as item
+ * 		| canHaveAsItem(getItem())
  */            
 
 public class Unit { 
@@ -353,6 +360,13 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
 	this.isAlive = true;
 }
 
+/*___________________________________________________________________
+ * __________________________________________________________________
+ * -----------------------DESTRUCTOR--------------------------------
+ *___________________________________________________________________
+ *___________________________________________________________________*/	
+
+
 /**
  * Terminates this unit
  * 
@@ -379,7 +393,10 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
  * 		|this.stopSprinting();
  */
  public void terminate() {
-	 //this.dropItem();
+	 
+	 if (hasItem())
+		 this.dropItem(this.getItem());
+	 
 	 this.setHitpoints(0);
 	 this.setSpeed(0);
 	 this.stopSprinting();
@@ -471,17 +488,6 @@ private boolean isValidInitialWeight(int weight){
  * -----------------------PROPERTIES---------------------------------
  *___________________________________________________________________
  *___________________________________________________________________*/
-
-
-
-
-
-
-
-
-
-
-
 
 
 //------------------------GETTERS
@@ -854,11 +860,19 @@ public boolean isValidPosition(@Raw double[] position) {
  *         The weight to check.
  * @return true if and only if the weight is between 0 and 200 inclusively and
  * 			the weight must be at least the minimum weight.
+ * 			If the unit has an item, the items weight will be added to the units weight.
  *       | result == (1<=weight&&weight<=200)&&(weight>getMinWeight(strength,agility))
+ *       
 */
 public boolean isValidWeight(int weight) {
-	return 	(1<=weight)&&(weight<=200)&&
-			(weight>=this.getMinWeight()) ;
+	if(hasItem()){
+		int weightItem = this.getItem().getWeight();
+		weight = weight-weightItem;
+	}	
+	return 	(1<=weight)
+			&&(weight<=200)
+			&&(weight>=this.getMinWeight()) ;
+	
 }
 
 
@@ -1129,9 +1143,14 @@ public void updateXP(int XP){
 
 //TODO further optimize advanceTime
 
-public void advanceTime(double dt) throws IllegalArgumentException {
+public void advanceTime(double dt) throws IllegalArgumentException, IllegalStateException {
+	
 	if (!(0.0<=dt&&dt<=0.2))
 		throw new IllegalArgumentException();
+	
+	if(!this.isAlive())
+		throw new IllegalStateException();
+	
     counterTillRest += dt;
     
     //set counter to the moment the unit needs to rest
@@ -2279,6 +2298,22 @@ public World getWorld() {
 protected void setWorld(World world){
 	this.world = world;
 }
+
+/**
+ * Checks if the world can belong to this unit
+ * 
+ * @param world
+ * 		the world to be checked
+ * @return
+ * 		| result = world == null || this.getWorld() == world
+ * 		
+ */
+@Raw
+public boolean canHaveAsWorld(World world){
+	return world == null || this.getWorld() == world;
+}
+
+
 /**
  * Returns whether the cube on the position is passable
  * 
@@ -2323,13 +2358,200 @@ public void setFaction(Faction faction) throws IllegalArgumentException{
 	this.faction = faction;
 }
 
+/**
+ * Checks if the faction can belong to this unit
+ * 
+ * @param faction
+ * 		the faction to be checked
+ * @return
+ * 		| result = faction != null
+ * 		
+ */
+@Raw
+public boolean canHaveAsFaction(Faction faction){
+	return faction != null;
+}
+
 
 /*_____________________________________________________________
  * ____________________________________________________________
- *-------------------------HELPER METHODS----------------------
+ *-------------------------ITEMS-----------------------------
+ *---------------------CONTROLLING CLASS-------------------
  * ____________________________________________________________
  *_____________________________________________________________
  */
-//TODO testen
+
+	//TODO PREPARE FOR MORE ITEMS
+
+	/**
+	* Variable registering the item of this Unit.
+	*/
+	private Item item;
+
+
+	/**
+	* Return the item of this Unit.
+	*/
+	@Basic @Raw
+	public Item getItem() {
+		return this.item;
+	}
+	
+
+	/**
+	 * Checks whether the unit has an item
+	 * 
+	 * @return this.getItem() != null
+	 */
+	public boolean hasItem(){
+		return this.getItem() != null;
+	}
+	
+	/**
+ 	* Set the item of this Unit to the given item.
+ 	* Set up the association
+ 	* 
+ 	* @param  item
+ 	*         The new item for this Unit.
+
+ 	* @post   The item of this new Unit is equal to
+ 	*         the given item.
+ 	*       | new.getItem() == item
+ 	*       
+ 	* @effect This item has now this unit as its unit
+ 	* 		| item.setUnit(unit)
+ 	* 
+ 	* @throws IllegalAgrumentException
+ 	*         The given item is not a valid item for this
+ 	*         Unit.
+ 	*       | ! canHaveAsItem(item)
+ 	*/
+	@Raw
+	public void addItem(Item item) throws IllegalArgumentException {
+		
+		if (! canHaveAsItem(item))
+			throw new IllegalArgumentException();
+		
+		item.setUnit(this);
+		this.item = item;
+			
+
+	}
+	/**
+ 	* remove the item of this Unit.
+ 	* Break down the association
+ 	* 
+ 	* @param  item
+ 	*         The item to remove for this Unit.
+
+ 	* @post   The item of this Unit is equal to
+ 	*         null.
+ 	*       | new.getItem() == null
+ 	*       
+ 	* @effect This item has no unit as unit
+ 	* 		| item.setUnit(null)
+ 	* 
+ 	* @throws IllegalAgrumentException
+ 	*         The given item is not a valid item for this
+ 	*         Unit.
+ 	*       | item.getUnit() != this && this.getItem() == item
+ 	*/
+	@Raw
+	public void removeItem(Item item) throws IllegalArgumentException {
+		if (item.getUnit() != this && this.getItem() == item)
+			throw new IllegalArgumentException();
+		//Break down association
+		item.setUnit(null);
+		this.item = null;
+	}
+	
+	/**
+ 	* Check whether the given item is a valid item for
+ 	* this Unit.
+ 	*  
+ 	* @param item
+ 	* 		The item to check.
+ 	* @return
+ 	* 		result == item.getUnit() == null || item.getUnit() == this
+ 	*/
+	@Raw @Model
+	private boolean canHaveAsItem(Item item){
+		return item.getUnit() == null || item.getUnit() == this;
+	}
+	
+	/**
+	 * The unit drops his item
+	 * 
+	 * @param
+	 * 		The item to be dropped
+	 * 
+	 * @effect
+	 * 		The item gets the units position
+	 * 		|item.setPosition(this.getPosition());
+	 * @effect
+	 * 		The item will be removed by the unit
+	 * 		|removeItem(item);
+	 * @effect
+	 * 		The world will add this item
+	 * 		|world.addItem(item);
+	 */
+	private void dropItem(Item item){
+		if(item != null){
+		
+			item.setPosition(this.getPosition());
+			removeItem(item);
+			this.getWorld().addItem(item);
+			
+			this.setWeight(this.getWeight() - item.getWeight());
+		}
+	}
+	
+	/**
+	 * The unit picks up an item
+	 * 
+	 * @param item
+	 * 		The item to be picked up
+	 * 
+	 * @effect
+	 * 		The item will be added by the unit
+	 * 		|addItem(item);
+	 * @effect
+	 * 		The world will remove this item
+	 * 		|world.removeItem(item);
+	 */
+	private void pickUpItem(Item item) {
+		if (item != null && canHaveAsItem(item) && !hasItem()){
+			addItem(item);
+			this.getWorld().removeItem(item);
+			
+			this.setWeight(this.getWeight()+item.getWeight());
+		}
+	}
+	
+	//-------------------------CARRYING HELPER
+	
+	/**
+	 * Checks whether the unit is carrying a boulder
+	 * 
+	 * @return this.hasItem() && (this.getItem() instanceof Boulder)
+	 */
+	public boolean isCarryingBoulder(){
+		return this.hasItem() && (this.getItem() instanceof Boulder);
+	}
+	
+	/**
+	 * Checks whether the unit is carrying a log
+	 * 
+	 * @return this.hasItem() && (this.getItem() instanceof Log)
+	 */
+	public boolean isCarryingLog(){
+		return this.hasItem() && (this.getItem() instanceof Log);
+	}
+	
+	
+
+	
+	
+	
 
 }

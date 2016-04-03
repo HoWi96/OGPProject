@@ -20,8 +20,22 @@ import hillbillies.model.World;
  * @invar  The unit of each Item must be a valid unit for any
  *         Item.
  *       | canHaveAs(getUnit())
+ *       
+ * @invar  Each rawMaterial can have its weight as weight.
+ *       | canHaveAsWeight(this.getWeight())
  */
 public abstract class Item {
+	
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------CONSTANTS---------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+		
+
+	private static final int MAX_WEIGHT = 50;
+	private static final int MIN_WEIGHT = 10;
+
 
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -35,9 +49,11 @@ public abstract class Item {
 	 * @post The game object is not terminated
 	 * @post There is no unit assigned to the item
 	 * @post There is no unit assigned to the raw item
+	 * @post The raw material gets a random weight between 10 and 50 (inclusive)
 	 */
 	public Item()throws IllegalArgumentException {
 		this.isTerminated = false;
+		this.weight = Utils.randInt(MIN_WEIGHT, MAX_WEIGHT);
 	}
 	
 	/*___________________________________________________________________
@@ -275,6 +291,40 @@ public abstract class Item {
 		position[2] = position[2]-3.0*dt;
 		this.setPosition(position);
 	}
+	
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------WEIGHT---------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+		
+
+	/**
+	 * Return the weight of this rawMaterial.
+	 */
+	@Basic @Raw @Immutable
+	public int getWeight() {
+		return this.weight;
+	}
+	
+	/**
+	 * Check whether this Item can have the given weight as its weight.
+	 *  
+	 * @param  weight
+	 *         The weight to check.
+	 * @return 
+	 *       | result == MIN_WEIGHT<weight && weight<MAX_WEIGHT 
+	 */
+	@Raw
+	public static boolean isValidWeight(int weight) {
+		return (MIN_WEIGHT<weight && weight<MAX_WEIGHT);
+	}
+	
+	/**
+	 * Variable registering the weight of this rawMaterial.
+	 */
+	private final int weight;
+
 		
 
 }

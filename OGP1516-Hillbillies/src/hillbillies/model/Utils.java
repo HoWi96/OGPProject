@@ -151,21 +151,22 @@ public class Utils {
     	return addPositionsFactor(position, new int[] {0,0,-1}, 1);
     }
     /**
-     * returns whether two positions are adjacent
+     * returns whether two positions are adjacent, but not the same
      * 
      * @param position1
      * 			the first position
      * @param position2
      * 			the second position
      * @return
-     * 			whether they are adjacent
+     * 			whether they are adjacent and not the same
      */
     public static boolean areAdjacent(int[] position1, int[] position2){
     	int[] difference = addPositionsFactor(position1, position2, -1);
     	int dx = difference[0];
     	int dy = difference[1];
     	int dz = difference[2];
-    	return !(Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1);
+    	return !(Math.abs(dx)>1||Math.abs(dy)>1||Math.abs(dz)>1) 
+    			&& !(dx != 0 && dy !=0 && dz != 0);
     }
     /**
      * 
