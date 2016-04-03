@@ -1,6 +1,4 @@
-package hillbillies.model.items.rawmaterials;
-
-import hillbillies.model.World;
+package hillbillies.model;
 
 /**
  * @author Holger

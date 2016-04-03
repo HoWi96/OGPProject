@@ -5,8 +5,9 @@ import java.util.Set;
 import hillbillies.model.Faction;
 import hillbillies.model.Unit;
 import hillbillies.model.World;
-import hillbillies.model.items.rawmaterials.Boulder;
-import hillbillies.model.items.rawmaterials.Log;
+import hillbillies.model.Boulder;
+import hillbillies.model.Log;
+
 import hillbillies.part2.listener.TerrainChangeListener;
 import ogp.framework.util.ModelException;
 

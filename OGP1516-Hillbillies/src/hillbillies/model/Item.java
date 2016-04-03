@@ -1,13 +1,6 @@
-package hillbillies.model.items;
+package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.Unit;
-import hillbillies.model.Utils;
-import hillbillies.model.World;
-/**
- * @author Holger
- * @version 1.0
- */
 
 /** 
  * 

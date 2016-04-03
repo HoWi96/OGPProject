@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Queue;
 
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.items.Item;
-import hillbillies.model.items.rawmaterials.Boulder;
-import hillbillies.model.items.rawmaterials.Log;
 
 
 

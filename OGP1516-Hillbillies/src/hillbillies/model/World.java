@@ -2,9 +2,6 @@ package hillbillies.model;
 
 import java.util.*;
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.items.Item;
-import hillbillies.model.items.rawmaterials.Boulder;
-import hillbillies.model.items.rawmaterials.Log;
 import hillbillies.part2.listener.TerrainChangeListener;
 import hillbillies.util.ConnectedToBorder;
 
