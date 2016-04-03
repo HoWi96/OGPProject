@@ -1,6 +1,7 @@
 package hillbillies.model.gameobjects;
 
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.Unit;
 import hillbillies.model.Utils;
 import hillbillies.model.World;
 /**
@@ -17,8 +18,11 @@ import hillbillies.model.World;
  * @invar  The World of each GameObject must be a valid World for any
  *         GameObject.
  *       | isValidWorld(getWorld())
+ * @invar  The unit of each Item must be a valid unit for any
+ *         Item.
+ *       | canHaveAs(getUnit())
  */
-public abstract class GameObject {
+public class Item {
 
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -41,7 +45,7 @@ public abstract class GameObject {
 	 *         
 	 * @post The game object is not terminated
 	 */
-	public GameObject(double[] position, World world)throws IllegalArgumentException {
+	public Item(double[] position, World world)throws IllegalArgumentException {
 		this.setPosition(position);
 		this.setWorld(world);
 		this.isTerminated = false;
@@ -59,10 +63,14 @@ public abstract class GameObject {
 	 * @post The game object is terminated
 	 * @throws IllegalStateException
 	 * 			if the GameObject is still connected to a world
+	 * @throws IllegalStateException
+	 * 		If the raw material is still connected to a unit
 	 */
 	public void terminate() throws IllegalStateException{
 		if(this.hasWorld())
-			throw new IllegalStateException();
+			throw new IllegalStateException("still connected to a world");
+		if(this.hasUnit())
+			throw new IllegalStateException("still connected to a unit");
 		this.isTerminated = true;
 	}
 	
@@ -196,16 +204,103 @@ public abstract class GameObject {
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
-	 * -----------------------ADVANCE TIME---------------------------------
+	 * -----------------------UNIT---------------------------------------
+	 * ------------------NON CONTROLLING CLASS--------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 	
 	/**
-	 * 
-	 * @param dt
-	 * 		The time that proceeds for the game object
-	 * @throws IllegalArgumentException
+	 * Return the unit of this Item.
 	 */
-	public abstract void advanceTime(double dt) throws IllegalArgumentException;	
+	@Basic @Raw
+	public Unit getUnit() {
+		return this.unit;
+	}
+	/**
+	 * check whether the Item is being carried 
+	 */
+	public boolean hasUnit(){
+		return this.getUnit() != null;
+	}
+	
+	/**
+	 * Check whether the given unit is a valid unit for
+	 * any Item.
+	 *  
+	 * @param  unit
+	 *         The unit to check.
+	 * @return 
+	 *       | result == true;
+	*/
+	public static boolean canHaveAsUnit(Unit unit) {
+		return true;
+	}
+	
+	/**
+	 * Set the unit of this Item to the given unit.
+	 * 
+	 * @param  unit
+	 *         The new unit for this Item.
+	 * @post   The unit of this new Item is equal to
+	 *         the given unit.
+	 *       | new.getUnit() == unit
+	 * @throws IllegalArgumentException
+	 *         The given unit is not a valid unit for any
+	 *         Item.
+	 *       | ! canHaveAsUnit(getUnit())
+	 */
+	@Raw
+	public void setUnit(Unit unit) throws IllegalArgumentException {
+		if (! canHaveAsUnit(unit))
+			throw new IllegalArgumentException();
+		this.unit = unit;
+	}
+	
+	/**
+	 * Variable registering the unit of this Item.
+	 */
+	private Unit unit;
+	
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------ADVANCE TIME-------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	public void advanceTime(double dt) throws IllegalArgumentException {
+		if(!this.getWorld().isSolidUnder(Utils.getCubePosition(this.getPosition())))
+			setFalling(true);
+		if(this.isFalling())
+			falling(dt);
+		
+	}
+	/**
+	 * Indicates whether the unit is falling
+	 */
+	public boolean isFalling() {
+		return isFalling;
+	}
+	/**
+	 * Set the behavior of falling
+	 * 
+	 * @param falling
+	 * 		if the unit is falling
+	 * @post
+	 * 		this.isFalling() == falling
+	 */
+	protected void setFalling(boolean falling) {
+		this.isFalling = falling;
+	}
+	
+	
+	protected void falling(double dt){
+		System.out.println("falling raw material");
+		//TODO
+	}
+
+	/**
+	 * boolean indicating whether the raw material is falling
+	 */
+	private boolean isFalling;	
 }
 

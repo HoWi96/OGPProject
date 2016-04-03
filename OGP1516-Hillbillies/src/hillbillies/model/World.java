@@ -2,6 +2,9 @@ package hillbillies.model;
 
 import java.util.*;
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.gameobjects.Boulder;
+import hillbillies.model.gameobjects.Log;
+import hillbillies.model.gameobjects.RawMaterial;
 import hillbillies.part2.listener.TerrainChangeListener;
 import hillbillies.util.ConnectedToBorder;
 
@@ -856,6 +859,68 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		Unit unit = new Unit(name,position,weight,agility,strength,toughness, enableDefaultBehavior);
 		return unit;
 	}
+	
+	/*___________________________________________________________________
+	 *___________________________________________________________________
+	 * -----------------------RAW MATERIALS------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	//-------------------BOULDERS
+	/**
+	 * Variable referencing a set collecting all the boulders
+	 * of this world.
+	 * 
+	 * @Invar  The referenced set is effective.
+	 *       
+	 * @Invar  Each boulder registered in the referenced list is
+	 *         effective and not yet terminated.
+	 *         
+	 */
+	private final Set<Boulder> boulders;
+	
+	/**
+	 * Creates a new Boulder in this World, on the position given.
+	 * 
+	 * @param position
+	 * 		the position for the boulder
+	 */
+	public void createBoulder(double[] position) {
+		new Boulder(position, this);
+	}
+
+	
+	//--------------------LOGS
+	/**
+	 * Variable referencing a set collecting all the logs
+	 * of this world.
+	 * 
+	 * @Invar  The referenced set is effective.
+	 *       
+	 * @Invar  Each log registered in the referenced list is
+	 *         effective and not yet terminated.
+	 *         
+	 */
+	private final Set<Log> logs;
+	
+	/**
+	 * Creates a new Log in this World, on the position given.
+	 * 
+	 * @param position
+	 * 		the position for the log
+	 */
+	public void createLog(double[] position) {
+		new Log(position, this);
+	}
+
+	
+	
+	
+	
+
+	
+	
+	
 	
 
 }
