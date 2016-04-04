@@ -69,13 +69,16 @@ public class WorldTest {
 		assertEquals(TYPE_AIR, world1.getCubeType(new int[]{1,1,2}));
 		assertEquals(TYPE_AIR, world1.getCubeType(new int[]{2,2,2}));
 	}
-	
-	
-	
-	
 
 	@Test
-	public void test1() {	
+	public void testAddUnitToWorld() {
+		world1.addUnit(unit1);
+		assertTrue(world1.hasAsUnit(unit1));
+		assertTrue(unit1.getWorld() == world1);
+		world1.removeUnit(unit1);
+		assertFalse(world1.hasAsUnit(unit1));
+		assertTrue(unit1.getWorld() == null);
+		assertTrue(world1.getNbUnits() == 0);
 	}
 
 	@Test

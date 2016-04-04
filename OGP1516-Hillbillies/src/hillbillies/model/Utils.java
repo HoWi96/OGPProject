@@ -189,6 +189,25 @@ public class Utils {
     	};
     	return newPosition;
     }
+    /**
+     * Get the step to be taken between to positions
+     * 
+     * @param currentPosition
+     * @param nextPosition
+     * @return
+     * 		new int[] {nextPosition[0] - currentPosition[0],
+     * 				 nextPosition[1] - currentPosition[1],
+     * 				 nextPosition[2] - currentPosition[2]};	
+     */
+    public static int[] getStep(int[] currentPosition, int[] nextPosition){
+		int dx = nextPosition[0] - currentPosition[0];
+		int dy = nextPosition[1] - currentPosition[1];
+		int dz = nextPosition[2] - currentPosition[2];
+		
+		int[] step = new int[] {dx, dy, dz};
+		
+		return step;
+    }
     
 
 

@@ -420,11 +420,88 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 		the given position
 	 * @return
 	 * 		whether the cube under the give position is solid
-	 * 			 with the level under z=0 considerd as 0
+	 * 			 with the level under z=0 considered as 0
 	 */
 	public boolean isSolidUnder(int[] position){
 		return position[2] == 0 || 
 				isSolidCube(Utils.getPositionUnder(position));
+	}
+	
+	/**
+	 * TODO find a more comprehensible peace of code (efficiency is okay!)
+	 * 
+	 * Check if you can move directly from the given position to the other
+	 * !!Only meant for adjacent cubes!!
+	 * 
+	 * @param nextPosition
+	 * @param currentPosition
+	 * @return
+	 * 		if you can move directly from the current position to the next
+	 */
+	@Raw
+	public boolean canMoveDirectly(int[] currentPosition,int[] nextPosition) {
+		
+		int[] step = Utils.getStep(currentPosition, nextPosition);
+
+		
+		if(step[0]==0 && step[1] !=0 && step[2] !=0){
+			if(isSolidCube(new int[] {currentPosition[0],currentPosition[1], currentPosition[2]+step[2]})&&
+					isSolidCube(new int[]{currentPosition[0],currentPosition[1]+step[1], currentPosition[2]}))
+				return false;
+		}
+		
+		if(step[0]!=0 && step[1] ==0 && step[2] !=0){
+			if(isSolidCube(new int[] {currentPosition[0],currentPosition[1], currentPosition[2]+step[2]})&&
+					isSolidCube(new int[]{currentPosition[0]+step[0],currentPosition[1], currentPosition[2]}))
+				return false;
+		}
+		
+		if(step[0]!=0 && step[1] !=0 && step[2] ==0){
+			if(isSolidCube(new int[] {currentPosition[0]+step[0],currentPosition[1], currentPosition[2]})&&
+					isSolidCube(new int[]{currentPosition[0],currentPosition[1]+step[1], currentPosition[2]}))
+				return false;
+		}
+		
+		if(step[0]!=0 && step[1] !=0 && step[2] !=0){
+			if(isSolidCube(new int[] {currentPosition[0],currentPosition[1], currentPosition[2]+step[2]})&&
+					isSolidCube(new int[]{currentPosition[0],currentPosition[1]+step[1], currentPosition[2]}) &&
+					isSolidCube(new int[]{currentPosition[0]+step[0],currentPosition[1], currentPosition[2]}))
+				return false;
+		}
+		return true;
+
+	}
+	/**
+	 * 
+	 * Get a list with all positions
+	 * Inside game world, non solid,directly movable to and not the same
+	 * 
+	 * @param position
+	 * @return
+	 * 		a list with all positions Inside game world, non solid,directly movable to and not the same
+	 */
+	public List<int[]> getReachableAdjacentPositions(int[] position){
+		
+		List<int[]> adjacentCubes = new ArrayList<>();
+		
+		int x = position[0];
+		int y = position[1];
+		int z = position[2];
+		
+			for (int dx=-1; dx<=1;dx++){
+				for (int dy=-1; dy<=1;dy++){
+					for (int dz=-1; dz<=1;dz++){
+						int[] nextPos = new int[]{x+dx,y+dy,z+dz};
+						//Inside game world, non solid,directly movable to and not the same
+						if(isValidPosition(nextPos)&& !isSolidCube(nextPos) && canMoveDirectly(position, nextPos) &&!(dx==0&&dy==0&&dz==0)){
+							adjacentCubes.add(nextPos);
+						}	
+					}
+				}	
+			}
+			return adjacentCubes;
+
+		
 	}
 	
 	

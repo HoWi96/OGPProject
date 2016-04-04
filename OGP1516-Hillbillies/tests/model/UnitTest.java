@@ -48,10 +48,8 @@ public class UnitTest {
 		world.addUnit(unit2);
 		world.addUnit(unit3);
 		
-    	Unit defender = new Unit("Baba 'O Reil", new int[]{50,50,50}, 50, 50, 50, 50, true);
- 	   
+    	defender = new Unit("Baba 'O Reil", new int[]{50,50,50}, 50, 50, 50, 50, true);
     	world.addUnit(defender);
-		System.out.println(" Nb Units in world "+world.getNbUnits());
 		
     }
 
@@ -188,7 +186,7 @@ public class UnitTest {
 	    	unit1.updateSpeed(0);
 	    	assertTrue(unit1.getSpeed() == 0);
 	    	//unit.setCurrentActivity(Activity.MOVING);
-	    	unit1.moveToTarget(targetPosition);
+	    	unit1.moveTo(targetPosition);
 	    	unit1.updateSpeed(-1);
 	    	assertTrue(Util.fuzzyEquals(unit1.getSpeed(), 1.8));
 	    	unit1.updateSpeed(0);
@@ -197,12 +195,6 @@ public class UnitTest {
 	    	assertTrue(Util.fuzzyEquals(unit1.getSpeed(),0.75));
 	    }
 	    
-	    @Test
-	    public void testGetTargetPosition(){
-	    	unit1.moveToTarget(targetPosition);
-	    	double[] target = unit1.getTargetPosition();
-	    	assertTrue(Utils.equals(target, Utils.getCubeCenter(targetPosition)));
-	    }
 	    
 	    @Test
 	    public void testGetNextPosition(){
@@ -243,22 +235,18 @@ public class UnitTest {
 	    */
 	    @Test
 	    public void testMoveToTarget(){
-	    	unit1.moveToTarget(targetPosition);
+	    	unit1.moveTo(targetPosition);
 	    	double[] next = unit1.getNextPosition();
-	    	double[] target = unit1.getTargetPosition();
 	    	assertTrue(next[0] == 1.5);
 	    	assertTrue(next[1] == 2.5);
 	    	assertTrue(next[2] == 3.5);
-	    	assertTrue(target[0] == 2.5);
-	    	assertTrue(target[1] == 3.5);
-	    	assertTrue(target[2] == 4.5);
 	    	
 	    }
 	    
 	    @Test(expected = IllegalArgumentException.class)
 	    public void testIllegalArgumentExceptionMoveToTarget(){
 	    	int[] position = {-3, 5, 70};
-	    	unit1.moveToTarget(position);
+	    	unit1.moveTo(position);
 	    }
 	    
 	    @Test
@@ -304,7 +292,7 @@ public class UnitTest {
 	    @Test
 	    public void testIsResting(){
 	    	assertFalse(unit1.isResting());
-	    	unit1.moveToTarget(targetPosition);
+	    	unit1.moveTo(targetPosition);
 	    	unit1.startSprinting();
 	    	unit1.advanceTime(0.2);
 	    	unit1.rest();
@@ -362,7 +350,7 @@ public class UnitTest {
 	    @Test
 	    public void testIsAbleToSprint(){
 	    	assertFalse(unit3.isAbleToSprint());
-	    	unit3.moveToTarget(targetPosition2);
+	    	unit3.moveTo(targetPosition2);
 	    	assertTrue(unit3.isAbleToSprint());
 	    	unit3.startSprinting();
 	    	while(unit3.getStamina()>0)
@@ -411,14 +399,14 @@ public class UnitTest {
 	    
 	    @Test(expected = IllegalArgumentException.class)
 	    public void testMoveToTargetIllegalArgumentException(){
-	    	unit1.moveToTarget(new int[]{1,60,3});
+	    	unit1.moveTo(new int[]{1,60,3});
 	    }
 	    
 	    @Test(expected = IllegalStateException.class)
 	    public void testMoveToTargetIllegalStateException(){
 	    	Unit defender = new Unit("Baba 'O Reil", position, 50, 50, 50, 50, true);
 	    	unit1.attack(defender);
-	    	unit1.moveToTarget(targetPosition);
+	    	unit1.moveTo(targetPosition);
 	    }
 	    
 	    @Test(expected = IllegalArgumentException.class)
@@ -435,6 +423,8 @@ public class UnitTest {
 	    
 	    @Test(expected = IllegalArgumentException.class)
 	    public void testMoveToAdjecentIllegalArgumentException2(){
+	    	System.out.println("world of defender "+defender.getWorld());
+	    	System.out.println("position "+defender.getPosition());
 	    	defender.moveToAdjacent(-1, -1, -1);
 	    }
 	    

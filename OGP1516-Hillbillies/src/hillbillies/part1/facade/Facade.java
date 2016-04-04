@@ -127,6 +127,7 @@ public class Facade implements IFacade{
 		try {
 			unit.moveToAdjacent(dx, dy, dz);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ModelException();
 		}
 	}
@@ -169,8 +170,8 @@ public class Facade implements IFacade{
 	@Override
 	public void moveTo(Unit unit, int[] cube) throws ModelException {
 		try {
-			unit.moveToTarget(cube);
-		} catch (IllegalArgumentException e) {
+			unit.moveTo(cube);
+		} catch (Exception e) {
 			throw new ModelException();
 		}
 	}
