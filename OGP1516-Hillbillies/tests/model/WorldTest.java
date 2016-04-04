@@ -80,9 +80,53 @@ public class WorldTest {
 		assertTrue(unit1.getWorld() == null);
 		assertTrue(world1.getNbUnits() == 0);
 	}
+	
+	@Test
+	public void testHasSolidAdjacents(){
+		int[][][] types = new int[3][3][3];
+		
+		types[0][0][0] = TYPE_ROCK;
+		World world = new World(types, new DefaultTerrainChangeListener());
+		assertTrue(world.hasSolidAdjacents(new int[]{0,0,0}));
+		assertTrue(world.hasSolidAdjacents(new int[]{1,0,0}));
+		assertTrue(world.hasSolidAdjacents(new int[]{1,1,1}));
+		
+		assertFalse(world.hasSolidAdjacents(new int[]{0,0,2}));
+		assertFalse(world.hasSolidAdjacents(new int[]{2,2,1}));
+		
+		world.caveIn(new int[]{0,0,0});
+		assertFalse(world.hasSolidAdjacents(new int[]{1,1,1}));
+		
+	
+	}
 
 	@Test
-	public void test2() {
+	public void testquickFindReachableAdjacents() {
+		int[][][] types = new int[3][3][3];
+		types[0][0][0] = TYPE_ROCK;
+		types[2][2][0] = TYPE_ROCK;
+		World world = new World(types, new DefaultTerrainChangeListener());
+		
+		assertEquals(TYPE_ROCK, world.getCubeType(new int[]{0,0,0}));
+		assertEquals(TYPE_ROCK, world.getCubeType(new int[]{2,2,0}));
+		
+		
+		assertTrue(!world.isSolidCube(new int[]{2,1,1}));
+		assertTrue(!world.isSolidCube(new int[]{1,2,1}));
+		System.out.println("....");
+		assertTrue(world.hasSolidAdjacents(new int[]{2,1,1}));
+		assertTrue(world.hasSolidAdjacents(new int[]{1,2,1}));
+		System.out.println("?????");
+		
+		assertEquals(5,world.quickFindReachableAdjacents(new int[]{1,1,1}).size());
+		
+		world.caveIn(new int[]{0,0,0});
+		
+		assertEquals(3,world.quickFindReachableAdjacents(new int[]{1,1,1}).size());
+		world.caveIn(new int[]{2,2,0});
+		
+		assertEquals(1,world.quickFindReachableAdjacents(new int[]{1,1,1}).size());
+		
 	}
 
 

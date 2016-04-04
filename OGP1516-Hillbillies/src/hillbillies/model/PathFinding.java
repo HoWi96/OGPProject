@@ -20,23 +20,34 @@ public class PathFinding {
 	}
 	
 	public class Node implements Comparable<Node>{
+		
 		private int[] myPos;
 		private double gvalue;
 		private double fvalue;
 		private Node parent;
+		
 		public Node(int[] pos, double g, double f, Node parent){
 			this.myPos = pos;
 			this.gvalue = g;
 			this.fvalue = f;
-			this.parent = parent;
-		
+			this.parent = parent;	
 		}
+		
+		//------------------------GETTERS
 		public int[] getPosition(){
 			return this.myPos;
 		}
 		public double getGValue(){
 			return this.gvalue;
 		}
+		public Node getParent(){
+			return this.parent;
+		}
+		public double getFValue(){
+			return this.fvalue;
+		}
+		
+		//----------------------SETTERS
 		public void setParent(Node parent){
 			this.parent = parent;
 		}
@@ -46,17 +57,8 @@ public class PathFinding {
 		public void setFValue(double fvalue){
 			this.fvalue = fvalue;
 		}
-		public Node getParent(){
-			return this.parent;
-		}
-		public double getFValue(){
-			return this.fvalue;
-		}
-		@Override
-		public String toString(){
-			return "("+myPos.toString()+","+gvalue+","+fvalue;
-		}
 
+		//Implement comparable for a natural ordening of the treeset
 		@Override
 		public int compareTo(Node o) {
 			if (this.equals(o)){
@@ -83,7 +85,8 @@ public class PathFinding {
 				break;
 			}
 			//CONTINUE SEARCHING
-			for (int[] pos : world.getReachableAdjacentPositions((current.getPosition()))){
+			for (int[] pos : world.quickFindReachableAdjacents((current.getPosition()))){
+				// time consuming factor!!!!!
 				
 				//Already a shorter way to this position
 				if (closedset.contains(pos)){
@@ -116,8 +119,8 @@ public class PathFinding {
 	private double getEstimatedTimeTo(int[] start, int[] target) {
 		double dx = Math.abs(target[0]-start[0]);
 		double dy = Math.abs(target[0]-start[0]);
-		
 		double dz = target[0]-start[0];
+		
 			if(dz>0)
 				dz = Math.abs(dz)/0.5;
 			else

@@ -1272,7 +1272,7 @@ private void startRandomActivity() throws IllegalArgumentException, IllegalState
 	}
 	if (randomActivity == 1) {
 		System.out.println("random work");
-		int[] randomWorkingPosition = this.getWorld().getAdjacentCubes(Utils.getCubePosition(this.getPosition())).get(2);
+		int[] randomWorkingPosition = Utils.getCubePosition(this.getPosition());
 		workAt(randomWorkingPosition);
 	}
 	if (randomActivity == 2) {
@@ -1369,21 +1369,21 @@ private void resting(double dt) throws IllegalArgumentException {
  * @param dt
  * 		The time the unit proceeds working
  */
-private void working(double dt) {
+private void working(double dt) throws IllegalArgumentException{
 	
-	this.setProgressTime((float)(this.getProgressTime()+dt));
+	this.setProgressTime(this.getProgressTime()+(float)dt);
 	
 	if (this.getProgressTime() >= this.getWorkingTime()) {
-		//Finished working
+		
+		System.out.println("finished working, getting data ...");
 		
 		int[] workingPosition = this.getWorkingPosition();
 		int cubeType = this.getWorld().getCubeType(workingPosition);
 		boolean solidCube = this.getWorld().isSolidCube(workingPosition);
 		Item item = this.getWorld().getItemOnPosition(workingPosition);
 		
-		System.out.println("completed working");
-		System.out.println("On cube type: " + cubeType );
-		System.out.println();
+		System.out.println("data selected");
+		System.out.println("worked on cube type: " + cubeType );
 		
 		if(hasItem()){
 			//drop item
@@ -1557,7 +1557,11 @@ public void moveTo(int[] target) throws IllegalArgumentException, IllegalStateEx
 		throw new IllegalStateException();
 	
 	this.setActivity(Activity.MOVING);
-	this.pathFinding = new PathFinding(this.getWorld(), Utils.getCubePosition(this.getPosition()),target);	
+	this.pathFinding = new PathFinding(this.getWorld(), Utils.getCubePosition(this.getPosition()),target);
+	if(!pathFinding.hasPathCompleted())
+		System.out.println("path found");
+	else
+		System.out.println("no such path");
 }
 
 /**
@@ -1603,21 +1607,18 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		if(!this.isAbleToMove())
 			throw new IllegalStateException();
 		
-		System.out.println("position " + this.getPosition());
-		System.out.println("world " + this.getWorld());
-		
 		int[] cubePosition = Utils.getCubePosition(this.getPosition());
 		double[] cubeCenter = Utils.getCubeCenter(Utils.getCubePosition(this.getPosition()));
 		int[] nextCubePosition = new int[] {cubePosition[0]+dx,cubePosition[1]+dy,cubePosition[2]+dz};
 		double[] nextPosition = Utils.getCubeCenter(nextCubePosition);
 		
 		
-		if(this.getWorld() != null &&(!isValidPosition(nextPosition) || !this.getWorld().canMoveDirectly(cubePosition, nextCubePosition))){
+		if(this.getWorld() != null &&(!isValidPosition(nextPosition) || !this.getWorld().canMoveDirectly(cubePosition,dx,dy,dz))){
 			if(pathFinding == null || pathFinding.hasPathCompleted()){ 
 				//only hitting moveToAdjacent
 				throw new IllegalArgumentException("Invalid next position");
 			} else {
-				// wrong path???
+	
 				this.setNextPosition(cubeCenter);
 				System.out.println("wrong path????");
 				return;

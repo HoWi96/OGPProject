@@ -396,19 +396,34 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	
 	/**
 	 * Checks whether there are solid cubes surrounding the given cube
+	 * 		or the cube is positioned on ground level
 	 * 
 	 * @param position
 	 * 		The position
 	 * @return
 	 * 		whether there are solid cubes surrounding the given cube
+	 *  or the cube itself is positioned on ground level
 	 * 		
 	 */
 	public boolean hasSolidAdjacents(int[] position){
-		List<int[]> adjacentCubes = getAdjacentCubes(position);
+		int x = position[0];
+		int y = position[1];
+		int z = position[2];
 		
-		for(int[] adjacentCube: adjacentCubes){
-			if(isSolidCube(adjacentCube))
-				return true;
+		if(z == 0)
+			return true;
+		
+		for (int dx= -1; dx <=1;dx++){
+			for (int dy= -1; dy <=1;dy++){
+				for (int dz= -1; dz <=1;dz++){
+
+					int[] adjacentCube = new int[]{x+dx,y+dy,z+dz};
+					
+					if(isValidPosition(adjacentCube) && !(dx==0&&dy==0&&dz==0) && isSolidCube(adjacentCube)){
+						return true ;
+					}	
+				}
+			}	
 		}
 		return false;
 	}
@@ -439,35 +454,31 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 		if you can move directly from the current position to the next
 	 */
 	@Raw
-	public boolean canMoveDirectly(int[] currentPosition,int[] nextPosition) {
+	public boolean canMoveDirectly(int[] currentPosition, int dx, int dy, int dz) {
 		
-		int[] step = Utils.getStep(currentPosition, nextPosition);
-
-		
-		if(step[0]==0 && step[1] !=0 && step[2] !=0){
-			if(isSolidCube(new int[] {currentPosition[0],currentPosition[1], currentPosition[2]+step[2]})&&
-					isSolidCube(new int[]{currentPosition[0],currentPosition[1]+step[1], currentPosition[2]}))
+		if(dx!=0 && dy !=0 && dz !=0){
+			// chance : 8/26
+			if(isSolidCube(new int[] {currentPosition[0],currentPosition[1], currentPosition[2]+dz})&&
+					isSolidCube(new int[]{currentPosition[0],currentPosition[1]+dy, currentPosition[2]}) &&
+					isSolidCube(new int[]{currentPosition[0]+dx,currentPosition[1], currentPosition[2]}))
+				return false;
+		} else if(dx!=0 && dy !=0 && dz ==0){
+			//chance : 4/26
+			if(isSolidCube(new int[] {currentPosition[0]+dx,currentPosition[1], currentPosition[2]})&&
+					isSolidCube(new int[]{currentPosition[0],currentPosition[1]+dy, currentPosition[2]}))
+				return false;
+		} else if(dx==0 && dy !=0 && dz !=0){
+			//chance : 4/26
+			if(isSolidCube(new int[] {currentPosition[0],currentPosition[1], currentPosition[2]+dz})&&
+					isSolidCube(new int[]{currentPosition[0],currentPosition[1]+dy, currentPosition[2]}))
+				return false;
+		}else if(dx!=0 && dy ==0 && dz !=0){
+			//chance :  4/26
+			if(isSolidCube(new int[] {currentPosition[0],currentPosition[1], currentPosition[2]+dz})&&
+					isSolidCube(new int[]{currentPosition[0]+dx,currentPosition[1], currentPosition[2]}))
 				return false;
 		}
 		
-		if(step[0]!=0 && step[1] ==0 && step[2] !=0){
-			if(isSolidCube(new int[] {currentPosition[0],currentPosition[1], currentPosition[2]+step[2]})&&
-					isSolidCube(new int[]{currentPosition[0]+step[0],currentPosition[1], currentPosition[2]}))
-				return false;
-		}
-		
-		if(step[0]!=0 && step[1] !=0 && step[2] ==0){
-			if(isSolidCube(new int[] {currentPosition[0]+step[0],currentPosition[1], currentPosition[2]})&&
-					isSolidCube(new int[]{currentPosition[0],currentPosition[1]+step[1], currentPosition[2]}))
-				return false;
-		}
-		
-		if(step[0]!=0 && step[1] !=0 && step[2] !=0){
-			if(isSolidCube(new int[] {currentPosition[0],currentPosition[1], currentPosition[2]+step[2]})&&
-					isSolidCube(new int[]{currentPosition[0],currentPosition[1]+step[1], currentPosition[2]}) &&
-					isSolidCube(new int[]{currentPosition[0]+step[0],currentPosition[1], currentPosition[2]}))
-				return false;
-		}
 		return true;
 
 	}
@@ -480,9 +491,10 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @return
 	 * 		a list with all positions Inside game world, non solid,directly movable to and not the same
 	 */
-	public List<int[]> getReachableAdjacentPositions(int[] position){
+	@Deprecated
+	public List<int[]> findReachableAdjacents(int[] position){
 		
-		List<int[]> adjacentCubes = new ArrayList<>();
+		List<int[]> adjacentCubes = new ArrayList<>(26);
 		
 		int x = position[0];
 		int y = position[1];
@@ -493,15 +505,51 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 					for (int dz=-1; dz<=1;dz++){
 						int[] nextPos = new int[]{x+dx,y+dy,z+dz};
 						//Inside game world, non solid,directly movable to and not the same
-						if(isValidPosition(nextPos)&& !isSolidCube(nextPos) && canMoveDirectly(position, nextPos) &&!(dx==0&&dy==0&&dz==0)){
-							adjacentCubes.add(nextPos);
+						//quick checks
+						if(isValidPosition(nextPos)&&!isSolidCube(nextPos)&&!(dx==0&&dy==0&&dz==0))
+							//longer checks
+							if(hasSolidAdjacents(nextPos) && canMoveDirectly(position,dx,dy,dz))
+								adjacentCubes.add(nextPos);
 						}	
 					}
-				}	
-			}
+				}
 			return adjacentCubes;
-
+		}
+	/**
+	 * A quicker way to select proper adjacents moving only in one direction at a time
+	 * 
+	 * @param position
+	 * 		the position departing from
+	 * @return
+	 * 		the list with adjacents where is direct access to
+	 */
+	public List<int[]> quickFindReachableAdjacents(int[] position){
 		
+		List<int[]> adjacentCubes = new ArrayList<>(6);
+		
+		int x = position[0];
+		int y = position[1];
+		int z = position[2];
+		
+		int[] di= new int[3];
+		
+		for(int i=0; i<=2; i++){
+			for(int d=-1;d<=1;d+=2){
+				
+				di[i] = d;
+				di[(i+1)%3] = 0;
+				di[(i+2)%3] = 0;
+				
+				
+				int[] nextPos = new int[]{x+di[0],y+di[1],z+di[2]};
+				
+
+				if(isValidPosition(nextPos) && !isSolidCube(nextPos) && hasSolidAdjacents(nextPos)){
+					adjacentCubes.add(nextPos);
+				}
+			}
+		}
+		return adjacentCubes;
 	}
 	
 	
