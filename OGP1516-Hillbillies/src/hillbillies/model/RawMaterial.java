@@ -3,9 +3,7 @@ package hillbillies.model;
 /**
  * @author Holger
  * @version 1.0
- *
- *
- *       
+ *     
  */
 public abstract class RawMaterial extends Item {
 	
@@ -29,8 +27,6 @@ public abstract class RawMaterial extends Item {
 	 *         the given position.
 	 * @effect The world of of this new raw material is set to
 	 *         the given world.
-	 * 
-	 * 
 	 */
 	public RawMaterial(int[] position, World world) throws IllegalArgumentException {
 		super();

@@ -11,27 +11,27 @@ import hillbillies.util.ConnectedToBorder;
  */
 
 /**
- * @invar  The TerrainTypes of each world must be a valid TerrainTypes for any
+ * ATTRIBUTES
+ * @Invar  The TerrainTypes of each world must be a valid TerrainTypes for any
  *         world.
  *       | isValidTerrainTypes(getTerrainTypes())
- * @invar  Each world can have its nbCubesX as dimension.
+ * @Invar  Each world can have its nbCubesX as dimension.
  *       | canHaveAsDimension(this.getNbCubesX())     
- * @invar  Each world can have its nbCubesY as dimension.
+ * @Invar  Each world can have its nbCubesY as dimension.
  *       | canHaveAsDimension(this.getNbCubesY())
- * @invar  Each world can have its nbCubesX as dimension.
+ * @Invar  Each world can have its nbCubesX as dimension.
  *       | canHaveAsDimension(this.getNbCubesZ())
- * @invar  The cubeType of each world must be a valid cubeType for any
+ * @Invar  The cubeType of each world must be a valid cubeType for any
  *         world.
  *       | isValidcubeType(getcubeType())  
- *       
+ *   
+ * ASSOCIATIONS
  * @Invar Each world must have proper units.
  * 		| this.hasProperUnits()
  * @Invar Each world must have proper factions.
  * 		| this.hasProperFactions()
- * @Invar Each world must have proper logs.
- * 		| this.hasProperLogs()
- * @Invar Each world must have proper boulders.
- * 		| this.hasProperBoulders()
+ * @Invar Each world must have proper items.
+ * 		| this.hasProperItems
  *       
  *       
  */
@@ -251,8 +251,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 *         world.
 	 *       | ! isValidTerrainTypes(getTerrainTypes())
 	 */
-	@Raw
-	public void setTerrainTypes(int[][][] terraintypes) throws IllegalArgumentException {
+	@Raw @Model
+	private void setTerrainTypes(int[][][] terraintypes) throws IllegalArgumentException {
 		if (! isValidTerrainTypes(terraintypes))
 			throw new IllegalArgumentException();
 		this.terrainTypes = terraintypes;
@@ -443,7 +443,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	}
 	
 	/**
-	 * TODO find a more comprehensible peace of code (efficiency is okay!)
+	 * TODO find a more comprehensible piece of code (efficiency is okay!)
 	 * 
 	 * Check if you can move directly from the given position to the other
 	 * !!Only meant for adjacent cubes!!
@@ -617,6 +617,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @effect the solid cubes in the world which are not connected will cave in
 	 * 
 	 */
+	@Raw @Model
 	private void makeAllSolidsConnected(){
 		
 		for (int x=0; x<getNbCubesX(); x++) {
@@ -640,7 +641,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	
 	/**
 	 * Invokes the advanceTime method on all objects present in this World.
-	 * This are alle units and all items
+	 * This are all units and all items
 	 * 
 	 * @param dt
 	 * 		The time by which to advance, expressed in seconds.
@@ -663,34 +664,35 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		}
 		
 	}
-	
-	
-	
+
 	
 	/*___________________________________________________________________
 	 *___________________________________________________________________
 	 * -----------------------FACTIONS-----------------------------------
+	 * -----------------UNI DIRECTIONAL----------------------------------
 	 *___________________________________________________________________
-
+	 *___________________________________________________________________
 	/**
 	 * Variable referencing a set collecting all the factions
 	 * of this world.
 	 * 
-	 * @invar  The referenced set is effective.
+	 * @Invar  The referenced set is effective.
 	 *       | factions != null
-	 * @invar  Each faction registered in the referenced list is
+	 * @Invar  Each faction registered in the referenced list is
 	 *         effective and not yet terminated.
 	 *       | for each faction in factions:
 	 *       |   ( (faction != null) &&
 	 *       |     (! faction.isTerminated()) )
 	 */
-	public Set<Faction> factions;
+	private Set<Faction> factions;
 	
 	
 	//------------------------GETTERS
 	
 	/**
 	 * Gives back the active factions of this world
+	 * 
+	 * @return a new hashset with all factions
 	 */
 	@Basic @Raw
 	public Set<Faction> getAllFactions(){
@@ -726,7 +728,6 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	}
 	
 	/**
-	 * TODO
 	 * 
 	 * Adds a unit to a faction
 	 * 
@@ -789,11 +790,10 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 *         
 	 * @throws IllegalArgumentException
 	 * 		|!this.hasAsFaction(faction)
-	 * 
 	 *       
 	 */
-	@Raw
-	public void removeAsFaction(@Raw Faction faction) throws IllegalArgumentException{
+	@Raw 
+	public void removeFaction(@Raw Faction faction) throws IllegalArgumentException{
 		if(!this.hasAsFaction(faction))
 			throw new IllegalArgumentException();
 		factions.remove(faction);
@@ -843,7 +843,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 *       |   ( (unit != null) &&
 	 *       |     (! unit.isTerminated()) )
 	 */
-	public Set<Unit> units;
+	private Set<Unit> units;
 	//------------------------GETTERS
 	
 	/**
@@ -1017,7 +1017,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 		The random unit
 	 * 		
 	 */
-	public Unit getRandomUnit(boolean enableDefaultBehavior){
+	public Unit createRandomUnit(boolean enableDefaultBehavior){
 		
 		Random rand = new Random();
 		int MIN = 25;
@@ -1120,13 +1120,18 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 
 	 * @param  item
 	 *         The Item to be added.
-	 * @pre    The world can have this item as item 
-	 * 				and the item does not yet reference any world
+	 *     
 	 * @post   This World has the given Item as one of its items.
 	 * @effect the item has this world as its world
+	 * @throws IllegalArgumentException
+	 * 			The world can not have this item as item 
+	 * 				or the item does already reference this world
+	 * 		
 	 */
-	public void addItem(@Raw Item item) {
-		assert this.canHaveAsItem(item) && item.getWorld() == this;
+	@Raw
+	public void addItem(Item item) throws IllegalArgumentException {
+		if(!this.canHaveAsItem(item) || item.getWorld() == this)
+			throw new IllegalArgumentException();
 		items.add(item);
 		item.setWorld(this);
 	}
@@ -1136,18 +1141,18 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 
 	 * @param  item
 	 *         The Item to be removed.
-	 * @pre    This World has the given Item as one of
-	 *         its items, and the given Item does not
-	 *         reference any World.
-	 *       | this.hasAsItem(item) &&
-	 *       | (item.getWorld() == null)
+
 	 * @post   This World no longer has the given Item as
 	 *         one of its items.
 	 *       | ! new.hasAsItem(item)
+	 *       
+	 * @throws IllegalArgumentException
+	 * 		|!this.hasAsItem(item) || item.getWorld() != this
 	 */
 	@Raw
-	public void removeItem(Item item) {
-		assert this.hasAsItem(item) && (item.getWorld() == this);
+	public void removeItem(Item item) throws IllegalArgumentException {
+		if(!this.hasAsItem(item) || item.getWorld() != this)
+			throw new IllegalArgumentException();
 		items.remove(item);
 		item.setWorld(null);
 	}
@@ -1155,7 +1160,9 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	//---------------------ADDITIONAL INSPECTORS
 	
 	/**
-	 * return  a clone of the set of Items that belong to this world
+	 * get a clone of the set of Items that belong to this world
+	 * 
+	 * @return a clone of the set of Items that belong to this world
 	 */
 	@Basic
 	public Set<Item> getAllItems(){
@@ -1225,8 +1232,11 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 
 	 * @param position
 	 * 		the position for the boulder
+	 * @effect
+	 * 		a new boulder is created
 	 */
-	public void createBoulder(int[] position) {
+	@Model @Raw
+	private void createBoulder(int[] position) throws IllegalArgumentException {
 		new Boulder(position, this);
 	}
 	
@@ -1234,7 +1244,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * Gives back all Boulders in this World.
 	 * 
 	 * @return
-	 * 		A Set of all Boulders in this World. 
+	 * 		A new HashSet of all Boulders in this World. 
 	 */
 	public Set<Boulder> getAllBoulders() {
 		Set<Boulder> allBoulders = new HashSet<Boulder>();
@@ -1272,8 +1282,11 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 
 	 * @param position
 	 * 		the position for the log
+	 * @effect
+	 * 		a new log is created
 	 */
-	public void createLog(int[] position) {
+	@Model @Raw
+	private void createLog(int[] position) {
 		new Log(position, this);	
 	}
 

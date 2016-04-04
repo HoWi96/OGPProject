@@ -5,6 +5,7 @@ import be.kuleuven.cs.som.annotate.*;
 
 
 /**
+ * ASSOCIATIONS
  * @Invar Each faction must have proper units.
  * 		| this.hasProperUnits()
  */
@@ -97,11 +98,12 @@ public class Faction {
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
-	 * -----------------------METHODS------------------------------------
+	 * -----------------------UNITS--------------------------------------
+	 * ------------------CONTROLLING CLASS-------------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 	
-	//-----------------------GETTERS
+	//-----------------------INSPECTORS
 	/**
 	 * Gives back the units of this faction
 	 */
@@ -163,7 +165,7 @@ public class Faction {
 		unit.setFaction(null);
 
 	}
-	//-----------------------INSPECTORS
+	//-----------------------EXTRA INSPECTORS
 	
 	/**
 	 * Check whether this faction has the given unit as one of its units.
@@ -208,19 +210,5 @@ public class Faction {
 		}
 		return true;
 	}
-	
-	
-	
-	
-	
-	
-	
-
-	
-	
-	
-	
-	
-
 
 }

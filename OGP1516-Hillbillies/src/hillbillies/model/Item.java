@@ -3,19 +3,20 @@ package hillbillies.model;
 import be.kuleuven.cs.som.annotate.*;
 
 /** 
- * 
- * @invar  The position of each GameObject must be a valid position for any
+ * ATTRIBUTES
+ * @Invar  The position of each GameObject must be a valid position for any
  *         GameObject.
  *       | isValidPosition(getPosition())
- * @invar  The World of each GameObject must be a valid World for any
- *         GameObject.
- *       | isValidWorld(getWorld())
- * @invar  The unit of each Item must be a valid unit for any
+ * @Invar  Each rawMaterial can have its weight as weight.
+ *       | canHaveAsWeight(this.getWeight())
+ *       
+ * ASSOCIATIONS
+ * @Invar  The unit of each Item must be a valid unit for any
  *         Item.
  *       | canHaveAs(getUnit())
- *       
- * @invar  Each rawMaterial can have its weight as weight.
- *       | canHaveAsWeight(this.getWeight())
+ * @Invar  The World of each GameObject must be a valid World for any
+ *         GameObject.
+ *       | isValidWorld(getWorld())    
  */
 public abstract class Item {
 	
@@ -281,7 +282,14 @@ public abstract class Item {
 		if(!this.getWorld().isSolidUnder(Utils.getCubePosition(this.getPosition())))
 			falling(dt);
 	}
-
+	/**
+	 * The item will fall until it reaches the ground
+	 * 
+	 * @param dt
+	 * 		the time it will fall
+	 * @post
+	 * 		the position will be updated till ground is reached
+	 */
 	protected void falling(double dt){
 		double[] position = this.getPosition();
 		position[2] = position[2]-3.0*dt;

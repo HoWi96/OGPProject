@@ -19,10 +19,13 @@ public class UnitTest {
 	private Unit unit1;
 	private Unit unit2;
 	private Unit unit3;
+	private Unit unit4;
 	private Unit defender;
 	private World world;
 
 	static int[] position = {1, 2, 3};
+	static int[] groundPosition = {0,0,0};
+	static int[] groundPosition2 = {4,4,0};
 	static int[] targetPosition = {2, 3, 4};
 	static int[] targetPosition2 = {4,4,4};
 	static double[] targetPositionDouble = {3, 4, 5};
@@ -41,7 +44,8 @@ public class UnitTest {
 	public void setUp() throws Exception {
 		unit1 = new Unit("Baba 'O Reily", position, 50, 50, 50, 50, false);
 		unit2 = new Unit("UnitStrong",position, 100,100,100,100, false);
-		unit3 = new Unit("UnitWeak",position, 25, 25, 25 ,25, false);
+		unit3 = new Unit("Baba 'O Reil", groundPosition, 50, 50, 50, 50, false);
+		unit4 = new Unit("UnitWeak",position, 25, 25, 25 ,25, false);
 		int[][][] types = new int[5][5][5];
 		world = new World(types, new DefaultTerrainChangeListener());
 		world.addUnit(unit1);
@@ -112,12 +116,12 @@ public class UnitTest {
 		 	assertTrue(unit1.isValidWeight(50));
 		 	assertTrue(unit1.isValidWeight(200));
 		 	assertTrue(unit2.isValidWeight(200));
-		 	assertTrue(unit3.isValidWeight(25));
+		 	assertTrue(unit4.isValidWeight(25));
 		 	
 	        assertFalse(unit1.isValidWeight(0));
 	        assertFalse(unit1.isValidWeight(49));
 	        assertFalse(unit2.isValidWeight(201)); 
-	        assertFalse(unit3.isValidWeight(-5));   
+	        assertFalse(unit4.isValidWeight(-5));   
 	    }
 	  @Test
 	    public void testIsValidStamina(){
@@ -125,11 +129,11 @@ public class UnitTest {
 		  	assertTrue(unit1.isValidStamina(50));
 		  	assertTrue(unit1.isValidStamina(0));
 		  	assertTrue(unit2.isValidStamina(200));
-		  	assertTrue(unit3.isValidStamina(1));
+		  	assertTrue(unit4.isValidStamina(1));
 		  	
 	        assertFalse(unit1.isValidStamina(-1));
 	        assertFalse(unit2.isValidStamina(201));
-	        assertFalse(unit3.isValidStamina(26)); 
+	        assertFalse(unit4.isValidStamina(26)); 
 	    }
 	  
 
@@ -138,11 +142,11 @@ public class UnitTest {
 	    	assertTrue(unit1.isValidHitpoints(50));
 		  	assertTrue(unit1.isValidHitpoints(0));
 		  	assertTrue(unit2.isValidHitpoints(200));
-		  	assertTrue(unit3.isValidHitpoints(1));
+		  	assertTrue(unit4.isValidHitpoints(1));
 		  	
 	        assertFalse(unit1.isValidHitpoints(-1));
 	        assertFalse(unit2.isValidHitpoints(201));
-	        assertFalse(unit3.isValidHitpoints(26)); 
+	        assertFalse(unit4.isValidHitpoints(26)); 
 
 	    }
 	    
@@ -170,31 +174,31 @@ public class UnitTest {
 	    public void testGetMaxHitpoints(){
 	    	assertTrue(unit1.getMaxHitpoints() == 50);
 	    	assertTrue(unit2.getMaxHitpoints() == 200);
-	    	assertTrue(unit3.getMaxHitpoints() == 13 );
+	    	assertTrue(unit4.getMaxHitpoints() == 13 );
 	    }
 	    
 	    @Test
 	    public void testGetMaxStamina(){
 	    	assertTrue(unit1.getMaxStamina() == 50);
 	    	assertTrue(unit2.getMaxStamina() == 200);
-	    	assertTrue(unit3.getMaxStamina() == 13);
+	    	assertTrue(unit4.getMaxStamina() == 13);
 	    }
-	    
-	    @Test
-	    public void testUpdateSpeed(){
-	    	
-	    	unit1.updateSpeed(0);
-	    	assertTrue(unit1.getSpeed() == 0);
-	    	//unit.setCurrentActivity(Activity.MOVING);
-	    	unit1.moveTo(targetPosition);
-	    	unit1.updateSpeed(-1);
-	    	assertTrue(Util.fuzzyEquals(unit1.getSpeed(), 1.8));
-	    	unit1.updateSpeed(0);
-	    	assertTrue(Util.fuzzyEquals(unit1.getSpeed(), 1.5));
-	    	unit1.updateSpeed(1);
-	    	assertTrue(Util.fuzzyEquals(unit1.getSpeed(),0.75));
-	    }
-	    
+//	    PRIVATE
+//	    @Test
+//	    public void testUpdateSpeed(){
+//	    	
+//	    	unit3.updateSpeed(0);
+//	    	assertTrue(unit3.getSpeed() == 0);
+//	    	//unit.setCurrentActivity(Activity.MOVING);
+//	    	unit3.moveTo(groundPosition2);
+//	    	unit3.updateSpeed(-1);
+//	    	assertTrue(Util.fuzzyEquals(unit3.getSpeed(), 1.8));
+//	    	unit3.updateSpeed(0);
+//	    	assertTrue(Util.fuzzyEquals(unit3.getSpeed(), 1.5));
+//	    	unit3.updateSpeed(1);
+//	    	assertTrue(Util.fuzzyEquals(unit3.getSpeed(),0.75));
+//	    }
+//	    
 	    
 	    @Test
 	    public void testGetNextPosition(){
@@ -233,14 +237,14 @@ public class UnitTest {
 	    	assertTrue(next[2] == 5);
 	    }
 	    */
-	    @Test
+	    @Test 
 	    public void testMoveToTarget(){
-	    	unit1.moveTo(targetPosition);
-	    	double[] next = unit1.getNextPosition();
-	    	assertTrue(next[0] == 1.5);
-	    	assertTrue(next[1] == 2.5);
-	    	assertTrue(next[2] == 3.5);
+	    	unit3.moveTo(groundPosition2);
 	    	
+	    	while(unit3.isMoving())
+	    		unit3.advanceTime(0.2);
+	    	int[] current = Utils.getCubePosition(unit3.getPosition());
+	    	assertTrue(Utils.equals(current, groundPosition2));
 	    }
 	    
 	    @Test(expected = IllegalArgumentException.class)
@@ -291,12 +295,13 @@ public class UnitTest {
 	    
 	    @Test
 	    public void testIsResting(){
-	    	assertFalse(unit1.isResting());
-	    	unit1.moveTo(targetPosition);
-	    	unit1.startSprinting();
-	    	unit1.advanceTime(0.2);
-	    	unit1.rest();
-	    	assertTrue(unit1.isResting());
+
+	    	assertFalse(unit3.isResting());
+	    	unit3.moveTo(groundPosition2);
+	    	unit3.startSprinting();
+	    	unit3.advanceTime(0.2);
+	    	unit3.rest();
+	    	assertTrue(unit3.isResting());
 	    }
 	    
 	    @Test
@@ -309,19 +314,19 @@ public class UnitTest {
 	    
 	    @Test
 	    public void testAttack(){
-	    	unit2.attack(unit3);
+	    	unit2.attack(unit4);
 	    	assertTrue(unit2.isAttacking());
-	    	assertTrue(unit2.getOrientation() == Math.atan2(0, 0));
-	    	assertTrue(unit3.isDoingNothing());
+	    	assertTrue(unit4.getOrientation() == Math.atan2(0, 0));
+	    	assertTrue(unit4.isDoingNothing());
 	    }
 	    
 	    @Test
 	    public void testDefend(){
-	    	double[] prevPosition = unit3.getPosition();
-	    	int prevHitpoints = unit3.getHitpoints();
-	    	unit2.attack(unit3);
-	    	double[] postPosition = unit3.getPosition();
-	    	int postHitpoints = unit3.getHitpoints();
+	    	double[] prevPosition = unit4.getPosition();
+	    	int prevHitpoints = unit4.getHitpoints();
+	    	unit2.attack(unit4);
+	    	double[] postPosition = unit4.getPosition();
+	    	int postHitpoints = unit4.getHitpoints();
 	    	assertTrue(Utils.inBetween(new double[] {-1,-1,-1},new double[] {1,1,1},Utils.addPositionsFactor(prevPosition, postPosition, -1))
 	    			|| (prevHitpoints-postHitpoints == (int) unit2.getStrength()/10));
 	    }
@@ -349,12 +354,13 @@ public class UnitTest {
 	    
 	    @Test
 	    public void testIsAbleToSprint(){
+	    	
 	    	assertFalse(unit3.isAbleToSprint());
-	    	unit3.moveTo(targetPosition2);
+	    	unit3.moveTo(groundPosition2);
 	    	assertTrue(unit3.isAbleToSprint());
 	    	unit3.startSprinting();
 	    	while(unit3.getStamina()>0)
-	    		unit3.advanceTime(0.2);
+	    		unit3.advanceTime(0.1);
 	    	assertFalse(unit3.isAbleToSprint());
 	    	
 	    }
@@ -405,8 +411,9 @@ public class UnitTest {
 	    @Test(expected = IllegalStateException.class)
 	    public void testMoveToTargetIllegalStateException(){
 	    	Unit defender = new Unit("Baba 'O Reil", position, 50, 50, 50, 50, true);
+	    	world.addUnit(defender);
 	    	unit1.attack(defender);
-	    	unit1.moveTo(targetPosition);
+	    	unit1.moveTo(groundPosition);
 	    }
 	    
 	    @Test(expected = IllegalArgumentException.class)

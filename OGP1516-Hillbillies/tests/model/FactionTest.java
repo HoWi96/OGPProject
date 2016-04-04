@@ -47,7 +47,7 @@ public class FactionTest {
 		assertEquals(world1.getNbFactions(), 0);
 
 		for (int i = 0; i<10; i++){
-			Unit unit = world1.getRandomUnit(false);
+			Unit unit = world1.createRandomUnit(false);
 			world1.addUnit(unit);
 		}
 		assertTrue(world1.getNbFactions() == 5);
@@ -97,10 +97,22 @@ public class FactionTest {
 
 	
 	@Test (expected = IllegalArgumentException.class)
-	public void IllegalUnitAdded(){
+	public void testIllegalUnitAdded(){
 		assertFalse(faction1.canHaveAsUnit(null));
 		faction1.addUnit(null);
 	}
+	
+	
+	@Test
+	public void testremoveFaction(){
+		world1.addUnit(unit1);
+		assertTrue(world1.hasAsFaction(unit1.getFaction()));
+
+		world1.removeFaction(unit1.getFaction());
+		assertFalse(world1.hasAsFaction(unit1.getFaction()));
+	}
+	
+	
 	
 
 

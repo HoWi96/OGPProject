@@ -293,7 +293,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public Unit spawnUnit(World world, boolean enableDefaultBehavior) throws ModelException {
-		Unit unit = world.getRandomUnit(enableDefaultBehavior);
+		Unit unit = world.createRandomUnit(enableDefaultBehavior);
 		world.addUnit(unit);
 		System.out.println("Spawn unit "+unit.getName());
 		return unit;
