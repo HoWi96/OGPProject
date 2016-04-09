@@ -1272,7 +1272,6 @@ private void attacking(double dt){
 
 /**
  * Helper function to start a random activity
- * TODO
  * 
  * @throws IllegalArgumentException
  * @throws IllegalStateException
@@ -1317,7 +1316,10 @@ private void startRandomActivity() throws IllegalArgumentException, IllegalState
 }
 
 /**
+ * Helper function to control the moving of the unit
+ * 
  * @param dt
+ * 		the time to progress
  * @throws IllegalArgumentException
  * @throws IllegalStateException
  */
@@ -1399,7 +1401,7 @@ private void resting(double dt) throws IllegalArgumentException {
 }
 
 /**
- * The unit is working
+ * Helper function to control the unit while he is working
  * 
  * @param dt
  * 		The time the unit proceeds working
@@ -1442,9 +1444,7 @@ private void working(double dt) throws IllegalArgumentException{
 			this.getWorld().caveIn(workingPosition);
 			System.out.println("Cave in happened");
 		}
-		
-		
-		
+
 		this.updateXP(10);
 		this.setActivity(Activity.NOTHING);
 		counterTillDefault =0;

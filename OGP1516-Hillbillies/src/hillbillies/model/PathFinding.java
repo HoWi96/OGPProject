@@ -5,117 +5,167 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
+import be.kuleuven.cs.som.annotate.Raw;
 
 public class PathFinding {
 	
-	private World world;
-	private ArrayList<int[]> path = new ArrayList<>();
-	private Set<int[]> closedset = new HashSet<>();
-	private TreeSet<Node> openset = new TreeSet<Node>();
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------VARIABLES---------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
 	
+	//---------Connection with the world
+	/*
+	 * The world for this pathFinding class
+	 */
+	private final World world;
+	
+	//---------A* algorithm
+	/*
+	 * Resize able list, ideal to store the path
+	 */
+	private ArrayList<int[]> path = new ArrayList<>();
+	/*
+	 * HashSet for the closedSet: ideal to access information in constant time
+	 */
+	private Set<int[]> closedSet = new HashSet<>();
+	/*
+	 * TreeSet for the openSet: ideal for making yourself a natural ordering (which is recommended for the A*)
+	 */
+	private TreeSet<Node> openSet = new TreeSet<Node>();
+	
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------CONSTRUCTOR---------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	/**
+	 * Initialize the pathFinding with a given world, a given start position and a given target position
+	 * 
+	 * @param world
+	 * 		the world for the pathFinding algorithm
+	 * @param start
+	 * 		the start position
+	 * @param target
+	 * 		the target position
+	 * 
+	 * @effect calculateFastestPath(start, target)
+
+	 * @throws IllegalArgumentException
+	 *  		| world == null
+	 */
 	public PathFinding(World world, int[] start, int[] target) throws IllegalArgumentException{
+		if(world == null)
+			throw new IllegalArgumentException();
 		this.world = world;
 		this.calculateFastestPath(start, target);
 	}
 	
-	public class Node implements Comparable<Node>{
-		
-		private int[] myPos;
-		private double gvalue;
-		private double fvalue;
-		private Node parent;
-		
-		public Node(int[] pos, double g, double f, Node parent){
-			this.myPos = pos;
-			this.gvalue = g;
-			this.fvalue = f;
-			this.parent = parent;	
-		}
-		
-		//------------------------GETTERS
-		public int[] getPosition(){
-			return this.myPos;
-		}
-		public double getGValue(){
-			return this.gvalue;
-		}
-		public Node getParent(){
-			return this.parent;
-		}
-		public double getFValue(){
-			return this.fvalue;
-		}
-		
-		//----------------------SETTERS
-		public void setParent(Node parent){
-			this.parent = parent;
-		}
-		public void setGValue(double gvalue){
-			this.gvalue = gvalue;
-		}
-		public void setFValue(double fvalue){
-			this.fvalue = fvalue;
-		}
-
-		//Implement comparable for a natural ordening of the treeset
-		@Override
-		public int compareTo(Node o) {
-			if (this.equals(o)){
-				return 0;
-			}
-			if (this.getFValue()<o.getFValue()){
-				return -1;
-			} else return 1;
-		}
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------WORLD--------------------------------------
+	 * -----------------UNI DIRECTIONAL----------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	/*
+	 * Returns the world of the pathfinding algorithm
+	 */
+	@Basic @Raw @Immutable
+	public World getWorld(){
+		return this.world;
 	}
 	
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------A* ALGORITHM-------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	/**
+	 * Calculates the fastest path from start to target
+	 * 
+	 * @param start
+	 * 		the starting position
+	 * @param target
+	 * 		the target position
+	 * @throws IllegalArgumentException
+	 * 		!world.isValidPosition(start) || !world.isValidPosition(target)
+	 * @post
+	 * 		the path will contain the fastest path or no path at all
+	 */
 	public void calculateFastestPath(int[] start, int[] target) throws IllegalArgumentException{
 		
-		openset.add(new Node(start,0,getEstimatedTimeTo(start,target),null));
+		if(!this.getWorld().isValidPosition(start) || !this.getWorld().isValidPosition(target))
+			throw new IllegalArgumentException();
 		
-		while (openset.size()>0){
+		openSet.add(new Node(start,0,getEstimatedTimeTo(start,target),null));
+		
+		while (openSet.size()>0 && closedSet.size()<200){
 			
-			Node current = openset.pollFirst();
-			closedset.add(current.getPosition());
+			Node current = openSet.pollFirst();
+			closedSet.add(current.getPosition());
 			
 			//TERMINATE PATHFINDING
 			if (Utils.equals(current.getPosition(), target)){
-				calculatePath(current);
+				calculatePathTo(current);
 				break;
 			}
 			//CONTINUE SEARCHING
-			for (int[] pos : world.quickFindReachableAdjacents((current.getPosition()))){
+			for (int[] pos : this.getWorld().quickFindReachableAdjacents((current.getPosition()))){
 				// time consuming factor!!!!!
 				
 				//Already a shorter way to this position
-				if (closedset.contains(pos)){
+				if (closedSet.contains(pos)){
 					continue;
 				}
 				
 				double tempGscore = current.getGValue()+getExactTimeToAdjacent(current.getPosition(),pos);
-				Node matchingNode = getMatchingNodeFromOpenSet(pos);
+				Node matchingNode = getNodeFromOpenSetCorrespondigWith(pos);
 				
 				if (matchingNode!=null && tempGscore >= matchingNode.getGValue()){
 					continue;
 				} else if (matchingNode != null){
-					openset.remove(matchingNode);
+					openSet.remove(matchingNode);
 				}
 				
 				matchingNode = new Node(pos, tempGscore, tempGscore+getEstimatedTimeTo(pos,target), current);
-				openset.add(matchingNode);
+				openSet.add(matchingNode);
 			}
 		}
 	}
 	
+	//---------------------------------------HELPERS
 	
-	@Immutable
-	private double getExactTimeToAdjacent(int[] position, int[] pos) {
-		return 1.0;
+	/**
+	 * Returns the exact time to move to an adjacent
+	 * 
+	 * @param start
+	 * 		the starting position
+	 * @param target
+	 * 		the target position
+	 * @return
+	 * 		getEstimatedTimeTo(start,target)
+	 */
+	private double getExactTimeToAdjacent(int[] start, int[] target) {
+		return getEstimatedTimeTo(start,target);
 	}
 
 
-
+	/**
+	 * Returns an estimated time to move from the the starting position to the target
+	 * 
+	 * @param start
+	 * 		the start position
+	 * @param target
+	 * 		the target position
+	 * @return
+	 * 		the maximal change in direction, taking in mind that moves in z direction change the time slightly
+	 */
 	private double getEstimatedTimeTo(int[] start, int[] target) {
 		double dx = Math.abs(target[0]-start[0]);
 		double dy = Math.abs(target[0]-start[0]);
@@ -131,25 +181,52 @@ public class PathFinding {
 		
 		return maxTotal;
 	}
-
-	private Node getMatchingNodeFromOpenSet(int[] pos){
-		for (Node node : openset){
-			if (Utils.equals(node.getPosition(),pos)){
+	/**
+	 * Returns the corresponding node of the open set for the given position
+	 * 
+	 * @param position
+	 * 		the position to correspond with
+	 * @return
+	 * 		the matching node or null
+	 */
+	private Node getNodeFromOpenSetCorrespondigWith(int[] position){
+		for (Node node : openSet){
+			if (Utils.equals(node.getPosition(),position)){
 				return node;
 			}
 		}
 		return null;
 	}
-	
-	private void calculatePath(Node target){
+	/**
+	 * Calculates the fastest path, storing it in the path variable
+	 * 
+	 * @param target
+	 * 		The target node
+	 * 
+	 * @post
+	 * 		the path is stored in the path variable
+	 * 		while the first node is not reached, 
+	 * 		the position of the current node will be added to the path
+	 */
+	private void calculatePathTo(Node target){
+		
 		Node currentNode = target;
+		
 		while (currentNode.getParent()!=null){
-			int[] pos = currentNode.getPosition();
-			path.add(pos);
+			
+			path.add(currentNode.getPosition());
 			currentNode = currentNode.getParent();
 		}
 	}
 	
+	/**
+	 * Returns the next position, and deleting it at the same time from the path
+	 * 
+	 * @return
+	 * 		the next position in the path
+	 * @post
+	 * 		the next position if removed from the path
+	 */
 	public int[] moveToNextPos(){
 		if (hasPathCompleted()){
 			return null;
@@ -159,27 +236,106 @@ public class PathFinding {
 		return nextPos;
 	}
 
-
 	/**
 	 * @return whether the path is completed
 	 */
 	public boolean hasPathCompleted() {
 		return this.path.isEmpty();
 	}
-	
-	public boolean setContains(Set<int[]> set, int[] pos){
-		for (int[] position : set){
-			if (Utils.equals(pos,position)){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	
-	
+
+	/**
+	 * @return the path that still needs to be taken
+	 */
 	public ArrayList<int[]> getPath(){
 		return this.path;
 	}
+	
+	/**
+	 * 
+	 * @author Holger
+	 * 
+	 * A class implementing the nodes used in the A* algorithm
+	 * with a natural ordering for the nodes used in the treeSet
+	 *
+	 */
+	public class Node implements Comparable<Node>{
+		
+		
+			//VARIABLES
+			private int[] position;
+			private Node parent;
+			private double gValue;
+			private double fValue;
+			
+			//CONSTRUCTOR
+			/**
+			 * Creates a node with immutable properties
+			 * 
+			 * @param position
+			 * 			the position of the node
+			 * @param g
+			 * 		the g value of the node
+			 * @param f
+			 * 		the f value of the node
+			 * @param parent
+			 * 		the nodes parent
+			 * @post
+			 * 		the position will be set to the given position
+			 * 		the parent will be set to the given parent
+			 * 		the g value will be set to the given g
+			 * 		the f value will be set to the given f
+			 */
+			public Node(int[] position, double g, double f, Node parent){
+				this.position = position;
+				this.parent = parent;	
+				this.gValue = g;
+				this.fValue = f;
+				
+			}
+			
+			//INSPECTORS
+			/**
+			 * returns the position
+			 */
+			@Basic @Immutable
+			public int[] getPosition(){
+				return this.position;
+			}
+			/**
+			 * returns the gvalue
+			 */
+			@Basic @Immutable
+			public double getGValue(){
+				return this.gValue;
+			}
+			/**
+			 * returns the parent
+			 */
+			@Basic @Immutable
+			public Node getParent(){
+				return this.parent;
+			}
+			/**
+			 * returns the f value
+			 */
+			@Basic @Immutable
+			public double getFValue(){
+				return this.fValue;
+			}
+			
+			//INTERFACE
+			/**
+			 * Override method for natural ordering of nodes
+			 */
+			@Override
+			public int compareTo(Node otherNode) {
+				if (this.equals(otherNode)){
+					return 0;
+				}
+				if (this.getFValue()<otherNode.getFValue()){
+					return -1;
+				} else return 1;
+			}
+		}
 	
 }
