@@ -124,10 +124,10 @@ public class PathFinding {
 					continue;
 				}
 				
-				double tempGscore = current.getGValue()+getExactTimeToAdjacent(current.getPosition(),pos);
+				double tempGscore = current.getGScore()+getExactTimeToAdjacent(current.getPosition(),pos);
 				Node matchingNode = getNodeFromOpenSetCorrespondigWith(pos);
 				
-				if (matchingNode!=null && tempGscore >= matchingNode.getGValue()){
+				if (matchingNode!=null && tempGscore >= matchingNode.getGScore()){
 					continue;
 				} else if (matchingNode != null){
 					openSet.remove(matchingNode);
@@ -264,8 +264,8 @@ public class PathFinding {
 			//VARIABLES
 			private int[] position;
 			private Node parent;
-			private double gValue;
-			private double fValue;
+			private double gScore;
+			private double fScore;
 			
 			//CONSTRUCTOR
 			/**
@@ -273,9 +273,9 @@ public class PathFinding {
 			 * 
 			 * @param position
 			 * 			the position of the node
-			 * @param g
+			 * @param gScore
 			 * 		the g value of the node
-			 * @param f
+			 * @param fScore
 			 * 		the f value of the node
 			 * @param parent
 			 * 		the nodes parent
@@ -285,11 +285,11 @@ public class PathFinding {
 			 * 		the g value will be set to the given g
 			 * 		the f value will be set to the given f
 			 */
-			public Node(int[] position, double g, double f, Node parent){
+			public Node(int[] position, double gScore, double fScore, Node parent){
 				this.position = position;
 				this.parent = parent;	
-				this.gValue = g;
-				this.fValue = f;
+				this.gScore = gScore;
+				this.fScore = fScore;
 				
 			}
 			
@@ -305,8 +305,8 @@ public class PathFinding {
 			 * returns the gvalue
 			 */
 			@Basic @Immutable
-			public double getGValue(){
-				return this.gValue;
+			public double getGScore(){
+				return this.gScore;
 			}
 			/**
 			 * returns the parent
@@ -319,8 +319,8 @@ public class PathFinding {
 			 * returns the f value
 			 */
 			@Basic @Immutable
-			public double getFValue(){
-				return this.fValue;
+			public double getFScore(){
+				return this.fScore;
 			}
 			
 			//INTERFACE
@@ -332,7 +332,7 @@ public class PathFinding {
 				if (this.equals(otherNode)){
 					return 0;
 				}
-				if (this.getFValue()<otherNode.getFValue()){
+				if (this.getFScore()<otherNode.getFScore()){
 					return -1;
 				} else return 1;
 			}
