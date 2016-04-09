@@ -1,6 +1,8 @@
 package hillbillies.model;
 
 
+import java.util.List;
+
 import be.kuleuven.cs.som.annotate.*;
 
 
@@ -85,7 +87,7 @@ public class Unit {
 	private static final String ALLOWED_NAME_PATTERN = "[a-zA-Z \"']+";
 	
 	private static final float PI = (float) Math.PI;
-
+	
 	private static final double REST_INTERVAL = 60*3;
 	private static final double NOTHING_INTERVAL = 10;
 	
@@ -683,7 +685,7 @@ public void setAgility(int agility) {
  *         The new toughness for this Unit.
  * @post   If the given toughness is a valid toughness for any Unit,
  *         the toughness of this new Unit is equal to the given
- *         toughness.
+ *         toughness. Else we don't change anything.
  *       | if (isValidToughness(toughness))
  *       |   then new.getToughness() == toughness
  */
@@ -836,8 +838,9 @@ public static boolean isValidName(String name) {
  * 			| this.getWorld() == null
 */
 @Raw
-public boolean isValidPosition(@Raw double[] position) {
-	return this.getWorld() == null || (world.isValidPosition(Utils.getCubePosition(position)) &&
+public boolean isValidPosition(double[] position) {
+	return this.getWorld() == null || 
+			(world.isValidPosition(Utils.getCubePosition(position)) &&
 			!world.isSolidCube(Utils.getCubePosition(position)));
 }
 
@@ -1238,7 +1241,10 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 }
 
 /**
+ * Helper function counting down till the unit goes in default mode
+ * 
  * @param dt
+ * 		the time to progress
  */
 private void nothing(double dt) {
 	counterTillDefault = counterTillDefault+dt;
@@ -1250,10 +1256,13 @@ private void nothing(double dt) {
 }
 
 /**
+ * Helper function counting down till the unit ends his attack
+ * 
  * @param dt
- * @throws IllegalArgumentException
+ * 		the time to progress
+ * 		
  */
-private void attacking(double dt) throws IllegalArgumentException {
+private void attacking(double dt){
 	this.setProgressTime((float)(this.getProgressTime()+dt));
 	if (this.getProgressTime() >= this.getFightingTime()) {
 		this.setActivity(Activity.NOTHING);
@@ -1262,25 +1271,48 @@ private void attacking(double dt) throws IllegalArgumentException {
 }
 
 /**
+ * Helper function to start a random activity
+ * TODO
+ * 
  * @throws IllegalArgumentException
  * @throws IllegalStateException
  */
 private void startRandomActivity() throws IllegalArgumentException, IllegalStateException {
-	int randomActivity = (int) (Math.random()*3);
+	int randomActivity = (int) (Math.random()*4);
 	
 	if (randomActivity == 0) {
 		System.out.println("random position");
 		int[] targetPosition = this.getWorld().getRandomPositionForUnit();
 		this.moveTo(targetPosition);
-	}
-	if (randomActivity == 1) {
+		
+	} else if (randomActivity == 1) {
 		System.out.println("random work");
 		int[] randomWorkingPosition = Utils.getCubePosition(this.getPosition());
 		workAt(randomWorkingPosition);
-	}
-	if (randomActivity == 2) {
+		
+	} else if (randomActivity == 2) {
 		System.out.println("random rest");
 		rest();
+		
+	} else if (randomActivity == 3) {
+		System.out.println("random attack");
+		//expand to more locations to attack
+		List<int[]> attackPositions = this.getWorld().quickFindReachableAdjacents(Utils.getCubePosition(getPosition()));
+		
+		for(int[] position: attackPositions){
+			//evaluating all the positions around the unit
+			List<Unit> units = this.getWorld().getAllUnitsOnPosition(position);
+			if(units != null){
+				for(Unit unit: units){
+					//evaluating the units on the position
+					if(this.isAbleToAttack(unit)){
+						//match found
+						this.attack(unit);
+						return;
+					}	
+				}
+			}
+		}
 	}
 }
 
@@ -1634,7 +1666,6 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 				//only hitting moveToAdjacent
 				throw new IllegalArgumentException("Invalid next position");
 			} else {
-	
 				this.setNextPosition(cubeCenter);
 				System.out.println("wrong path????");
 				return;
@@ -2300,23 +2331,33 @@ public boolean isAbleToWork(){
 /**
  * Checks if this unit is currently able to attack.
  * A unit can work if it is not attacking.
- * @return	true if this unit is not attacking.
- * 			| result == (Math.abs(dx)<=1&&Math.abs(dy)<=1&&Math.abs(dz)==0) && 
- * 			  this.getActivity() == Activity.FALLING ||
- * 			  defender.getActivity() == Activity.FALLING;
+ * @return	
+ * 		true the unit nor the defender is falling and the unit is not attacking
+ * 		AND the faction of defender and attacker are different
+ * 		AND they are positioned on the same or on adjacent cubes
+ * 
+ * 	 |	!(this.getActivity() == Activity.FALLING
+ *		|| this.getActivity() == Activity.ATTACKING
+ *			|| defender.getActivity() == Activity.FALLING)
+ *		&& !(this.getFaction() == defender.getFaction())
+ *		&& (Utils.areAdjacent(aPosition, dPosition) || Utils.equals(aPosition, dPosition))
  */
 @Immutable
 public boolean isAbleToAttack(Unit defender){
-	if(this.getActivity() == Activity.FALLING || this.getActivity() == Activity.ATTACKING || defender.getActivity() == Activity.FALLING)
+	if(this.getActivity() == Activity.FALLING
+			|| this.getActivity() == Activity.ATTACKING
+			|| defender.getActivity() == Activity.FALLING)
 		return false;
 	
+	//they must belong to different factions
+	if(this.getFaction() == defender.getFaction())
+		return false;
+	
+	//they must be placed on adjacents or the same cube
 	int[] aPosition = Utils.getCubePosition(this.getPosition());
 	int[] dPosition = Utils.getCubePosition(defender.getPosition());
-	int dx = aPosition[0] - dPosition[0];
-	int dy = aPosition[1] - dPosition[1];
-	int dz = aPosition[2] - dPosition[2];
 
-	return (Math.abs(dx)<=1&&Math.abs(dy)<=1&&Math.abs(dz)==0);
+	return Utils.areAdjacent(aPosition, dPosition) || Utils.equals(aPosition, dPosition);
 }
 
 /*_____________________________________________________________

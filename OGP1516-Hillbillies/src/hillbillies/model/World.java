@@ -52,9 +52,8 @@ public class World {
 	public static final int TYPE_WORKSHOP = 3;
 	public static final int[] VALID_CUBE_TYPES = {TYPE_AIR,TYPE_ROCK,TYPE_TREE,TYPE_WORKSHOP};
 	
-	//PRIVATE
-	private static final int MAX_UNITS = 100;
-	private static final int MAX_FACTIONS = 5;
+	public static final int MAX_UNITS_IN_WORLD = 100;
+	public static final int MAX_FACTIONS = 5;
 	
 	
 	
@@ -146,7 +145,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	this.nbCubesZ = terrainTypes[0][0].length;
 	
 	//Initialize associations
-	this.units = new HashSet<Unit>(MAX_UNITS);
+	this.units = new HashSet<Unit>(MAX_UNITS_IN_WORLD);
 	this.factions = new HashSet<Faction>(MAX_FACTIONS);
 	this.items = new HashSet<Item>();
 	
@@ -717,7 +716,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	@Raw @Model
 	private Faction getSmallestFaction(){
 		Faction smallestFaction = null;
-		int unitsInSmallest = 50;
+		int unitsInSmallest = Faction.MAX_UNITS_IN_FACTION;
 		for (Faction faction : this.getAllFactions()) {
 			if (faction.getNbUnits() < unitsInSmallest){
 				smallestFaction = faction;
@@ -889,7 +888,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 				unit.setPosition(Utils.getCubeCenter(getRandomPositionForUnit()));
 		
 		// SILENTLY REJECT UNIT
-		if(this.units.size() < MAX_UNITS){
+		if(this.units.size() < MAX_UNITS_IN_WORLD){
 			
 			//ADDING UNIT TO WORLD
 			this.units.add(unit);
@@ -962,7 +961,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 */
 	public boolean hasProperUnits() {
 		
-		if (this.getNbUnits()>MAX_UNITS)
+		if (this.getNbUnits()>MAX_UNITS_IN_WORLD)
 			return false;
 	
 		for (Unit unit : this.units) {
@@ -970,6 +969,33 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 				return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Returns all units located on the cube, if any.
+	 * 
+	 * @param position
+	 * 		The position of the cube
+	 * 
+	 * @return
+	 * 		A new ArrayList of all units with positions located on the cube.
+	 */
+	@Raw
+	public List<Unit> getAllUnitsOnPosition(int[] position) throws IllegalArgumentException {
+		
+		if (!isValidPosition(position)) {
+			throw new IllegalArgumentException("Given position is invalid");
+		}
+		
+		List<Unit> AllUnits = new ArrayList<>();
+		
+		for (Unit unit: this.units) {
+			if (Utils.equals(position, Utils.getCubePosition(unit.getPosition()))) {
+				AllUnits.add(unit);
+			}
+		}
+		
+		return AllUnits;
 	}
 	
 	
