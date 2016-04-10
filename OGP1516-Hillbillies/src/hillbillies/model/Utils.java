@@ -3,8 +3,10 @@ package hillbillies.model;
 import java.util.Random;
 
 /**
- * @author Holger
- * @version 1.0
+ * @author Holger Willems |2e bach. ing.: OOP
+ * @date 10/04/2016
+ * @Version 2.0
+ * 
  */
 
 public class Utils {

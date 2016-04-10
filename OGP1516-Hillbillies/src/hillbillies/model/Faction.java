@@ -5,6 +5,10 @@ import be.kuleuven.cs.som.annotate.*;
 
 
 /**
+ * @author Holger Willems |2e bach. ing.: OOP
+ * @date 10/04/2016
+ * @Version 2.0
+ * 
  * ASSOCIATIONS
  * @Invar Each faction must have proper units.
  * 		| this.hasProperUnits()

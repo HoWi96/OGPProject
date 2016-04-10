@@ -312,11 +312,11 @@ public class UnitTest {
 	    	assertTrue(unit1.isAttacking());
 	    }
 	    
-	    @Test
+		@Test
 	    public void testAttack(){
 	    	unit2.attack(unit4);
 	    	assertTrue(unit2.isAttacking());
-	    	assertTrue(unit4.getOrientation() == Math.atan2(0, 0));
+	    	assertEquals(Math.atan2(0, 0),(double)unit4.getOrientation(),0.01);
 	    	assertTrue(unit4.isDoingNothing());
 	    }
 	    

@@ -3,6 +3,11 @@ package hillbillies.model;
 import be.kuleuven.cs.som.annotate.*;
 
 /** 
+ * @author Holger Willems |2e bach. ing.: OOP
+ * @date 10/04/2016
+ * @Version 2.0
+ *  
+ * 
  * ATTRIBUTES
  * @Invar  The position of each GameObject must be a valid position for any
  *         GameObject.

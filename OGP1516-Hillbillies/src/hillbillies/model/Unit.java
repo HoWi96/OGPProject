@@ -9,9 +9,9 @@ import be.kuleuven.cs.som.annotate.*;
 
 /**
  * This class is all about the units of the game.
- * @author Holger Willems & Sebastiaan Van Overschee
- * @date 20/02/2016
- * @Version 0.0
+ * @author Holger Willems |2e bach. ing.: OOP
+ * @date 10/04/2016
+ * @Version 2.0
  * 
  */
 
@@ -1178,11 +1178,12 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
     // if the unit gets a new task, he first have to move to the next position
     if(this.getActivity() != Activity.FALLING &&
     		((!this.isMoving() && !Utils.equals(this.getPosition(),this.getNextPosition()))|| this.isMovingToNext())){
-    	System.out.println("continue moving to next pos");
+    	//System.out.println("continue moving to next pos");
+    	
+    	this.setActivity(Activity.MOVING);
     	
     	if(!this.isMovingToNext()){
 	    	this.setNextActivity(this.getActivity());
-	    	this.setActivity(Activity.MOVING);
 	    	this.setMovingToNext(true);
 	    	
     	} else if(Utils.equals(this.getPosition(),this.getNextPosition())){
@@ -1201,7 +1202,7 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 	
 	// continue moving after you are again able to move
 	if(!this.isMoving() && pathFinding != null && !pathFinding.hasPathCompleted()&& this.isAbleToMoveFurther()){
-			System.out.println("continue path after stopping");
+			//System.out.println("continue path after stopping");
 			setActivity(Activity.MOVING);
 	}
 	
@@ -1282,21 +1283,21 @@ private void startRandomActivity() throws IllegalArgumentException, IllegalState
 	int randomActivity = (int) (Math.random()*4);
 	
 	if (randomActivity == 0) {
-		System.out.println("random position");
+		//System.out.println("random position");
 		int[] targetPosition = this.getWorld().getRandomPositionForUnit();
 		this.moveTo(targetPosition);
 		
 	} else if (randomActivity == 1) {
-		System.out.println("random work");
+		//System.out.println("random work");
 		int[] randomWorkingPosition = Utils.getCubePosition(this.getPosition());
 		workAt(randomWorkingPosition);
 		
 	} else if (randomActivity == 2) {
-		System.out.println("random rest");
+		//System.out.println("random rest");
 		rest();
 		
 	} else if (randomActivity == 3) {
-		System.out.println("random attack");
+		//System.out.println("random attack");
 		//expand to more locations to attack
 		List<int[]> attackPositions = this.getWorld().quickFindReachableAdjacents(Utils.getCubePosition(getPosition()));
 		
@@ -1416,19 +1417,19 @@ private void working(double dt) throws IllegalArgumentException{
 	
 	if (this.getProgressTime() >= this.getWorkingTime()) {
 		
-		System.out.println("finished working, getting data ...");
+		//System.out.println("finished working, getting data ...");
 		
 		int[] workingPosition = this.getWorkingPosition();
 		int cubeType = this.getWorld().getCubeType(workingPosition);
 		boolean solidCube = this.getWorld().isSolidCube(workingPosition);
 		Item item = this.getWorld().getItemOnPosition(workingPosition);
 		
-		System.out.println("data selected");
-		System.out.println("worked on cube type: " + cubeType );
+		//System.out.println("data selected");
+		//System.out.println("worked on cube type: " + cubeType );
 		
 		if(hasItem()){
 			//drop item
-			System.out.println("unit drops item");
+			//System.out.println("unit drops item");
 			dropItem(this.getItem(), Utils.getCubeCenter(workingPosition));
 		}else if(item != null){
 			if(cubeType == World.TYPE_WORKSHOP){
@@ -1446,7 +1447,7 @@ private void working(double dt) throws IllegalArgumentException{
 			// cave in
 			
 			this.getWorld().caveIn(workingPosition);
-			System.out.println("Cave in happened");
+			//System.out.println("Cave in happened");
 		}
 
 		this.updateXP(10);
@@ -1628,6 +1629,8 @@ public void moveTo(int[] target) throws IllegalArgumentException, IllegalStateEx
 }
 
 /**
+ * TODO optimize all moving activities (adaptable, comprehensible, efficient)
+ * 
  * Variable registering the path finding algorithm
  */
 private PathFinding pathFinding;

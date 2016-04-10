@@ -6,8 +6,10 @@ import hillbillies.part2.listener.TerrainChangeListener;
 import hillbillies.util.ConnectedToBorder;
 
 /**
- * @author Holger
- * @version 1.0
+ * @author Holger Willems |2e bach. ing.: OOP
+ * @date 10/04/2016
+ * @Version 2.0
+ * 
  */
 
 /**
@@ -599,11 +601,11 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 					
 					if (type == TYPE_ROCK){
 						this.createBoulder(caveInPosition);
-						System.out.println("spawn boulder");
+						//System.out.println("spawn boulder");
 						
 					}else if(type == TYPE_TREE){
 						this.createLog(caveInPosition);
-						System.out.println("spawn log");
+						//System.out.println("spawn log");
 					}
 				}
 			}
@@ -899,7 +901,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 			unit.getFaction().removeUnit(unit);
 			faction.addUnit(unit);
 			
-			System.out.println("Succesfully added unit: " + unit.getName());
+			//System.out.println("Succesfully added unit: " + unit.getName());
 		}
 	}
 

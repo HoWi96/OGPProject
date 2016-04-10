@@ -9,6 +9,15 @@ import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Raw;
 
+/**
+ * A class used to find paths for units in the game world
+ * 
+ * @author Holger Willems |2e bach. ing.: OOP
+ * @date 10/04/2016
+ * @Version 2.0
+ *
+ */
+
 public class PathFinding {
 	
 	/*___________________________________________________________________
@@ -271,10 +280,10 @@ public class PathFinding {
 		
 		
 			//VARIABLES
-			private int[] position;
-			private Node parent;
-			private double gScore;
-			private double fScore;
+			private final int[] position;
+			private final Node parent;
+			private final double gScore;
+			private final double fScore;
 			
 			//CONSTRUCTOR
 			/**
@@ -334,7 +343,7 @@ public class PathFinding {
 			
 			//INTERFACE
 			/**
-			 * Override method for natural ordering of nodes
+			 * Override method for natural ordering of nodes (used in TreeSet)
 			 */
 			@Override
 			public int compareTo(Node otherNode) {
