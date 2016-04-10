@@ -1042,7 +1042,7 @@ private static float getMovingOrientation(double[] velocityVector){
  * 			| defender.getOrientation() = (float) Math.atan2(aPosition[1]-dPosition[1], aPosition[0]-dPosition[1])
  */
 @Model
-private static void updateOrientation(Unit attacker, Unit defender){ 
+private static void updateFightingOrientation(Unit attacker, Unit defender){ 
 	double[] aPosition = attacker.getPosition();
 	double[] dPosition = defender.getPosition();
 	float aOrientation = getOrientation(aPosition,dPosition);
@@ -1168,8 +1168,7 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
     //set counter to the moment the unit needs to rest
     if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
     	counterTillRest = 0.0;
-    	rest();
-    	
+    	rest();	
     }
     
     //if the unit is not connected to solid cubes anymore, he needs to fall
@@ -1177,8 +1176,9 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
     	this.fall();
     
     // if the unit gets a new task, he first have to move to the next position
-    if(this.getActivity() != Activity.FALLING && (!this.isMoving() &&
-    		!Utils.equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext())){
+    if(this.getActivity() != Activity.FALLING && !this.isMoving() &&
+    		(!Utils.equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext())){
+    	System.out.println("continue moving to next pos");
     	
     	if(!this.isMovingToNext()){
 	    	this.setNextActivity(this.getActivity());
@@ -1193,17 +1193,19 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
     }
 	
 	//if the unit is in default mode, it can randomly start to sprint while moving
-	if(this.hasDefaultBehavior() && !this.isSprinting() && this.isMoving() && this.isAbleToSprint()){
+	if(this.hasDefaultBehavior() && !this.isSprinting() && this.isAbleToSprint()){
 		double randomSprint = Math.random();
 		if(randomSprint<0.01)
 			this.startSprinting();
 	}
 	
 	// continue moving after you are again able to move
-	if(!this.isMoving() && pathFinding != null &&!pathFinding.hasPathCompleted()&&this.isAbleToMoveFurther()){
+	if(!this.isMoving() && pathFinding != null && !pathFinding.hasPathCompleted()&& this.isAbleToMoveFurther()){
+			System.out.println("continue path after stopping");
 			setActivity(Activity.MOVING);
 	}
 	
+	//Start a random activity
 	if(this.hasDefaultBehavior() && this.getActivity()==Activity.NOTHING){
 			startRandomActivity();
 	}
@@ -1324,6 +1326,7 @@ private void startRandomActivity() throws IllegalArgumentException, IllegalState
  * @throws IllegalStateException
  */
 private void moving(double dt) throws IllegalArgumentException, IllegalStateException {
+	
 	//SPRINTING
 	if(this.isSprinting()){
 		if(this.getStamina()>=10*dt){
@@ -1348,6 +1351,7 @@ private void moving(double dt) throws IllegalArgumentException, IllegalStateExce
 			counterTillDefault = 0;
 			this.stopSprinting();
 			this.setSpeed(0);
+			return;
 			
 		} else{
 			//TARGET NOT YET REACHED
@@ -1466,6 +1470,8 @@ private void working(double dt) throws IllegalArgumentException{
  * 				| this.takeDamage(heightFalled*10);
  * 				its activity will be set to nothing
  * 				| this.setActivity(Activity.NOTHING);
+ * 				the step will be set to -1 z
+ * 				| this.setStep(new int[] {0,0,-1});
  */
 private void falling(double dt) {
 	
@@ -1481,6 +1487,7 @@ private void falling(double dt) {
 		int heightFalled = (int) Math.floor(startedFallingPosition[2]-currentFallingPosition[2]);
 		double[] nextPosition = Utils.getCubeCenter(Utils.getCubePosition(currentFallingPosition));
 		
+		this.setStep(new int[] {0,0,-1});
 		this.setNextPosition(nextPosition);
 		this.setActivity(Activity.NOTHING);
 		this.takeDamage(heightFalled*10);
@@ -1590,6 +1597,7 @@ private void setMovingToNext(boolean b) {
  */
 public void moveTo(int[] target) throws IllegalArgumentException, IllegalStateException{
 	
+	//EXCEPTIONS
 	if(this.getWorld() == null)
 		throw new IllegalStateException();
 	
@@ -1598,14 +1606,17 @@ public void moveTo(int[] target) throws IllegalArgumentException, IllegalStateEx
 	
 	if(!this.isAbleToMove())
 		throw new IllegalStateException();
-	
-	this.setActivity(Activity.MOVING);
+
+	//PATHFINDING
 	System.out.println("searching for path...");
 	this.pathFinding = new PathFinding(this.getWorld(), Utils.getCubePosition(this.getPosition()),target);
-	if(!pathFinding.hasPathCompleted())
+	
+	if(!pathFinding.hasPathCompleted()){
 		System.out.println("path found");
-	else
-		System.out.println("no such path");
+		this.setActivity(Activity.MOVING);
+	}else{
+		System.out.println("no such path found");
+	}
 }
 
 /**
@@ -1646,6 +1657,7 @@ private PathFinding pathFinding;
  */
 public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentException, IllegalStateException{
 		
+		//EXCEPTIONS
 		if (!isValidStep(dx, dy, dz)){
 			throw new IllegalArgumentException();
 		}
@@ -1655,6 +1667,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		if(!this.isAbleToMove())
 			throw new IllegalStateException();
 		
+		//VARS
 		int[] cubePosition = Utils.getCubePosition(this.getPosition());
 		double[] cubeCenter = Utils.getCubeCenter(Utils.getCubePosition(this.getPosition()));
 		int[] nextCubePosition = new int[] {cubePosition[0]+dx,cubePosition[1]+dy,cubePosition[2]+dz};
@@ -1667,12 +1680,11 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 				throw new IllegalArgumentException("Invalid next position");
 			} else {
 				this.setNextPosition(cubeCenter);
+				this.setPosition(cubeCenter);
 				System.out.println("wrong path????");
 				return;
 			}
 		}
-		
-		
 
 		this.setStep(new int[]{dx,dy,dz});
 		this.setActivity(Activity.MOVING);
@@ -2046,7 +2058,7 @@ public void attack(Unit defender) throws IllegalStateException{
 	
 	defender.defend(this);
 	
-	updateOrientation(this, defender);
+	updateFightingOrientation(this, defender);
 	this.setActivity(Activity.ATTACKING);
 	this.setProgressTime(0);
 }
@@ -2100,7 +2112,10 @@ public void defend(Unit attacker){
 			nextPosition[1] = currentPosition[1] + step[1];
 		};
 		//may move instantaneous
-		this.setPosition(Utils.getCubeCenter(Utils.getCubePosition(nextPosition)));
+		double[] nextCubeCenter = Utils.getCubeCenter(Utils.getCubePosition(nextPosition));
+		
+		this.setPosition(nextCubeCenter);
+		this.setNextPosition(nextCubeCenter);
 		this.updateXP(20);
 		return;
 	};
@@ -2291,17 +2306,17 @@ public boolean isAbleToMove(){
  * Checks if this unit can move further.
  * A unit can move further if it has no activity
  * @return	true if unit is not attacking and not working.
- * 			| result == this.getCurrentActivity()!=Activity.NOTHING && this.getActivity() != Activity.FALLING
+ * 			| result == this.getCurrentActivity()!=Activity.NOTHING
  */
 public boolean isAbleToMoveFurther(){
-	return this.getActivity()==Activity.NOTHING && this.getActivity() != Activity.FALLING;
+	return this.getActivity()==Activity.NOTHING;
 }
 
 /**
  * Checks if this unit can rest.
  * A unit can rest if it is not attacking and it needs to recover
- * @return	true if unit is not attacking.
- * 			| result == this.getCurrentActivity()!=Activity.ATTACKING && !this.isFullyHealed()
+ * @return	true if unit is not attacking or falling
+ * 			| result ==  this.getActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING;
  */
 public boolean isAbleToRest(){
 	return this.getActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING;

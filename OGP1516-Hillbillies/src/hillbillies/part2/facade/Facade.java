@@ -256,12 +256,12 @@ public class Facade implements IFacade {
 	}
 
 	@Override
-	public void advanceTime(World world, double dt) throws ModelException {
-		try {
+	public void advanceTime(World world, double dt) throws IllegalArgumentException, IllegalStateException {
+		//try {
 			world.advanceTime(dt);
-		} catch (Exception e) {
-			throw new ModelException();
-		}
+		//} catch (Exception e) {
+		//	throw new ModelException();
+		//}
 		
 	}
 
