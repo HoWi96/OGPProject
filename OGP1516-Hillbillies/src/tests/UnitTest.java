@@ -1,5 +1,5 @@
 
-package model;
+package tests;
 
 import static org.junit.Assert.*;
 
@@ -372,7 +372,7 @@ public class UnitTest {
 	    	Unit defender3 = new Unit("Baba 'O Reil", new int[]{2,3,3}, 50, 50, 50, 50, true);
 	    	Unit defender4 = new Unit("Baba 'O Reil", new int[]{20,30,3}, 50, 50, 50, 50, true);
 	    	assertTrue(unit1.isAbleToAttack(defender1));
-	    	assertFalse(unit1.isAbleToAttack(defender2));
+	    	assertTrue(defender3.isAbleToAttack(defender1));
 	    	assertTrue(unit1.isAbleToAttack(defender3));
 	    	assertFalse(unit1.isAbleToAttack(defender4));
 	    }

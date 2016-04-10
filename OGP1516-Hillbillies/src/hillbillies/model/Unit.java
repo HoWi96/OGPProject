@@ -1176,8 +1176,8 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
     	this.fall();
     
     // if the unit gets a new task, he first have to move to the next position
-    if(this.getActivity() != Activity.FALLING && !this.isMoving() &&
-    		(!Utils.equals(this.getPosition(),this.getNextPosition())|| this.isMovingToNext())){
+    if(this.getActivity() != Activity.FALLING &&
+    		((!this.isMoving() && !Utils.equals(this.getPosition(),this.getNextPosition()))|| this.isMovingToNext())){
     	System.out.println("continue moving to next pos");
     	
     	if(!this.isMovingToNext()){
@@ -1464,33 +1464,41 @@ private void working(double dt) throws IllegalArgumentException{
  * @post the position will be updated
  * 			this.setPosition(currentFallingPosition);
  * @effect if the ground is reached, 
- * 				its next position will be set to the current cube center
- * 				| this.setNextPosition(nextPosition);
+
  * 				it will suffer damage according to the height
  * 				| this.takeDamage(heightFalled*10);
- * 				its activity will be set to nothing
- * 				| this.setActivity(Activity.NOTHING);
- * 				the step will be set to -1 z
- * 				| this.setStep(new int[] {0,0,-1});
+
+ * 				the unit will move to the center of the cube
+ * 				| this.moveToAdjacent(0, 0, 0);
+ * 
+ * 				if the unit was on a route, he will continue if possible
+ * 				| this.moveTo(target)
  */
 private void falling(double dt) {
 	
-	//FALLING
 	double[] currentFallingPosition = this.getPosition();
-	currentFallingPosition[2] = currentFallingPosition[2]-3.0*dt;
-	this.setPosition(currentFallingPosition);
 	
 	//IF SOLID UNDER CURRENT NEW POSITION
 	if(this.getWorld().isSolidUnder(Utils.getCubePosition(currentFallingPosition))){
 		
 		double[] startedFallingPosition = this.getNextPosition();
 		int heightFalled = (int) Math.floor(startedFallingPosition[2]-currentFallingPosition[2]);
-		double[] nextPosition = Utils.getCubeCenter(Utils.getCubePosition(currentFallingPosition));
+		//double[] nextPosition = Utils.getCubeCenter(Utils.getCubePosition(currentFallingPosition));
 		
-		this.setStep(new int[] {0,0,-1});
-		this.setNextPosition(nextPosition);
-		this.setActivity(Activity.NOTHING);
+		
+		this.moveToAdjacent(0, 0, 0);
 		this.takeDamage(heightFalled*10);
+		
+		//TODO initialize with world (also defend)
+		if(this.pathFinding != null){
+		int[] target = this.pathFinding.getTargetPosition();
+		if(target != null)
+			moveTo(target);
+		}
+	} else {
+		//FALLING
+		currentFallingPosition[2] = currentFallingPosition[2]-3.0*dt;
+		this.setPosition(currentFallingPosition);
 	}
 }
 
@@ -1669,7 +1677,6 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		
 		//VARS
 		int[] cubePosition = Utils.getCubePosition(this.getPosition());
-		double[] cubeCenter = Utils.getCubeCenter(Utils.getCubePosition(this.getPosition()));
 		int[] nextCubePosition = new int[] {cubePosition[0]+dx,cubePosition[1]+dy,cubePosition[2]+dz};
 		double[] nextPosition = Utils.getCubeCenter(nextCubePosition);
 		
@@ -1678,11 +1685,6 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 			if(pathFinding == null || pathFinding.hasPathCompleted()){ 
 				//only hitting moveToAdjacent
 				throw new IllegalArgumentException("Invalid next position");
-			} else {
-				this.setNextPosition(cubeCenter);
-				this.setPosition(cubeCenter);
-				System.out.println("wrong path????");
-				return;
 			}
 		}
 
@@ -2045,6 +2047,9 @@ public void rest() throws IllegalStateException{
  * @post the activity of the unit is switched off to nothing
  * 		 | new.getCurrentAcivity() == Activity.ATTACKING
  * 
+ * @effect the defender will defend himself against the attacker
+ * 		| defender.defend(this)
+ * 
  * @throws IllegalStateException
  * 			if the  unit is not able to attack or is in default behavior
  * 			| !this.isAbleToAttack()
@@ -2116,6 +2121,14 @@ public void defend(Unit attacker){
 		
 		this.setPosition(nextCubeCenter);
 		this.setNextPosition(nextCubeCenter);
+		
+		//can only attack unit in same world
+		if(this.pathFinding != null){
+		int[] target = this.pathFinding.getTargetPosition();
+		if(target != null)
+			this.moveTo(target);
+		}
+		
 		this.updateXP(20);
 		return;
 	};

@@ -243,13 +243,21 @@ public class PathFinding {
 	public boolean hasPathCompleted() {
 		return this.path.isEmpty();
 	}
-
+	
 	/**
-	 * @return the path that still needs to be taken
+	 * Returns the target position or if the path is completed null
+	 * 
+	 * @return the target position
+	 * 			or null if the path is completed
 	 */
-	public ArrayList<int[]> getPath(){
-		return this.path;
+	public int[] getTargetPosition(){
+		if (hasPathCompleted()){
+			return null;
+		}
+		int[] target = this.path.get(0);
+		return target;
 	}
+
 	
 	/**
 	 * 
