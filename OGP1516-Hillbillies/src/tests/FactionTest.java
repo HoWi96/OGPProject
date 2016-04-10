@@ -63,7 +63,19 @@ public class FactionTest {
 		assertTrue(world1.getAllFactions().isEmpty());
 	}
 	
-	
+	@Test (expected=IllegalArgumentException.class)
+	public void moreThan50UnitsInFaction(){
+		Faction faction = new Faction();
+		for(int i = 0; i<50;i++){
+			Unit unit = new Unit("Test", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
+			unit.getFaction().removeUnit(unit);
+			faction.addUnit(unit);
+		}
+		Unit unit = new Unit("Test", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
+		unit.getFaction().removeUnit(unit);
+		faction.addUnit(unit);
+	}
+
 
 	@Test
 	public void testUnitInFaction(){

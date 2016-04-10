@@ -128,11 +128,4 @@ public class ItemTest {
 		assertTrue(Utils.equals(unit.getPosition(),log.getPosition()));
 		assertFalse(log.hasUnit());
 	}
-	
-	
-	
-
-	
-	
-
 }

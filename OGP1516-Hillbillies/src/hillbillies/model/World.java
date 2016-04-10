@@ -1261,8 +1261,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @effect
 	 * 		a new boulder is created
 	 */
-	@Model @Raw
-	private void createBoulder(int[] position) throws IllegalArgumentException {
+	@Raw
+	public void createBoulder(int[] position) throws IllegalArgumentException {
 		new Boulder(position, this);
 	}
 	
@@ -1311,8 +1311,8 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @effect
 	 * 		a new log is created
 	 */
-	@Model @Raw
-	private void createLog(int[] position) {
+	@Raw
+	public void createLog(int[] position) {
 		new Log(position, this);	
 	}
 

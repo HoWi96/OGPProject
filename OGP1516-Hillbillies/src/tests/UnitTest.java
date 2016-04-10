@@ -368,7 +368,7 @@ public class UnitTest {
 	    @Test
 	    public void testIsAbleToAttack(){
 	    	Unit defender1 = new Unit("Baba 'O Reil", new int[]{2,2,3}, 50, 50, 50, 50, true);
-	    	Unit defender2 = new Unit("Baba 'O Reil", new int[]{1,2,4}, 50, 50, 50, 50, true);
+	    	//Unit defender2 = new Unit("Baba 'O Reil", new int[]{1,2,4}, 50, 50, 50, 50, true);
 	    	Unit defender3 = new Unit("Baba 'O Reil", new int[]{2,3,3}, 50, 50, 50, 50, true);
 	    	Unit defender4 = new Unit("Baba 'O Reil", new int[]{20,30,3}, 50, 50, 50, 50, true);
 	    	assertTrue(unit1.isAbleToAttack(defender1));
