@@ -172,6 +172,7 @@ public class Facade implements IFacade{
 		try {
 			unit.moveTo(cube);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ModelException();
 		}
 	}
