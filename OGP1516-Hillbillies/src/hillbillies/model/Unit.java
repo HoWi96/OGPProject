@@ -1444,10 +1444,15 @@ private void working(double dt) throws IllegalArgumentException{
 				pickUpItem(item);
 			}	
 		}else if(solidCube){
-			// cave in
-			
+			//CAVE IN
 			this.getWorld().caveIn(workingPosition);
-			//System.out.println("Cave in happened");
+			
+			if (cubeType == World.TYPE_ROCK){
+				this.getWorld().createBoulder(workingPosition);
+				
+			}else if(cubeType == World.TYPE_TREE){
+				this.getWorld().createLog(workingPosition);
+			}
 		}
 
 		this.updateXP(10);
