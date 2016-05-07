@@ -2,11 +2,10 @@ package program.expression;
 
 import hillbillies.part3.programs.SourceLocation;
 
-public class Parentheses extends Expression<Boolean> {
+public class Parentheses extends UnairyOperation {
 
-	public Parentheses(SourceLocation sourceLocation) {
-		super(sourceLocation);
-		// TODO Auto-generated constructor stub
+	public Parentheses(Expression<Boolean> expression, SourceLocation sourceLocation) {
+		super(expression, sourceLocation);
 	}
 
 	@Override

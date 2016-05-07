@@ -2,11 +2,10 @@ package program.expression;
 
 import hillbillies.part3.programs.SourceLocation;
 
-public class Not extends Expression<Boolean> {
+public class Not extends UnairyOperation {
 
-	public Not(SourceLocation sourceLocation) {
-		super(sourceLocation);
-		// TODO Auto-generated constructor stub
+	public Not(Expression<Boolean> expression, SourceLocation sourceLocation) {
+		super(expression, sourceLocation);
 	}
 
 	@Override

@@ -1,12 +1,12 @@
 package program.expression;
 
+import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class carriesItem extends Expression<Boolean> {
+public class carriesItem extends UnitInspector {
 
-	public carriesItem(SourceLocation sourceLocation) {
-		super(sourceLocation);
-		// TODO Auto-generated constructor stub
+	public carriesItem(Expression<Unit> unit, SourceLocation sourceLocation) {
+		super(unit, sourceLocation);
 	}
 
 	@Override

@@ -1,12 +1,13 @@
 package program.expression;
 
+import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class IsAlive extends Expression<Boolean> {
+public class IsAlive extends UnitInspector {
 
-	public IsAlive(SourceLocation sourceLocation) {
-		super(sourceLocation);
-		// TODO Auto-generated constructor stub
+
+	public IsAlive(Expression<Unit> unit, SourceLocation sourceLocation) {
+		super(unit, sourceLocation);
 	}
 
 	@Override

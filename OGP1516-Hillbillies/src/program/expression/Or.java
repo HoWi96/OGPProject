@@ -2,11 +2,10 @@ package program.expression;
 
 import hillbillies.part3.programs.SourceLocation;
 
-public class Or extends Expression<Boolean> {
+public class Or extends BinairyOperation {
 
-	public Or(SourceLocation sourceLocation) {
-		super(sourceLocation);
-		// TODO Auto-generated constructor stub
+	public Or(Expression<Boolean> left, Expression<Boolean> right, SourceLocation sourceLocation) {
+		super(left, right, sourceLocation);
 	}
 
 	@Override

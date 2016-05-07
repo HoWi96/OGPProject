@@ -1,12 +1,12 @@
 package program.expression;
 
+import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class isFriend extends Expression<Boolean> {
+public class isFriend extends UnitInspector {
 
-	public isFriend(SourceLocation sourceLocation) {
-		super(sourceLocation);
-		// TODO Auto-generated constructor stub
+	public isFriend(Expression<Unit> unit, SourceLocation sourceLocation) {
+		super(unit, sourceLocation);
 	}
 
 	@Override
