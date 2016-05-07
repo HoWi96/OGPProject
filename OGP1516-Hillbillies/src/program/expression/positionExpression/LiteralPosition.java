@@ -20,8 +20,7 @@ public class LiteralPosition extends Expression<CubePosition> {
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-		return null;
+		return new CubePosition(x,y,z);
 	}
 
 	/**

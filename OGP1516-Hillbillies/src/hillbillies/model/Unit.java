@@ -4,6 +4,7 @@ package hillbillies.model;
 import java.util.List;
 
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.position.CubePosition;
 
 
 
@@ -1145,7 +1146,12 @@ private void updateXP(int XP){
 			this.setToughness(this.getToughness()+1);
 		}
 	}
+//POSITION
+public CubePosition getCubePosition(){
+	int[] position = Utils.getCubePosition(getPosition());
+	return new CubePosition(position);
 	
+}
 
 /*___________________________________________________________________
  * __________________________________________________________________

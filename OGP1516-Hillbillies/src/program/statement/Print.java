@@ -6,24 +6,23 @@ import program.expression.Expression;
 
 public class Print extends Statement {
 
-	private final Expression<?> value;
+	private final Expression<?> expression;
 
-	public Print(Expression<?> value, SourceLocation sourceLocation) {
+	public Print(Expression<?> expression, SourceLocation sourceLocation) {
 		super(sourceLocation);
-		this.value = value;
+		this.expression = expression;
 	}
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-
+		System.out.println(getExpression().evaluate(taskHandler).toString());
 	}
 
 	/**
 	 * @return the value
 	 */
-	public Expression<?> getValue() {
-		return value;
+	public Expression<?> getExpression() {
+		return expression;
 	}
 
 }

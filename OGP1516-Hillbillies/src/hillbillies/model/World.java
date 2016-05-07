@@ -492,7 +492,6 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @return
 	 * 		a list with all positions Inside game world, non solid,directly movable to and not the same
 	 */
-	@Deprecated
 	public List<int[]> findReachableAdjacents(int[] position){
 		
 		List<int[]> adjacentCubes = new ArrayList<>(26);

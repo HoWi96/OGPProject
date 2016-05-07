@@ -1,6 +1,7 @@
 package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.position.CubePosition;
 
 /**
  * @invar  Each TaskHandler can have its Task as Task.
@@ -83,6 +84,16 @@ public void setWorld(World world) {
  * Variable registering the Task of this TaskHandler.
  */
 private final Task task;
+
+public CubePosition getClosestBoulder() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+public CubePosition getClosestLog() {
+	// TODO Auto-generated method stub
+	return null;
+}
 
 
 

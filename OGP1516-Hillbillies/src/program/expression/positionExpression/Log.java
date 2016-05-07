@@ -9,13 +9,11 @@ public class Log extends Expression<CubePosition> {
 
 	public Log(SourceLocation sourceLocation) {
 		super(sourceLocation);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-		return null;
+		return taskHandler.getClosestLog();
 	}
 
 }

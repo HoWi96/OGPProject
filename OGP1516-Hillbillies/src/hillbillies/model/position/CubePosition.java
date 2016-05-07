@@ -2,12 +2,12 @@ package hillbillies.model.position;
 
 public class CubePosition extends Position<Integer> {
 
-	public CubePosition(Integer x, Integer y, Integer z) {
+	public CubePosition(int x, int y, int z) {
 		super(x, y, z);
 	}
 
-	public CubePosition(Integer[] array) {
-		super(array);
+	public CubePosition(int[] array) {
+		super(array[0], array[1], array[2]);
 	}
 	/**
 	 * Creates an array of the cube position

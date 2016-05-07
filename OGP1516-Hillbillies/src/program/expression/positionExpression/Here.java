@@ -13,7 +13,7 @@ public class Here extends Expression<CubePosition> {
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-		return null;
+		return taskHandler.getUnit().getCubePosition();
 	}
 
 }
