@@ -16,12 +16,7 @@ public class NextToPosition extends Expression<CubePosition> {
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-		
-		int[] pos = getPosition().evaluate(taskHandler).toArray();
-		taskHandler.getWorld().findReachableAdjacents(pos);
-		
-		
-		
+		return taskHandler.getNextToPosition(getPosition().evaluate(taskHandler));
 	}
 
 	/**

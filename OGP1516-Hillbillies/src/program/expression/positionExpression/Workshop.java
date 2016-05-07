@@ -13,8 +13,7 @@ public class Workshop extends Expression<CubePosition> {
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-		return null;
+		return taskHandler.getClosestWorkshop();
 	}
 
 }

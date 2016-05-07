@@ -95,6 +95,20 @@ public CubePosition getClosestLog() {
 	return null;
 }
 
-
-
+public void stop() {
+	// TODO Auto-generated method stub
+	
 }
+
+public CubePosition getClosestWorkshop() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+public CubePosition getNextToPosition(CubePosition evaluate) {
+	// TODO Auto-generated method stub
+	return null;
+}
+	
+}
+
