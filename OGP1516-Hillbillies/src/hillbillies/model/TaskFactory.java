@@ -69,7 +69,7 @@ public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
 	}
 
 	@Override
-	public Statement<Unit> createWork(Expression position, SourceLocation sourceLocation) {
+	public Statement<CubePosition> createWork(Expression position, SourceLocation sourceLocation) {
 		return new Work(position, sourceLocation);
 	}
 

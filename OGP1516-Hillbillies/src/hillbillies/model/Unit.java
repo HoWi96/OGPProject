@@ -1207,7 +1207,7 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 	}
 	
 	// continue moving after you are again able to move
-	if(!this.isMoving() && pathFinding != null && !pathFinding.hasPathCompleted()&& this.isAbleToMoveFurther()){
+	if(!this.isMoving() && getPathFinding() != null && !getPathFinding().hasPathCompleted()&& this.isAbleToMoveFurther()){
 			//System.out.println("continue path after stopping");
 			setActivity(Activity.MOVING);
 	}
@@ -1352,7 +1352,7 @@ private void moving(double dt) throws IllegalArgumentException, IllegalStateExce
 	if(Utils.equals(cPosition,nPosition)){
 		// NEXT POSITION REACHED
 		
-		if (this.pathFinding == null || pathFinding.hasPathCompleted()){
+		if (this.getPathFinding() == null || getPathFinding().hasPathCompleted()){
 			//TARGET REACHED
 			this.setActivity(Activity.NOTHING);
 			counterTillDefault = 0;
@@ -1362,7 +1362,7 @@ private void moving(double dt) throws IllegalArgumentException, IllegalStateExce
 			
 		} else{
 			//TARGET NOT YET REACHED
-			int[] nextPos = pathFinding.moveToNextPos();
+			int[] nextPos = getPathFinding().moveToNextPos();
 			int[] step = Utils.getStep(Utils.getCubePosition(cPosition),nextPos);
 			moveToAdjacent(step[0], step[1], step[2]);
 			} 
@@ -1502,8 +1502,8 @@ private void falling(double dt) {
 		this.takeDamage(heightFalled*10);
 		
 		//TODO initialize with world (also defend)
-		if(this.pathFinding != null){
-		int[] target = this.pathFinding.getTargetPosition();
+		if(this.getPathFinding() != null){
+		int[] target = this.getPathFinding().getTargetPosition();
 		if(target != null)
 			moveTo(target);
 		}
@@ -1629,9 +1629,9 @@ public void moveTo(int[] target) throws IllegalArgumentException, IllegalStateEx
 
 	//PATHFINDING
 	System.out.println("searching for path...");
-	this.pathFinding = new PathFinding(this.getWorld(), Utils.getCubePosition(this.getPosition()),target);
+	this.setPathFinding(new PathFinding(this.getWorld(), Utils.getCubePosition(this.getPosition()),target));
 	
-	if(!pathFinding.hasPathCompleted()){
+	if(!getPathFinding().hasPathCompleted()){
 		System.out.println("path found");
 		this.setActivity(Activity.MOVING);
 	}else{
@@ -1640,8 +1640,20 @@ public void moveTo(int[] target) throws IllegalArgumentException, IllegalStateEx
 }
 
 /**
- * TODO optimize all moving activities (adaptable, comprehensible, efficient)
- * 
+ * @return the pathFinding
+ */
+public PathFinding getPathFinding() {
+	return pathFinding;
+}
+
+/**
+ * @param pathFinding the pathFinding to set
+ */
+public void setPathFinding(PathFinding pathFinding) {
+	this.pathFinding = pathFinding;
+}
+
+/**
  * Variable registering the path finding algorithm
  */
 private PathFinding pathFinding;
@@ -1696,7 +1708,7 @@ public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentExcepti
 		
 		
 		if(!isValidPosition(nextPosition) || !this.getWorld().canMoveDirectly(cubePosition,dx,dy,dz)){
-			if(pathFinding == null || pathFinding.hasPathCompleted()){ 
+			if(getPathFinding() == null || getPathFinding().hasPathCompleted()){ 
 				//only hitting moveToAdjacent
 				throw new IllegalArgumentException("Invalid next position");
 			}
@@ -2137,8 +2149,8 @@ public void defend(Unit attacker){
 		this.setNextPosition(nextCubeCenter);
 		
 		//can only attack unit in same world
-		if(this.pathFinding != null){
-		int[] target = this.pathFinding.getTargetPosition();
+		if(this.getPathFinding() != null){
+		int[] target = this.getPathFinding().getTargetPosition();
 		if(target != null)
 			this.moveTo(target);
 		}

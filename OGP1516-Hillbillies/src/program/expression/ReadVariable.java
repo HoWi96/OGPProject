@@ -13,8 +13,8 @@ public class ReadVariable<T> extends Expression<T> {
 	}
 
 	@Override
-	public Expression evaluate(TaskHandler taskHandler) {
-		return taskHandler.getValueOfVariable(getVariableName()).evaluate(taskHandler);
+	public T evaluate(TaskHandler taskHandler) {
+		return (T) taskHandler.getValueOfVariable(getVariableName()).evaluate(taskHandler);
 	}
 
 	/**

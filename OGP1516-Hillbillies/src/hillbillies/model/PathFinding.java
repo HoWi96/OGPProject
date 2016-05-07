@@ -343,7 +343,7 @@ public class PathFinding {
 			
 			//INTERFACE
 			/**
-			 * Override method for natural ordering of nodes (used in TreeSet)
+			 * Override functional method for natural ordering of nodes (used in TreeSet)
 			 */
 			@Override
 			public int compareTo(Node otherNode) {
