@@ -3,7 +3,7 @@ package program.statement;
 import java.util.List;
 
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.TaskHandler;
+import program.expression.booleanExpression.TaskHandler;
 
 public class Sequence extends Statement {
 

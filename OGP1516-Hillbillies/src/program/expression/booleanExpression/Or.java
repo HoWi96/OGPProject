@@ -1,10 +1,11 @@
-package program.expression;
+package program.expression.booleanExpression;
 
 import hillbillies.part3.programs.SourceLocation;
+import program.expression.Expression;
 
-public class And extends BinairyOperation {
+public class Or extends BinairyOperation {
 
-	public And(Expression<Boolean> left, Expression<Boolean> right, SourceLocation sourceLocation) {
+	public Or(Expression<Boolean> left, Expression<Boolean> right, SourceLocation sourceLocation) {
 		super(left, right, sourceLocation);
 	}
 

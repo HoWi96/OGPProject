@@ -1,7 +1,8 @@
-package program.expression;
+package program.expression.booleanExpression;
 
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
+import program.expression.Expression;
 
 public abstract class UnitInspector extends Expression<Boolean> {
 

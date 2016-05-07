@@ -1,12 +1,12 @@
-package program.expression;
+package program.expression.booleanExpression;
 
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
+import program.expression.Expression;
 
-public class IsAlive extends UnitInspector {
+public class isFriend extends UnitInspector {
 
-
-	public IsAlive(Expression<Unit> unit, SourceLocation sourceLocation) {
+	public isFriend(Expression<Unit> unit, SourceLocation sourceLocation) {
 		super(unit, sourceLocation);
 	}
 

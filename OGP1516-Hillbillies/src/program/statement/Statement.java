@@ -2,12 +2,10 @@ package program.statement;
 
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.Expression;
-import program.expression.TaskHandler;
+import program.expression.booleanExpression.TaskHandler;
 
-public abstract class Statement<T>{	
+public abstract class Statement{	
 	
-private final Expression<T> expression;
 
 /**
  * Initialize this new S with given sourceLocation.
@@ -18,8 +16,7 @@ private final Expression<T> expression;
  *         sourceLocation.
  *       | new.getSourceLocation() == sourceLocation
  */ 
-public Statement(Expression<T> expression, SourceLocation sourceLocation) {
-	this.expression = expression;
+public Statement(SourceLocation sourceLocation) {
 	this.sourceLocation = sourceLocation;
 }
 
@@ -43,12 +40,4 @@ private final SourceLocation sourceLocation;
  * 		the handler of the task
  */
 public abstract void execute(TaskHandler taskHandler);
-
-/**
- * @return the expression
- */
-public Expression<T> getExpression() {
-	return expression;
-}
-
 }

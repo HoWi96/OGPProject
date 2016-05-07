@@ -1,11 +1,13 @@
-package program.expression;
+package program.expression.unitExpression;
 
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
+import program.expression.Expression;
+import program.expression.booleanExpression.TaskHandler;
 
-public class Any extends Expression<Unit> {
+public class Friend extends Expression<Unit> {
 
-	public Any(SourceLocation sourceLocation) {
+	public Friend(SourceLocation sourceLocation) {
 		super(sourceLocation);
 	}
 

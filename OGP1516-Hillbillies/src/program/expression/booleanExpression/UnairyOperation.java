@@ -1,6 +1,7 @@
-package program.expression;
+package program.expression.booleanExpression;
 
 import hillbillies.part3.programs.SourceLocation;
+import program.expression.Expression;
 
 public abstract class UnairyOperation extends Expression<Boolean> {
 
