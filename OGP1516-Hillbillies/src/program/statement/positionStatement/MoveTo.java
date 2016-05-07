@@ -4,8 +4,9 @@ import hillbillies.model.TaskHandler;
 import hillbillies.model.position.CubePosition;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
+import program.statement.Statement;
 
-public class MoveTo extends PositionStatement {
+public class MoveTo extends Statement<CubePosition> {
 
 	public MoveTo(Expression<CubePosition> position, SourceLocation sourceLocation) {
 		super(position, sourceLocation);
@@ -14,7 +15,6 @@ public class MoveTo extends PositionStatement {
 	@Override
 	public void execute(TaskHandler taskHandler) {
 		// TODO Auto-generated method stub
-
 	}
 
 }

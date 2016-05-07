@@ -5,14 +5,13 @@ import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
 import program.statement.Statement;
 
-public class While extends Statement {
+public class While extends Statement<Boolean> {
  
-	private Expression<Boolean> condition;
-	private Statement body;
 
-	public While(Expression<Boolean> condition, Statement body, SourceLocation sourceLocation) {
-		super(sourceLocation);
-		this.condition = condition;
+	private Statement<?> body;
+
+	public While(Expression<Boolean> condition, Statement<?> body, SourceLocation sourceLocation) {
+		super(condition,sourceLocation);
 		this.body = body;
 	}
 
@@ -23,16 +22,9 @@ public class While extends Statement {
 	}
 	
 	/**
-	 * @return the condition
-	 */
-	public Expression<Boolean> getCondition() {
-		return condition;
-	}
-
-	/**
 	 * @return the body
 	 */
-	public Statement getBody() {
+	public Statement<?> getBody() {
 		return body;
 	}
 

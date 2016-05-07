@@ -4,9 +4,12 @@ package program.statement;
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.TaskHandler;
 import hillbillies.part3.programs.SourceLocation;
+import program.expression.Expression;
 
-public abstract class Statement{	
+public abstract class Statement<T>{	
 	
+private final Expression<T> expression;
+
 /**
  * Initialize this new S with given sourceLocation.
  * 
@@ -16,7 +19,8 @@ public abstract class Statement{
  *         sourceLocation.
  *       | new.getSourceLocation() == sourceLocation
  */ 
-public Statement(SourceLocation sourceLocation) {
+public Statement(Expression<T> expression, SourceLocation sourceLocation) {
+	this.expression = expression;
 	this.sourceLocation = sourceLocation;
 }
 
@@ -40,5 +44,12 @@ private final SourceLocation sourceLocation;
  * 		the handler of the task
  */
 public abstract void execute(TaskHandler taskHandler);
+
+/**
+ * @return the expression
+ */
+public Expression<T> getExpression() {
+	return expression;
+}
 
 }

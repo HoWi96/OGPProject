@@ -16,8 +16,8 @@ import program.expression.positionExpression.Log;
 import program.statement.booleanStatement.*;
 import program.statement.positionStatement.*;
 import program.statement.unitStatement.*;
-import program.statement.Assignment;
-import program.statement.Print;
+import program.statement.wildcardStatement.Assignment;
+import program.statement.wildcardStatement.Print;
 import program.statement.Statement;
 
 public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {

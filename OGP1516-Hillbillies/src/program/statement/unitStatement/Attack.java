@@ -4,8 +4,9 @@ import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
+import program.statement.Statement;
 
-public class Attack extends UnitStatement {
+public class Attack extends Statement<Unit> {
 
 	public Attack(Expression<Unit> unit, SourceLocation sourceLocation) {
 		super(unit, sourceLocation);

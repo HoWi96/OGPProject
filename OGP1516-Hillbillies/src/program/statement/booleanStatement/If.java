@@ -5,16 +5,14 @@ import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
 import program.statement.Statement;
 
-public class If extends Statement {
+public class If extends Statement<Boolean> {
 
-	private final Expression<Boolean> condition;
-	private final Statement ifBody;
-	private final Statement elseBody;
+	private final Statement<?> ifBody;
+	private final Statement<?> elseBody;
 
 
-	public If(Expression<Boolean> condition, Statement ifBody, Statement elseBody, SourceLocation sourceLocation) {
-		super(sourceLocation);
-		this.condition = condition;
+	public If(Expression<Boolean> condition, Statement<?> ifBody, Statement<?> elseBody, SourceLocation sourceLocation) {
+		super(condition,sourceLocation);
 		this.ifBody = ifBody;
 		this.elseBody = elseBody;
 	}
@@ -22,20 +20,12 @@ public class If extends Statement {
 	@Override
 	public void execute(TaskHandler taskHandler) {
 		// TODO Auto-generated method stub
-
-	}
-
-	/**
-	 * @return the condition
-	 */
-	public final Expression<Boolean> getCondition() {
-		return condition;
 	}
 	
 	/**
 	 * @return the ifBody
 	 */
-	public final Statement getIfBody() {
+	public final Statement<?> getIfBody() {
 		return ifBody;
 	}
 
@@ -43,7 +33,7 @@ public class If extends Statement {
 	/**
 	 * @return the elseBody
 	 */
-	public final Statement getElseBody() {
+	public final Statement<?> getElseBody() {
 		return elseBody;
 	}
 
