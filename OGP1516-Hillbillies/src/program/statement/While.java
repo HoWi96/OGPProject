@@ -1,15 +1,15 @@
 package program.statement;
 
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.E;
+import program.expression.Expression;
 import program.expression.TaskHandler;
 
-public class While extends S {
+public class While extends Statement {
  
-	private E<Boolean> condition;
-	private S body;
+	private Expression<Boolean> condition;
+	private Statement body;
 
-	public While(E<Boolean> condition, S body, SourceLocation sourceLocation) {
+	public While(Expression<Boolean> condition, Statement body, SourceLocation sourceLocation) {
 		super(sourceLocation);
 		this.setCondition(condition);
 		this.setBody(body);
@@ -24,28 +24,28 @@ public class While extends S {
 	/**
 	 * @return the condition
 	 */
-	public E<Boolean> getCondition() {
+	public Expression<Boolean> getCondition() {
 		return condition;
 	}
 
 	/**
 	 * @param condition the condition to set
 	 */
-	public void setCondition(E<Boolean> condition) {
+	public void setCondition(Expression<Boolean> condition) {
 		this.condition = condition;
 	}
 
 	/**
 	 * @return the body
 	 */
-	public S getBody() {
+	public Statement getBody() {
 		return body;
 	}
 
 	/**
 	 * @param body the body to set
 	 */
-	public void setBody(S body) {
+	public void setBody(Statement body) {
 		this.body = body;
 	}
 

@@ -1,14 +1,14 @@
 package program.statement;
 
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.E;
+import program.expression.Expression;
 import program.expression.TaskHandler;
 
-public class Print extends S {
+public class Print extends Statement {
 
-	private final E<?> value;
+	private final Expression<?> value;
 
-	public Print(E<?> value, SourceLocation sourceLocation) {
+	public Print(Expression<?> value, SourceLocation sourceLocation) {
 		super(sourceLocation);
 		this.value = value;
 	}
@@ -22,7 +22,7 @@ public class Print extends S {
 	/**
 	 * @return the value
 	 */
-	public E<?> getValue() {
+	public Expression<?> getValue() {
 		return value;
 	}
 

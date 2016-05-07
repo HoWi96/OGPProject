@@ -1,17 +1,17 @@
 package program.statement;
 
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.E;
+import program.expression.Expression;
 import program.expression.TaskHandler;
 
-public class If extends S {
+public class If extends Statement {
 
-	private final E<Boolean> condition;
-	private final S ifBody;
-	private final S elseBody;
+	private final Expression<Boolean> condition;
+	private final Statement ifBody;
+	private final Statement elseBody;
 
 
-	public If(E<Boolean> condition, S ifBody, S elseBody, SourceLocation sourceLocation) {
+	public If(Expression<Boolean> condition, Statement ifBody, Statement elseBody, SourceLocation sourceLocation) {
 		super(sourceLocation);
 		this.condition = condition;
 		this.ifBody = ifBody;
@@ -27,14 +27,14 @@ public class If extends S {
 	/**
 	 * @return the condition
 	 */
-	public final E<Boolean> getCondition() {
+	public final Expression<Boolean> getCondition() {
 		return condition;
 	}
 	
 	/**
 	 * @return the ifBody
 	 */
-	public final S getIfBody() {
+	public final Statement getIfBody() {
 		return ifBody;
 	}
 
@@ -42,7 +42,7 @@ public class If extends S {
 	/**
 	 * @return the elseBody
 	 */
-	public final S getElseBody() {
+	public final Statement getElseBody() {
 		return elseBody;
 	}
 

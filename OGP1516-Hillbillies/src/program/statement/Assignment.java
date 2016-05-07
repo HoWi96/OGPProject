@@ -1,18 +1,16 @@
 package program.statement;
 
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.E;
+import program.expression.Expression;
 import program.expression.TaskHandler;
 
-public class Assignment extends S {
+public class Assignment extends Statement {
 	
 	private final String variableName;
-	private final E<?> value;
 
-	public Assignment(String variableName, E<?> value, SourceLocation sourceLocation) {
-		super(sourceLocation);
+	public Assignment(String variableName, Expression<?> value, SourceLocation sourceLocation) {
+		super();
 		this.variableName = variableName;
-		this.value = value;
 
 	}
 
@@ -28,13 +26,5 @@ public class Assignment extends S {
 	public final String getVariableName() {
 		return variableName;
 	}
-
-	/**
-	 * @return the value
-	 */
-	public final E<?> getValue() {
-		return value;
-	}
-
 
 }

@@ -2,11 +2,11 @@ package program.expression;
 
 import hillbillies.part3.programs.SourceLocation;
 
-public abstract class E<T> {
+public abstract class Expression<T> {
 	
 	private SourceLocation sourceLocation;
 
-	public E(SourceLocation sourceLocation) {
+	public Expression(SourceLocation sourceLocation) {
 		this.sourceLocation = sourceLocation;
 	}
 	
@@ -15,6 +15,5 @@ public abstract class E<T> {
 	}
 	
 	public abstract T evaluate(TaskHandler taskHandler);
-	
 
 }

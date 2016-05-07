@@ -2,13 +2,13 @@ package program.statement;
 
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.E;
+import program.expression.Expression;
 
-public abstract class UnitStatement extends S {
+public abstract class UnitStatement extends Statement {
 
-	private final E<Unit> unit;
+	private final Expression<Unit> unit;
 
-	public UnitStatement(E<Unit> unit, SourceLocation sourceLocation) {
+	public UnitStatement(Expression<Unit> unit, SourceLocation sourceLocation) {
 		super(sourceLocation);
 		this.unit = unit;
 	}
@@ -16,7 +16,7 @@ public abstract class UnitStatement extends S {
 	/**
 	 * @return the unit
 	 */
-	public E<Unit> getUnit() {
+	public Expression<Unit> getUnit() {
 		return unit;
 	}
 

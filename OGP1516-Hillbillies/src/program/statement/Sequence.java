@@ -5,11 +5,11 @@ import java.util.List;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.TaskHandler;
 
-public class Sequence extends S {
+public class Sequence extends Statement {
 
-	private final List<S> statements;
+	private final List<Statement> statements;
 
-	public Sequence(List<S> statements, SourceLocation sourceLocation) {
+	public Sequence(List<Statement> statements, SourceLocation sourceLocation) {
 		super(sourceLocation);
 		this.statements = statements;
 	}
@@ -23,7 +23,7 @@ public class Sequence extends S {
 	/**
 	 * @return the statements
 	 */
-	public List<S> getStatements() {
+	public List<Statement> getStatements() {
 		return statements;
 	}
 

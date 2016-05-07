@@ -2,12 +2,12 @@ package program.statement;
 
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.E;
+import program.expression.Expression;
 import program.expression.TaskHandler;
 
 public class Follow extends UnitStatement {
 
-	public Follow(E<Unit> unit, SourceLocation sourceLocation) {
+	public Follow(Expression<Unit> unit, SourceLocation sourceLocation) {
 		super(unit, sourceLocation);
 	}
 

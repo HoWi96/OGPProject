@@ -2,13 +2,13 @@ package program.statement;
 
 import hillbillies.model.Position;
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.E;
+import program.expression.Expression;
 
-public abstract class PositionStatement extends S {
+public abstract class PositionStatement extends Statement {
 
-	private final E<Position> position;
+	private final Expression<Position> position;
 
-	public PositionStatement(E<Position> position, SourceLocation sourceLocation) {
+	public PositionStatement(Expression<Position> position, SourceLocation sourceLocation) {
 		super(sourceLocation);
 		this.position = position;
 	}
@@ -16,7 +16,7 @@ public abstract class PositionStatement extends S {
 	/**
 	 * @return the position
 	 */
-	public E<Position> getPosition() {
+	public Expression<Position> getPosition() {
 		return position;
 	}
 
