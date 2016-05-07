@@ -1,8 +1,9 @@
-package program.statement;
+package program.statement.unitStatement;
 
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
+import program.statement.Statement;
 
 public abstract class UnitStatement extends Statement {
 

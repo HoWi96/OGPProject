@@ -1,13 +1,14 @@
-package program.statement;
+package program.statement.positionStatement;
 
-import hillbillies.model.Position;
+
+import hillbillies.model.position.CubePosition;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
 import program.expression.booleanExpression.TaskHandler;
 
 public class Work extends PositionStatement {
 
-	public Work(Expression<Position> position, SourceLocation sourceLocation) {
+	public Work(Expression<CubePosition> position, SourceLocation sourceLocation) {
 		super(position, sourceLocation);
 	}
 
