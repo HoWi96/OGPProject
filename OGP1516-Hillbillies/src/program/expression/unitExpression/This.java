@@ -13,7 +13,7 @@ public class This extends Expression<Unit> {
 
 	@Override
 	public Unit evaluate(TaskHandler taskHandler) {
-		return null;
+		return taskHandler.getUnit();
 	}
 
 }

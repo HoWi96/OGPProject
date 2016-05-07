@@ -109,6 +109,21 @@ public CubePosition getNextToPosition(CubePosition evaluate) {
 	// TODO Auto-generated method stub
 	return null;
 }
+
+public Unit getClosestUnit() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+public Unit getClosestEnemy() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+public Unit getClosestFriend() {
+	// TODO Auto-generated method stub
+	return null;
+}
 	
 }
 

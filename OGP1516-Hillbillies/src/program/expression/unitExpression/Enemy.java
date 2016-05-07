@@ -13,8 +13,7 @@ public class Enemy extends Expression<Unit> {
 
 	@Override
 	public Unit evaluate(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-		return null;
+		return taskHandler.getClosestEnemy();
 	}
 
 }
