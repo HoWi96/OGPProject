@@ -2,6 +2,7 @@ package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.position.CubePosition;
+import program.expression.Expression;
 
 /**
  * @invar  Each TaskHandler can have its Task as Task.
@@ -123,6 +124,16 @@ public Unit getClosestEnemy() {
 public Unit getClosestFriend() {
 	// TODO Auto-generated method stub
 	return null;
+}
+
+public Expression<?> getValueOfVariable(String variableName) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+public void assign(String variableName, Expression<?> expression) {
+	// TODO Auto-generated method stub
+	
 }
 	
 }

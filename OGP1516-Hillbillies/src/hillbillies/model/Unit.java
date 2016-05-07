@@ -2679,6 +2679,11 @@ public boolean canHaveAsFaction(Faction faction){
 	public boolean isCarryingLog(){
 		return this.hasItem() && (this.getItem() instanceof Log);
 	}
+
+	public void follow(Unit leader) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 

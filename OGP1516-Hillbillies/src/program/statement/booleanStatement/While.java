@@ -17,7 +17,10 @@ public class While extends Statement<Boolean> {
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
+		while(getExpression().evaluate(taskHandler)){
+			getBody().execute(taskHandler);
+			//break statement here
+		}
 
 	}
 	

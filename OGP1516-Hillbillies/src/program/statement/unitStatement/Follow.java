@@ -14,8 +14,9 @@ public class Follow extends Statement<Unit> {
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-
+		Unit leader = taskHandler.getUnit();
+		Unit stalker = getExpression().evaluate(taskHandler);
+		stalker.follow(leader);
 	}
 
 }

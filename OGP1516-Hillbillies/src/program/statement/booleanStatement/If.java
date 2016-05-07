@@ -19,7 +19,10 @@ public class If extends Statement<Boolean> {
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
+		if(getExpression().evaluate(taskHandler))
+			getIfBody().execute(taskHandler);
+		else
+			getElseBody().execute(taskHandler);
 	}
 	
 	/**

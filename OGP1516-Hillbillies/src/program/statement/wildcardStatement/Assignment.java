@@ -17,7 +17,7 @@ public class Assignment<T> extends Statement<T> {
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
+		taskHandler.assign(getVariableName(), getExpression());
 
 	}
 	

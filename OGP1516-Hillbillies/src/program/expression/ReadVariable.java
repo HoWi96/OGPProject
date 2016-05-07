@@ -13,9 +13,8 @@ public class ReadVariable<T> extends Expression<T> {
 	}
 
 	@Override
-	public T evaluate(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-		return null;
+	public Expression evaluate(TaskHandler taskHandler) {
+		return taskHandler.getValueOfVariable(getVariableName()).evaluate(taskHandler);
 	}
 
 	/**

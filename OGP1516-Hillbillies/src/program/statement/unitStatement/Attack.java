@@ -14,8 +14,9 @@ public class Attack extends Statement<Unit> {
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-
+		Unit attacker = taskHandler.getUnit();
+		Unit defender = getExpression().evaluate(taskHandler);
+		attacker.attack(defender);
 	}
 
 }
