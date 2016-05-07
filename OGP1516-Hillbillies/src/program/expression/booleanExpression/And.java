@@ -11,8 +11,7 @@ public class And extends BinairyOperation {
 
 	@Override
 	public Boolean evaluate(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-		return null;
+		return getLeft().evaluate(taskHandler) && getRight().evaluate(taskHandler);
 	}
 
 }

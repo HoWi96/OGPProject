@@ -12,8 +12,8 @@ public class While extends Statement {
 
 	public While(Expression<Boolean> condition, Statement body, SourceLocation sourceLocation) {
 		super(sourceLocation);
-		this.setCondition(condition);
-		this.setBody(body);
+		this.condition = condition;
+		this.body = body;
 	}
 
 	@Override
@@ -30,25 +30,12 @@ public class While extends Statement {
 	}
 
 	/**
-	 * @param condition the condition to set
-	 */
-	public void setCondition(Expression<Boolean> condition) {
-		this.condition = condition;
-	}
-
-	/**
 	 * @return the body
 	 */
 	public Statement getBody() {
 		return body;
 	}
 
-	/**
-	 * @param body the body to set
-	 */
-	public void setBody(Statement body) {
-		this.body = body;
-	}
 
 
 }

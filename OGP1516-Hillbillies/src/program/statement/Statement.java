@@ -1,12 +1,12 @@
 package program.statement;
 
+
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.booleanExpression.TaskHandler;
 
 public abstract class Statement{	
 	
-
 /**
  * Initialize this new S with given sourceLocation.
  * 
@@ -40,4 +40,5 @@ private final SourceLocation sourceLocation;
  * 		the handler of the task
  */
 public abstract void execute(TaskHandler taskHandler);
+
 }

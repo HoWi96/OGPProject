@@ -4,9 +4,9 @@ import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
 
-public class carriesItem extends UnitInspector {
+public class CarriesItem extends UnitInspector {
 
-	public carriesItem(Expression<Unit> unit, SourceLocation sourceLocation) {
+	public CarriesItem(Expression<Unit> unit, SourceLocation sourceLocation) {
 		super(unit, sourceLocation);
 	}
 
