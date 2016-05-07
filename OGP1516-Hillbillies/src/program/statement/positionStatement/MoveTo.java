@@ -1,9 +1,9 @@
 package program.statement.positionStatement;
 
+import hillbillies.model.TaskHandler;
 import hillbillies.model.position.CubePosition;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
-import program.expression.booleanExpression.TaskHandler;
 
 public class MoveTo extends PositionStatement {
 

@@ -78,5 +78,6 @@ public class Position<T extends Number> {
 		return true;
 	}
 
+
 }
 

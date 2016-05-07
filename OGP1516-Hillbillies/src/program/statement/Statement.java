@@ -2,8 +2,8 @@ package program.statement;
 
 
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.TaskHandler;
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.booleanExpression.TaskHandler;
 
 public abstract class Statement{	
 	

@@ -1,5 +1,6 @@
 package program.expression.booleanExpression;
 
+import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
@@ -13,8 +14,7 @@ public class IsAlive extends UnitInspector {
 
 	@Override
 	public Boolean evaluate(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-		return null;
+		return getUnit().evaluate(taskHandler).isAlive();
 	}
 
 }

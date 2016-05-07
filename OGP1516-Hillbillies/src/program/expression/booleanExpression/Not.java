@@ -1,5 +1,6 @@
 package program.expression.booleanExpression;
 
+import hillbillies.model.TaskHandler;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
 
@@ -11,8 +12,7 @@ public class Not extends UnairyOperation {
 
 	@Override
 	public Boolean evaluate(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
-		return null;
+		return !getExpression().evaluate(taskHandler);
 	}
 
 }
