@@ -1,5 +1,6 @@
 package program.expression.unitExpression;
 
+import hillbillies.model.Faction;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
@@ -13,7 +14,21 @@ public class Enemy extends Expression<Unit> {
 
 	@Override
 	public Unit evaluate(TaskHandler taskHandler) {
-		return taskHandler.getClosestEnemy();
+		Faction faction = taskHandler.getUnit().getFaction();
+		Unit unit = taskHandler.getUnit();
+		return taskHandler.getWorld().getAllFactions()
+				
+				.stream()
+				.filter((Faction f)-> f != faction)
+				.findAny()
+				.get()
+				.getAllUnits()
+				
+				.stream()
+				.filter((Unit u)-> u != unit)
+				.findAny()
+				.get();
+		
 	}
 
 }

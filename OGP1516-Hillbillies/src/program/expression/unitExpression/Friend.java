@@ -13,7 +13,12 @@ public class Friend extends Expression<Unit> {
 
 	@Override
 	public Unit evaluate(TaskHandler taskHandler) {
-		return taskHandler.getClosestFriend();
+		Unit unit = taskHandler.getUnit();
+		return unit.getFaction().getAllUnits()
+				.stream()
+				.filter((Unit u) -> u != unit)
+				.findAny()
+				.get();
 	}
 
 }

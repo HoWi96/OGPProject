@@ -9,7 +9,6 @@ public class Boulder extends Expression<CubePosition> {
 
 	public Boulder(SourceLocation sourceLocation) {
 		super(sourceLocation);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override

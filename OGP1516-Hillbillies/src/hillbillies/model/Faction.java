@@ -12,6 +12,8 @@ import be.kuleuven.cs.som.annotate.*;
  * ASSOCIATIONS
  * @Invar Each faction must have proper units.
  * 		| this.hasProperUnits()
+ * @Invar  Each Faction can have its Scheduler as Scheduler.
+ *      | canHaveAsScheduler(this.getScheduler())
  */
 public class Faction {
 	/*___________________________________________________________________
@@ -57,16 +59,15 @@ public class Faction {
 	/**
 	 * Creates a new faction
 	 * 
-	 * @param world
-	 * 		the world the faction belongs to
-	 * 
-	 * @post the faction is enot yet terminated
-	 * @post the faction does not contain any units yet
-	 * 
+	 * @post   The faction is not yet terminated
+	 * @post   The faction does not contain any units yet
+	 * @post   The Scheduler of this new Faction is equal to a new
+	 *         Scheduler.
 	 */
 	public Faction(){
 		this.isTerminated = false;
-		units = new HashSet<Unit>(MAX_UNITS_IN_FACTION);
+		this.units = new HashSet<Unit>(MAX_UNITS_IN_FACTION);
+		this.scheduler = new Scheduler();
 	}
 	
 	/*___________________________________________________________________
@@ -214,5 +215,38 @@ public class Faction {
 		}
 		return true;
 	}
+	
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * -----------------------SCHEDULER--------------------------------------
+	 * ------------------CONTROLLING CLASS-------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
+	/**
+	 * Return the Scheduler of this Faction.
+	 */
+	@Basic @Raw @Immutable
+	public Scheduler getScheduler() {
+		return this.scheduler;
+	}
+	
+	/**
+	 * Check whether this Faction can have the given Scheduler as its Scheduler.
+	 *  
+	 * @param  scheduler
+	 *         The Scheduler to check.
+	 * @return 
+	 *       | result == scheduler != null
+	*/
+	@Raw
+	public boolean canHaveAsScheduler(Scheduler scheduler) {
+		return scheduler != null;
+	}
+	
+	/**
+	 * Variable registering the Scheduler of this Faction.
+	 */
+	private final Scheduler scheduler;
 
 }

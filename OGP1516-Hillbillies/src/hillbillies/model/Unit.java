@@ -73,6 +73,10 @@ import hillbillies.model.position.CubePosition;
  * @invar Each unit can have his item as item
  * 		| canHaveAsItem(getItem())
  * 
+ * @invar Each unit can have his task as task
+ * 		| canHaveAsTask(getTask())
+ * 
+ * 
  */            
 
 public class Unit { 
@@ -2576,8 +2580,7 @@ public boolean canHaveAsFaction(Faction faction){
 			throw new IllegalArgumentException();
 		
 		item.setUnit(this);
-		this.item = item;
-			
+		this.item = item;		
 
 	}
 	/**
@@ -2697,10 +2700,74 @@ public boolean canHaveAsFaction(Faction faction){
 		
 	}
 	
+	/*_____________________________________________________________
+	 * ____________________________________________________________
+	 *-------------------------TASK-----------------------------
+	 *---------------------NON CONTROLLING CLASS-------------------
+	 * ____________________________________________________________
+	 *_____________________________________________________________
+	 */
 	
+	/**
+	 * Return the Task of this Unit.
+	 */
+	@Basic @Raw
+	public Task getTask() {
+		return this.task;
+	}
+	
+	/**
+	 * Checks whether this unit has a task
+	 * 
+	 * @return 
+	 * 		| result == (this.getTask() != null)
+	 */
+	public boolean hasTask(){
+		return this.getTask() != null;
+	}
 
 	
+	/**
+ 	* Checks whether this unit can have the task as task.
+ 	*  
+ 	* @param task
+ 	* 		The task to check.
+ 	* @return
+ 	* 		result == (task == null) || (task.getUnit() == this)
+ 	*/
+	@Raw
+	public boolean canHaveAsTask(Task task){
+		return (task == null) || (task.getUnit() == this);
+	}
 	
+	/**
+	 * Set the Task of this Unit to the given Task.
+	 * 
+	 * @param  task
+	 *         The new Task for this Unit.
+	 * @post   The Task of this new Unit is equal to
+	 *         the given Task.
+	 *       | new.getTask() == task
+	 * @throws IllegalArgumentException
+	 *         The given Task is not a valid Task for any
+	 *         Unit.
+	 *       | ! canHaveAsTask(getTask())
+	 */
+	@Raw
+	public void setTask(Task task) throws IllegalArgumentException {
+		if (! canHaveAsTask(task))
+			throw new IllegalArgumentException();
+		this.task = task;
+	}
 	
-
+	/**
+	 * Variable registering the Task of this Unit.
+	 */
+	private Task task;
+		
+	
+		
+		
+		
+	
 }

@@ -20,7 +20,7 @@ import program.statement.wildcardStatement.Assignment;
 import program.statement.wildcardStatement.Print;
 import program.statement.Statement;
 
-public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
+public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task> {
 
 	public TaskFactory() {
 		// TODO Auto-generated constructor stub
@@ -39,7 +39,7 @@ public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
 
 	@Override
 	public Statement<Boolean> createWhile(Expression condition, Statement body, SourceLocation sourceLocation) {
-		return new While(condition, body, sourceLocation);
+		return new While<Expression<Boolean>>(condition, body, sourceLocation);
 	}
 
 	@Override
