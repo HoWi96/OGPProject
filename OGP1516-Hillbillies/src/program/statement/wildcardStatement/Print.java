@@ -5,9 +5,9 @@ import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
 import program.statement.Statement;
 
-public class Print<T> extends Statement<T> {
+public class Print extends Statement {
 	
-	public Print(Expression<T> expression, SourceLocation sourceLocation) {
+	public Print(Expression<?> expression, SourceLocation sourceLocation) {
 		super(expression, sourceLocation);
 	}
 

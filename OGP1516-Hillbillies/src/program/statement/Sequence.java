@@ -10,7 +10,7 @@ public class Sequence extends Statement {
 
 	private final List<Statement> statements;
 
-	@SuppressWarnings("unchecked")
+
 	public Sequence(List<Statement> statements, SourceLocation sourceLocation) {
 		super(new True(sourceLocation),sourceLocation);
 		this.statements = statements;

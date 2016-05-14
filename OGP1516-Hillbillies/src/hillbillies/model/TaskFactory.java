@@ -33,28 +33,28 @@ public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task>
 	}
 
 	@Override
-	public Statement<?> createAssignment(String variableName, Expression value, SourceLocation sourceLocation) {
+	public Statement createAssignment(String variableName, Expression<?> value, SourceLocation sourceLocation) {
 		return new Assignment(variableName, value, sourceLocation);
 	}
 
 	@Override
-	public Statement<Boolean> createWhile(Expression condition, Statement body, SourceLocation sourceLocation) {
-		return new While<Expression<Boolean>>(condition, body, sourceLocation);
+	public Statement createWhile(Expression condition, Statement body, SourceLocation sourceLocation) {
+		return new While(condition, body, sourceLocation);
 	}
 
 	@Override
-	public Statement<Boolean> createIf(Expression condition, Statement ifBody, Statement elseBody,
+	public Statement createIf(Expression condition, Statement ifBody, Statement elseBody,
 			SourceLocation sourceLocation) {
 		return new If(condition, ifBody, elseBody, sourceLocation);
 	}
 
 	@Override
-	public Statement<?> createBreak(SourceLocation sourceLocation) {
+	public Statement createBreak(SourceLocation sourceLocation) {
 		return null;
 	}
 
 	@Override
-	public Statement<?> createPrint(Expression value, SourceLocation sourceLocation) {
+	public Statement createPrint(Expression value, SourceLocation sourceLocation) {
 		return new Print(value, sourceLocation);
 	}
 
@@ -64,17 +64,17 @@ public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task>
 	}
 
 	@Override
-	public Statement<CubePosition> createMoveTo(Expression position, SourceLocation sourceLocation) {
+	public Statement createMoveTo(Expression position, SourceLocation sourceLocation) {
 		return new MoveTo(position, sourceLocation);
 	}
 
 	@Override
-	public Statement<CubePosition> createWork(Expression position, SourceLocation sourceLocation) {
+	public Statement createWork(Expression position, SourceLocation sourceLocation) {
 		return new Work(position, sourceLocation);
 	}
 
 	@Override
-	public Statement<Unit> createFollow(Expression unit, SourceLocation sourceLocation) {
+	public Statement createFollow(Expression unit, SourceLocation sourceLocation) {
 		return new Follow(unit, sourceLocation);
 	}
 
@@ -85,7 +85,7 @@ public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task>
 
 	@Override
 	public Expression<?> createReadVariable(String variableName, SourceLocation sourceLocation) {
-		return new ReadVariable<>(variableName, sourceLocation);
+		return new ReadVariable(variableName, sourceLocation);
 	}
 
 	@Override

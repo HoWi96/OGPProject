@@ -5,11 +5,11 @@ import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
 import program.statement.Statement;
 
-public class Assignment<T> extends Statement<T> {
+public class Assignment extends Statement {
 	
 	private final String variableName;
 
-	public Assignment(String variableName, Expression<T> value, SourceLocation sourceLocation) {
+	public Assignment(String variableName, Expression<?> value, SourceLocation sourceLocation) {
 		super(value,sourceLocation);
 		this.variableName = variableName;
 

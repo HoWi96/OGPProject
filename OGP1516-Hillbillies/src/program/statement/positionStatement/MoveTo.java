@@ -7,7 +7,7 @@ import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
 import program.statement.Statement;
 
-public class MoveTo extends Statement<CubePosition> {
+public class MoveTo extends Statement {
 
 	public MoveTo(Expression<CubePosition> position, SourceLocation sourceLocation) {
 		super(position, sourceLocation);
@@ -16,7 +16,7 @@ public class MoveTo extends Statement<CubePosition> {
 	@Override
 	public void execute(TaskHandler taskHandler) {
 		Unit unit = taskHandler.getUnit();
-		int[] cube = getExpression().evaluate(taskHandler).toArray();
+		int[] cube = ((CubePosition) getExpression().evaluate(taskHandler)).toArray();
 		unit.moveTo(cube);
 	}
 

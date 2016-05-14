@@ -6,9 +6,9 @@ import hillbillies.model.TaskHandler;
 import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
 
-public abstract class Statement<T>{	
+public abstract class Statement{	
 	
-private final Expression<T> expression;
+private final Expression<?> expression;
 
 /**
  * Initialize this new S with given sourceLocation.
@@ -19,7 +19,7 @@ private final Expression<T> expression;
  *         sourceLocation.
  *       | new.getSourceLocation() == sourceLocation
  */ 
-public Statement(Expression<T> expression, SourceLocation sourceLocation) {
+public Statement(Expression<?> expression, SourceLocation sourceLocation) {
 	this.expression = expression;
 	this.sourceLocation = sourceLocation;
 }
@@ -48,7 +48,7 @@ public abstract void execute(TaskHandler taskHandler);
 /**
  * @return the expression
  */
-public Expression<T> getExpression() {
+public Expression<?> getExpression() {
 	return expression;
 }
 

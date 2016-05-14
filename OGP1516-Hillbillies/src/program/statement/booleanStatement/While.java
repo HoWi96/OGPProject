@@ -5,19 +5,19 @@ import hillbillies.part3.programs.SourceLocation;
 import program.expression.Expression;
 import program.statement.Statement;
 
-public class While extends Statement<Boolean> {
+public class While extends Statement {
  
 
-	private Statement<?> body;
+	private Statement body;
 
-	public While(Expression<Boolean> condition, Statement<?> body, SourceLocation sourceLocation) {
+	public While(Expression<Boolean> condition, Statement body, SourceLocation sourceLocation) {
 		super(condition,sourceLocation);
 		this.body = body;
 	}
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		while(getExpression().evaluate(taskHandler)){
+		while((boolean) getExpression().evaluate(taskHandler)){
 			getBody().execute(taskHandler);
 			//break statement here
 		}
@@ -27,7 +27,7 @@ public class While extends Statement<Boolean> {
 	/**
 	 * @return the body
 	 */
-	public Statement<?> getBody() {
+	public Statement getBody() {
 		return body;
 	}
 
