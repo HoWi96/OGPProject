@@ -2764,10 +2764,15 @@ public boolean canHaveAsFaction(Faction faction){
 	 * Variable registering the Task of this Unit.
 	 */
 	private Task task;
-		
 	
-		
-		
-		
+	//TASK ACTIONS
+	
+	public void interruptTask(){
+		if (this.hasTask()){
+			Task task = this.getTask();
+			task.removeUnit();
+			task.setPriority(task.getPriority() - 100);
+		}
+	}
 	
 }

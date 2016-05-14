@@ -16,7 +16,13 @@ public class Follow extends Statement {
 	public void execute(TaskHandler taskHandler) {
 		Unit leader = taskHandler.getUnit();
 		Unit stalker = (Unit) getExpression().evaluate(taskHandler);
-		stalker.follow(leader);
+		try{
+			stalker.follow(leader);
+			this.setExecuted(true);
+		
+		} catch(Exception e){
+			stalker.interruptTask();
+			throw new Error("follow not executable");
+		}
 	}
-
 }

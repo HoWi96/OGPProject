@@ -24,6 +24,8 @@ import program.statement.Statement;
 
 public class Task {
 
+
+
 /**
  * Initialize this new Task with given priority and
  *  a given name and a given activity and an empty set of schedulers.
@@ -62,6 +64,25 @@ public Task(String name, int priority,Statement activity)throws IllegalArgumentE
 	this.name = name;
 	this.activity = activity;
 	this.schedulers = new HashSet<>();
+	this.isTerminated = false;
+}
+
+public void terminate(){
+	
+	this.setPriority(Integer.MIN_VALUE);
+	this.removeUnit();
+	for(Scheduler scheduler: getAllSchedulers()){
+		scheduler.removeAsTask(this);
+	}
+	
+	this.isTerminated = true;
+	
+}
+
+private boolean isTerminated;
+
+public boolean isTerminated(){
+	return this.isTerminated;
 }
 
 //PRIORITY
@@ -258,8 +279,8 @@ public boolean hasUnit(){
 
 /*___________________________________________________________________
  * __________________________________________________________________
- * -----------------------SCHEDULERS--------------------------------------
- * ------------------NON CONTROLLING CLASS-------------------------------
+ * -----------------------SCHEDULERS---------------------------------
+ * ------------------NON CONTROLLING CLASS---------------------------
  *___________________________________________________________________
  *___________________________________________________________________*/
 

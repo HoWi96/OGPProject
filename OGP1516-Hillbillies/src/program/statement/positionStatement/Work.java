@@ -18,7 +18,13 @@ public class Work extends Statement {
 	public void execute(TaskHandler taskHandler) {
 		Unit unit = taskHandler.getUnit();
 		int[] cube = ((CubePosition) getExpression().evaluate(taskHandler)).toArray();
-		unit.workAt(cube);
+		try{
+			unit.workAt(cube);
+			this.setExecuted(true);
+		} catch(Exception e){
+			unit.interruptTask();
+			throw new Error("work not executable");
+		}
 
 	}
 

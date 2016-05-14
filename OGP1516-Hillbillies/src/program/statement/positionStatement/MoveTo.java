@@ -17,7 +17,13 @@ public class MoveTo extends Statement {
 	public void execute(TaskHandler taskHandler) {
 		Unit unit = taskHandler.getUnit();
 		int[] cube = ((CubePosition) getExpression().evaluate(taskHandler)).toArray();
-		unit.moveTo(cube);
+		try{
+			unit.moveTo(cube);
+			this.setExecuted(true);
+		}catch(Exception e){
+			unit.interruptTask();
+			throw new Error("moveTo not executable");
+		}
 	}
 
 }

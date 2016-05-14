@@ -3,19 +3,17 @@ package hillbillies.model;
 import java.util.HashMap;
 
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.position.CubePosition;
 import program.expression.Expression;
 
 /**
- * @invar  Each TaskHandler can have its Task as Task.
+ * @Invar  Each TaskHandler can have its Task as Task.
  *       | canHaveAsTask(this.getTask())
  */
 
 public class TaskHandler {
 
-private World world;
-private Unit unit;
-
+private final World world;
+private final Unit unit;
 
 /**
  * Initialize this new TaskHandler with given Task.
@@ -29,46 +27,23 @@ private Unit unit;
  *         This new TaskHandler cannot have the given Task as its Task.
  *       | ! canHaveAsTask(this.getTask())
  */
-public TaskHandler(Task task) throws IllegalArgumentException {
-	if (! canHaveAsTask(task))
-		throw new IllegalArgumentException();
-	this.task = task;
+public TaskHandler(Unit unit, World world) throws IllegalArgumentException {
+	this.unit = unit;
+	this.world = world;
+
 }
 
-/**
- * Return the Task of this TaskHandler.
- */
-@Basic @Raw @Immutable
-public Task getTask() {
-	return this.task;
-}
-
-/**
- * Check whether this TaskHandler can have the given Task as its Task.
- *  
- * @param  task
- *         The Task to check.
- * @return 
- *       | result == 
-*/
-@Raw
-public boolean canHaveAsTask(Task task) {
-	return true;
-}
+//UNIT
 
 /**
  * @return the unit
  */
+@Basic @Raw @Immutable
 public Unit getUnit() {
 	return unit;
 }
 
-/**
- * @param unit the unit to set
- */
-public void setUnit(Unit unit) {
-	this.unit = unit;
-}
+//WORLD
 
 /**
  * @return the world
@@ -77,34 +52,8 @@ public World getWorld() {
 	return world ;
 }
 
-/**
- * @param world the world to set
- */
-public void setWorld(World world) {
-	this.world = world;
-}
-
-/**
- * Variable registering the Task of this TaskHandler.
- */
-private final Task task;
-
-
-public void stop() {
-	// TODO Auto-generated method stub
-	
-}
-
-public CubePosition getNextToPosition(CubePosition evaluate) {
-	// TODO Auto-generated method stub
-	return null;
-}
-
 //ASSIGNING VARIABLES
 
-/**
- * Hashmap storing
- */
 private HashMap<String,Expression<?>> assignedVariablesMap = new  HashMap<String,Expression<?>>();
 
 public void assign(String variableName, Expression<?> expression) {

@@ -16,7 +16,18 @@ public class Attack extends Statement {
 	public void execute(TaskHandler taskHandler) {
 		Unit attacker = taskHandler.getUnit();
 		Unit defender = (Unit) getExpression().evaluate(taskHandler);
-		attacker.attack(defender);
+		
+		try{
+			
+			attacker.attack(defender);
+			this.setExecuted(true);
+			
+		} catch(Exception e){
+			attacker.interruptTask();
+			throw new Error("attack not executable ");
+		}
+		
+		
 	}
 
 }

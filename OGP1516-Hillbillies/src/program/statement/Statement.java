@@ -8,7 +8,9 @@ import program.expression.Expression;
 
 public abstract class Statement{	
 	
+private final SourceLocation sourceLocation;	
 private final Expression<?> expression;
+private boolean isExecuted;
 
 /**
  * Initialize this new S with given sourceLocation.
@@ -22,6 +24,7 @@ private final Expression<?> expression;
 public Statement(Expression<?> expression, SourceLocation sourceLocation) {
 	this.expression = expression;
 	this.sourceLocation = sourceLocation;
+	this.setExecuted(false);
 }
 
 /**
@@ -33,11 +36,6 @@ public SourceLocation getSourceLocation() {
 }
 
 /**
- * Variable registering the sourceLocation of this S.
- */
-private final SourceLocation sourceLocation;
-
-/**
  * A method to execute the statement
  * 
  * @param taskHandler
@@ -46,10 +44,31 @@ private final SourceLocation sourceLocation;
 public abstract void execute(TaskHandler taskHandler);
 
 /**
+ * Returns whether the activity is executed
+ */
+@Basic @Raw
+public boolean isExecuted(){
+	return this.isExecuted;
+}
+
+/**
+ * @param executed the isExecuted to set
+ */
+public void setExecuted(boolean executed) {
+	this.isExecuted = executed;
+}
+
+/**
  * @return the expression
  */
 public Expression<?> getExpression() {
 	return expression;
 }
+
+
+
+
+
+
 
 }
