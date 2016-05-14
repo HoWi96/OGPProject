@@ -14,6 +14,7 @@ public class Print extends Statement {
 	@Override
 	public void execute(TaskHandler taskHandler) {
 		System.out.println(getExpression().evaluate(taskHandler).toString());
+		setExecuted(true);
 	}
 
 }

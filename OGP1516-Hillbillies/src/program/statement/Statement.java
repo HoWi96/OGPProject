@@ -59,6 +59,14 @@ public void setExecuted(boolean executed) {
 }
 
 /**
+ * @param taskHandler
+ * @return the next Statement
+ */
+public Statement getNext(TaskHandler taskHandler) {
+	return null;
+}
+
+/**
  * @return the expression
  */
 public Expression<?> getExpression() {

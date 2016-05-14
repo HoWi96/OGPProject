@@ -12,12 +12,12 @@ public class Assignment extends Statement {
 	public Assignment(String variableName, Expression<?> value, SourceLocation sourceLocation) {
 		super(value,sourceLocation);
 		this.variableName = variableName;
-
 	}
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
 		taskHandler.assign(getVariableName(), getExpression());
+		setExecuted(true);
 
 	}
 	

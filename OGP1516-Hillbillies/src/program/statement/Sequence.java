@@ -18,8 +18,29 @@ public class Sequence extends Statement {
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		// TODO Auto-generated method stub
+		return;
+			
+	}
 
+	@Override
+	public void setExecuted(boolean executed) {
+		super.setExecuted(executed);
+		if(executed == false)
+			for (Statement statement: statements){
+				statement.setExecuted(false);
+			}
+	}
+	
+	@Override
+	public Statement getNext(TaskHandler taskHandler) {
+		for (Statement statement: statements){
+			if(!statement.isExecuted())
+				return statement;
+		}
+		this.setExecuted(true);
+		return null;
+		
+		
 	}
 
 	/**
@@ -28,5 +49,6 @@ public class Sequence extends Statement {
 	public List<Statement> getStatements() {
 		return statements;
 	}
+	
 
 }

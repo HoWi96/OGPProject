@@ -17,19 +17,34 @@ public class While extends Statement {
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		while((boolean) getExpression().evaluate(taskHandler)){
-			getBody().execute(taskHandler);
-			//break statement here
-		}
-
+		if((boolean) getExpression().evaluate(taskHandler))
+			getBody().setExecuted(false);
+		else
+			setExecuted(true);	
 	}
 	
+	@Override
+	public void setExecuted(boolean executed) {
+		super.setExecuted(executed);
+		if(executed == false)
+			getBody().setExecuted(false);
+	}
+	
+	@Override
+	public Statement getNext(TaskHandler taskHandler) {
+		if((boolean) getExpression().evaluate(taskHandler))
+			return getBody();
+		else
+			return null;
+	}
+
 	/**
 	 * @return the body
 	 */
 	public Statement getBody() {
 		return body;
 	}
+
 
 
 

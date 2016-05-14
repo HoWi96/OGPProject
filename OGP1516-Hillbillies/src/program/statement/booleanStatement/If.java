@@ -19,26 +19,40 @@ public class If extends Statement {
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		if((boolean) getExpression().evaluate(taskHandler))
-			getIfBody().execute(taskHandler);
-		else
-			getElseBody().execute(taskHandler);
+		this.setExecuted(true);
 	}
 	
+	@Override
+	public Statement getNext(TaskHandler taskHandler) {
+		if((boolean) getExpression().evaluate(taskHandler))
+			return getIfBody();
+		else if(getElseBody()!=null)
+			return getElseBody();
+		else
+			return null;
+	}
+
 	/**
 	 * @return the ifBody
 	 */
 	public final Statement getIfBody() {
 		return ifBody;
 	}
-
-
+	
 	/**
 	 * @return the elseBody
 	 */
 	public final Statement getElseBody() {
 		return elseBody;
 	}
-
-
+	
+	@Override
+	public void setExecuted(boolean executed){
+		super.setExecuted(executed);
+		if(executed == false){
+			getIfBody().setExecuted(executed);
+			if(getElseBody()!= null)
+				getElseBody().setExecuted(executed);
+		}
+	}
 }

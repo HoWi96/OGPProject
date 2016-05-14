@@ -2772,6 +2772,7 @@ public boolean canHaveAsFaction(Faction faction){
 			Task task = this.getTask();
 			task.removeUnit();
 			task.setPriority(task.getPriority() - 100);
+			task.getActivity().setExecuted(false);
 		}
 	}
 	
