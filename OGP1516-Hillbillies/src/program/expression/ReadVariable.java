@@ -3,7 +3,7 @@ package program.expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.part3.programs.SourceLocation;
 
-public class ReadVariable<T> extends Expression<T> {
+public class ReadVariable extends Expression<Object> {
 
 	private final String variableName;
 
@@ -13,8 +13,8 @@ public class ReadVariable<T> extends Expression<T> {
 	}
 
 	@Override
-	public T evaluate(TaskHandler taskHandler) {
-		return (T) taskHandler.getValueOfVariable(getVariableName()).evaluate(taskHandler);
+	public Object evaluate(TaskHandler taskHandler) {
+		return taskHandler.getValueOfVariable(getVariableName()).evaluate(taskHandler);
 	}
 
 	/**

@@ -1,4 +1,5 @@
 package hillbillies.model.position;
+
 import be.kuleuven.cs.som.annotate.*;
 
 @Value
@@ -77,6 +78,8 @@ public class Position<T extends Number> {
 		}
 		return true;
 	}
+	
+	
 
 
 }

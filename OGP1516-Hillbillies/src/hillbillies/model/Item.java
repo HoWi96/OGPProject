@@ -1,6 +1,7 @@
 package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.position.CubePosition;
 
 /** 
  * @author Holger Willems |2e bach. ing.: OOP
@@ -142,6 +143,12 @@ public abstract class Item {
 		if (!isValidPosition(position))
 			throw new IllegalArgumentException();
 		this.position = position;
+	}
+	
+	@Raw
+	public CubePosition getCubePosition(){
+		int[] cube = Utils.getCubePosition(this.getPosition());
+		return new CubePosition(cube);
 	}
 	
 	/**

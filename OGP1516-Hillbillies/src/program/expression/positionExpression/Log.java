@@ -13,7 +13,11 @@ public class Log extends Expression<CubePosition> {
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-		return taskHandler.getClosestLog();
+		return taskHandler.getWorld().getAllLogs()
+				.stream()
+				.findAny()
+				.get()
+				.getCubePosition();
 	}
 
 }

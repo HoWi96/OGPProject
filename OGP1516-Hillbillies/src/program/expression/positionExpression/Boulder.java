@@ -13,7 +13,13 @@ public class Boulder extends Expression<CubePosition> {
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-		return taskHandler.getClosestBoulder();
+	
+		return taskHandler.getWorld().getAllBoulders()
+				.stream()
+				.findAny()
+				.get()
+				.getCubePosition();
+				
 	}
 
 }

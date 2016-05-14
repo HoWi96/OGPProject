@@ -13,7 +13,12 @@ public class Workshop extends Expression<CubePosition> {
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-		return taskHandler.getClosestWorkshop();
+		return taskHandler.getWorld().getAllWorkshops()
+				.stream()
+				.findAny()
+				.get();
 	}
+	
+	
 
 }

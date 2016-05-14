@@ -86,24 +86,10 @@ public void setWorld(World world) {
  */
 private final Task task;
 
-public CubePosition getClosestBoulder() {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-public CubePosition getClosestLog() {
-	// TODO Auto-generated method stub
-	return null;
-}
 
 public void stop() {
 	// TODO Auto-generated method stub
 	
-}
-
-public CubePosition getClosestWorkshop() {
-	// TODO Auto-generated method stub
-	return null;
 }
 
 public CubePosition getNextToPosition(CubePosition evaluate) {
@@ -111,20 +97,6 @@ public CubePosition getNextToPosition(CubePosition evaluate) {
 	return null;
 }
 
-public Unit getClosestUnit() {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-public Unit getClosestEnemy() {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-public Unit getClosestFriend() {
-	// TODO Auto-generated method stub
-	return null;
-}
 
 public Expression<?> getValueOfVariable(String variableName) {
 	// TODO Auto-generated method stub

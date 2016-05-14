@@ -2,6 +2,7 @@ package hillbillies.model;
 
 import java.util.*;
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.position.CubePosition;
 import hillbillies.part2.listener.TerrainChangeListener;
 import hillbillies.util.ConnectedToBorder;
 
@@ -90,7 +91,19 @@ public class World {
 	 * Variable registering the ConnectedToBorder class storing information about this world
 	 */
 	private final ConnectedToBorder border;
-	
+	/**
+	 * Variable referencing a set collecting all the cubepositions of workshops
+	 * of this world.
+	 * 
+	 * @Invar  The referenced set is effective.
+	 *       | workshops != null
+	 * @Invar  Each CubePosition registered in the referenced list is
+	 *         effective
+	 *       | for each CubePosition in workshops:
+	 *       |   (workshop != null)     
+	 */
+	@Model
+	private final Set<CubePosition> workshops;
 		
 	
 	/*___________________________________________________________________
@@ -145,6 +158,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	this.nbCubesX = terrainTypes.length;
 	this.nbCubesY = terrainTypes[0].length;
 	this.nbCubesZ = terrainTypes[0][0].length;
+	this.workshops = new HashSet<CubePosition>();
 	
 	//Initialize associations
 	this.units = new HashSet<Unit>(MAX_UNITS_IN_WORLD);
@@ -154,9 +168,6 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	//Connection to ConnectedToBorder
 	this.border = new ConnectedToBorder(this.getNbCubesX(),this.getNbCubesY(), this.getNbCubesZ());
 	this.makeAllSolidsConnected();
-	
-	
-
 }
 
 	/*___________________________________________________________________
@@ -235,6 +246,14 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	@Basic @Raw @Immutable
 	public ConnectedToBorder getConnectedToBorder() {
 		return this.border;
+	}
+	
+	/**
+	 * Return a set with all workshops in this world
+	 */
+	@Basic @Raw @Immutable
+	public Set<CubePosition> getAllWorkshops(){
+		return new HashSet<CubePosition>(workshops);
 	}
 	
 	//------------------------SETTERS
@@ -623,9 +642,17 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		for (int x=0; x<getNbCubesX(); x++) {
 			for (int y=0; y<getNbCubesY(); y++) {
 				for (int z=0; z<getNbCubesZ(); z++) {
+					int[] position = new int[] {x,y,z};
 					// non solid cubes have to be notified if they are not already updated
-					if(!isSolidCube(new int[] {x,y,z}) && this.getConnectedToBorder().isSolidConnectedToBorder(x, y, z)){
-						this.caveIn(new int[] {x,y,z});
+					if(!isSolidCube(position)){
+						// make a set with all cubepositions of workshop
+						if(getCubeType(position)==TYPE_WORKSHOP)
+							this.workshops.add(new CubePosition(position));
+						
+						if(this.getConnectedToBorder().isSolidConnectedToBorder(x, y, z)){
+								this.caveIn(position);
+					
+						}
 					}	
 				}
 			}
