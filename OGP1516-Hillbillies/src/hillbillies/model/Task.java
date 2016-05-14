@@ -51,7 +51,7 @@ public class Task {
  *         This new Task cannot have the given Activity as its Activity.
  *       | ! canHaveAsActivity(this.getActivity())       
  */
-public Task(int priority,String name,Statement activity)throws IllegalArgumentException {
+public Task(String name, int priority,Statement activity)throws IllegalArgumentException {
 	
 	if (! canHaveAsName(name))
 		throw new IllegalArgumentException("Invalid name for a task");
@@ -316,6 +316,9 @@ public void removeAsScheduler(Scheduler scheduler) throws IllegalArgumentExcepti
 		throw new IllegalArgumentException("scheduler is not part of task");
 	schedulers.remove(scheduler);
 }
+
+//STATIC TASKS CONSTRUCTOR
+
 
 
 

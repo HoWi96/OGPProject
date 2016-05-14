@@ -1,5 +1,7 @@
 package hillbillies.model;
 
+import java.util.HashMap;
+
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.position.CubePosition;
 import program.expression.Expression;
@@ -10,9 +12,10 @@ import program.expression.Expression;
  */
 
 public class TaskHandler {
-	
-private Unit unit;
+
 private World world;
+private Unit unit;
+
 
 /**
  * Initialize this new TaskHandler with given Task.
@@ -50,7 +53,7 @@ public Task getTask() {
 */
 @Raw
 public boolean canHaveAsTask(Task task) {
-	return false;
+	return true;
 }
 
 /**
@@ -97,16 +100,22 @@ public CubePosition getNextToPosition(CubePosition evaluate) {
 	return null;
 }
 
+//ASSIGNING VARIABLES
 
-public Expression<?> getValueOfVariable(String variableName) {
-	// TODO Auto-generated method stub
-	return null;
-}
+/**
+ * Hashmap storing
+ */
+private HashMap<String,Expression<?>> assignedVariablesMap = new  HashMap<String,Expression<?>>();
 
 public void assign(String variableName, Expression<?> expression) {
-	// TODO Auto-generated method stub
-	
+	assignedVariablesMap.put(variableName, expression);
 }
+
+public Expression<?> getValueOfVariable(String variableName) {
+	return assignedVariablesMap.get(variableName);
+}
+
+
 	
 }
 

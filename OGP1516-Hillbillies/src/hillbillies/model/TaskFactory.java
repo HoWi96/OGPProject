@@ -1,5 +1,6 @@
 package hillbillies.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -22,14 +23,13 @@ import program.statement.Statement;
 
 public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task> {
 
-	public TaskFactory() {
-		// TODO Auto-generated constructor stub
-	}
-
 	@Override
 	public List<Task> createTasks(String name, int priority, Statement activity, List<int[]> selectedCubes) {
-		// TODO Auto-generated method stub
-		return null;
+		 List<Task> tasks = new ArrayList<>();
+		 
+//	        for(int[] cube : selectedCubes)
+	            tasks.add(new Task(name, priority, activity));
+	        return tasks;
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task>
 	}
 
 	@Override
-	public Statement createPrint(Expression value, SourceLocation sourceLocation) {
+	public Statement createPrint(Expression<?> value, SourceLocation sourceLocation) {
 		return new Print(value, sourceLocation);
 	}
 
