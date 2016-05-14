@@ -14,9 +14,10 @@ public class Friend extends Expression<Unit> {
 	@Override
 	public Unit evaluate(TaskHandler taskHandler) {
 		Unit unit = taskHandler.getUnit();
-		return unit.getFaction().getAllUnits()
+		return taskHandler.getWorld().getAllUnits()
 				.stream()
-				.filter((Unit u) -> u != unit)
+				.filter((Unit u)-> u.getFaction() == unit.getFaction())
+				.filter((Unit u)-> u != unit)
 				.findAny()
 				.get();
 	}

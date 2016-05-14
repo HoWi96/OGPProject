@@ -13,9 +13,10 @@ public class Any extends Expression<Unit> {
 
 	@Override
 	public Unit evaluate(TaskHandler taskHandler) {
+		Unit unit = taskHandler.getUnit();
 		return taskHandler.getWorld().getAllUnits()
 				.stream()
-				.filter((Unit u) ->  u != taskHandler.getUnit())
+				.filter((Unit u)-> u != unit)
 				.findAny()
 				.get();
 	}
