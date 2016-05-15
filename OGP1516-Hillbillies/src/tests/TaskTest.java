@@ -33,7 +33,7 @@ public class TaskTest {
 
 	@Before
 	public void setUp() throws Exception {
-		 task = new Task("task",100,new Print(new LiteralPosition(0,0,0,null),null));
+		 task = new Task("task",100,new Print(new LiteralPosition(0,0,0)));
 	}
 
 	@After

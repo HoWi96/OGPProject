@@ -34,8 +34,8 @@ public class SchedulerTest {
         faction2 = unit2.getFaction();
         scheduler1 = faction1.getScheduler();
         scheduler2 = faction2.getScheduler();
-        task1 = new Task("task1",100,new Print(new LiteralPosition(0,0,0,null),null));
-        task2 = new Task("task2",200,new Print(new LiteralPosition(0,0,0,null),null));
+        task1 = new Task("task1",100,new Print(new LiteralPosition(0,0,0)));
+        task2 = new Task("task2",200,new Print(new LiteralPosition(0,0,0)));
     }
 
 
@@ -138,8 +138,8 @@ public class SchedulerTest {
 	 
 	 @Test
 	 public void testGetAllTasksIterator() throws Exception{
-		 Task task3 = new Task("task1",300,new Print(new LiteralPosition(0,0,0,null),null));
-	     Task task4 = new Task("task2",400,new Print(new LiteralPosition(0,0,0,null),null));
+		 Task task3 = new Task("task1",300,new Print(new LiteralPosition(0,0,0)));
+	     Task task4 = new Task("task2",400,new Print(new LiteralPosition(0,0,0)));
 		 scheduler1.addAsTask(task4);
 		 scheduler1.addAsTask(task2);
 		 scheduler1.addAsTask(task3);
@@ -159,8 +159,8 @@ public class SchedulerTest {
 	 
 	 @Test
 	 public void testGetAllTasksSatisfying() throws Exception{
-		 Task task3 = new Task("task1",300,new Print(new LiteralPosition(0,0,0,null),null));
-	     Task task4 = new Task("task2",400,new Print(new LiteralPosition(0,0,0,null),null));
+		 Task task3 = new Task("task1",300,new Print(new LiteralPosition(0,0,0)));
+	     Task task4 = new Task("task2",400,new Print(new LiteralPosition(0,0,0)));
 		 scheduler1.addAsTask(task4);
 		 scheduler1.addAsTask(task2);
 		 scheduler1.addAsTask(task3);

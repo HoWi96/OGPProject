@@ -8,13 +8,28 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hillbillies.expression.Expression;
 import hillbillies.expression.booleanExpression.IsSolid;
+import hillbillies.expression.booleanExpression.Not;
+import hillbillies.expression.booleanExpression.Or;
+import hillbillies.expression.booleanExpression.True;
+import hillbillies.expression.booleanExpression.And;
+import hillbillies.expression.booleanExpression.CarriesItem;
+import hillbillies.expression.booleanExpression.IsAlive;
+import hillbillies.expression.booleanExpression.IsFriend;
+import hillbillies.expression.positionExpression.Here;
+import hillbillies.expression.positionExpression.LiteralPosition;
+import hillbillies.expression.positionExpression.LogPosition;
+import hillbillies.expression.unitExpression.Enemy;
+import hillbillies.expression.unitExpression.Friend;
+import hillbillies.expression.unitExpression.This;
 import hillbillies.model.Boulder;
 import hillbillies.model.Faction;
 import hillbillies.model.Log;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
 import hillbillies.model.World;
+import hillbillies.model.position.CubePosition;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
 
 public class TaskFactoryTest {
@@ -30,7 +45,11 @@ public class TaskFactoryTest {
 	private static Faction faction;
 	private static Log log;
 	private static Boulder boulder;
-	private static TaskHandler expressionTaskHandler;
+	private static TaskHandler taskHandler;
+	private static CubePosition rock;
+	private static CubePosition tree;
+	private static CubePosition workshop;
+	private static CubePosition unitPosition;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -38,6 +57,12 @@ public class TaskFactoryTest {
 		types[1][1][0] = TYPE_ROCK;
 		types[1][1][1] = TYPE_TREE;
 		types[1][1][2] = TYPE_WORKSHOP;
+		rock = new CubePosition(1,1,0);
+		tree = new CubePosition(1,1,0);
+		workshop = new CubePosition(1,1,0);
+		unitPosition = new CubePosition(0,0,0);
+		
+		
 		world = new World(types, new DefaultTerrainChangeListener());
 		unit = new Unit("Unit", new int[] { 0, 0, 0 }, 50, 50, 50, 50, false);
 		enemy = new Unit("Enemy", new int[] { 0, 0, 0 }, 50, 50, 50, 50, false);
@@ -52,15 +77,21 @@ public class TaskFactoryTest {
 		faction.addUnit(friend);
 		log = new Log(new int[] { 2, 2, 0 }, world);
 		boulder = new Boulder(new int[] { 2, 3, 0 }, world);
-		expressionTaskHandler = new TaskHandler(unit, world, null);
+		taskHandler = new TaskHandler(unit, world, null);
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 	}
 
+	private Unit actionUnit;
+	private TaskHandler action;
+
 	@Before
 	public void setUp() throws Exception {
+		actionUnit = new Unit("ActionUnit", new int[] { 0, 0, 0 }, 50, 50, 50, 50, false);
+		world.addUnit(actionUnit);
+		action = new TaskHandler(actionUnit, world, null);
 	}
 
 	@After
@@ -133,57 +164,107 @@ public class TaskFactoryTest {
 	
 	@Test
 	public final void testCreateIsSolid() {
-		Expression<Boolean> e = new IsSolid(null, null);
+		Expression<Boolean> e1 = new IsSolid(new LiteralPosition(rock.getX(), rock.getY(), rock.getZ()));
+		assertTrue(e1.evaluate(taskHandler));
+		Expression<Boolean> e2 = new IsSolid(new LiteralPosition(workshop.getX(), workshop.getY(), workshop.getZ()));
+		assertFalse(e2.evaluate(taskHandler));
 	}
 
-	@Test
-	public final void testCreateIsPassable() {
-		fail("Not yet implemented"); // TODO
-	}
+//	@Test
+//	public final void testCreateIsPassable() {
+//		fail("Not yet implemented"); // TODO
+//	}
 
 	@Test
 	public final void testCreateIsFriend() {
-		fail("Not yet implemented"); // TODO
+		Expression<Boolean> e1 = new IsFriend(new Friend());
+		assertTrue(e1.evaluate(taskHandler));
+		Expression<Boolean> e2 = new IsFriend(new Enemy());
+		assertFalse(e2.evaluate(taskHandler));
+		Expression<Boolean> e3 = new IsFriend(new This());
+		assertTrue(e3.evaluate(taskHandler));
 	}
 
-	@Test
-	public final void testCreateIsEnemy() {
-		fail("Not yet implemented"); // TODO
-	}
+//	@Test
+//	public final void testCreateIsEnemy() {
+//		fail("Not yet implemented"); // TODO
+//	}
 
 	@Test
 	public final void testCreateIsAlive() {
-		fail("Not yet implemented"); // TODO
+		Expression<Boolean> e1 = new IsAlive(new This());
+		assertTrue(e1.evaluate(action));
+		
+		actionUnit.terminate();
+		Expression<Boolean> e2 = new IsAlive(new This());
+		assertFalse(e2.evaluate(action));
 	}
 
 	@Test
 	public final void testCreateCarriesItem() {
-		fail("Not yet implemented"); // TODO
+		Expression<Boolean> e1 = new CarriesItem(new This());
+		assertTrue(e1.evaluate(action));
+		new Log(new int[]{0,0,0},world);
+		actionUnit.pickUpItem(log);
+		Expression<Boolean> e2 = new CarriesItem(new This());
+		assertFalse(e2.evaluate(action));
 	}
 
 	@Test
 	public final void testCreateNot() {
-		fail("Not yet implemented"); // TODO
+		Expression<Boolean> e1 = new True();
+		assertTrue(e1.evaluate(taskHandler));
+		Expression<Boolean> e2 = new Not(e1);
+		assertFalse(e2.evaluate(taskHandler));
+		
 	}
 
 	@Test
 	public final void testCreateAnd() {
-		fail("Not yet implemented"); // TODO
+		Expression<Boolean> e1 = new True();
+		Expression<Boolean> e2 = new Not(e1);
+		
+		Expression<Boolean> e3 = new And(e1,e1);
+		Expression<Boolean> e4 = new And(e2,e1);
+		Expression<Boolean> e5 = new And(e1,e2);
+		Expression<Boolean> e6 = new And(e2,e2);
+		
+	
+		assertTrue(e3.evaluate(taskHandler));
+		assertFalse(e4.evaluate(taskHandler));
+		assertFalse(e5.evaluate(taskHandler));
+		assertFalse(e6.evaluate(taskHandler));
+		
+		
 	}
 
 	@Test
 	public final void testCreateOr() {
-		fail("Not yet implemented"); // TODO
+		Expression<Boolean> e1 = new True();
+		Expression<Boolean> e2 = new Not(e1);
+		
+		Expression<Boolean> e3 = new Or(e1,e1);
+		Expression<Boolean> e4 = new Or(e2,e1);
+		Expression<Boolean> e5 = new Or(e1,e2);
+		Expression<Boolean> e6 = new Or(e2,e2);
+		
+	
+		assertTrue(e3.evaluate(taskHandler));
+		assertTrue(e4.evaluate(taskHandler));
+		assertTrue(e5.evaluate(taskHandler));
+		assertFalse(e6.evaluate(taskHandler));
 	}
 
 	@Test
 	public final void testCreateHerePosition() {
-		fail("Not yet implemented"); // TODO
+		Expression<CubePosition> e1 = new Here();
+		assertEquals(unitPosition,e1.evaluate(taskHandler));
 	}
 
 	@Test
 	public final void testCreateLogPosition() {
-		fail("Not yet implemented"); // TODO
+		Expression<CubePosition> e1 = new LogPosition();
+		assertEquals(log,e1.evaluate(taskHandler));
 	}
 
 	@Test

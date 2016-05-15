@@ -98,7 +98,7 @@ public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task>
 
 	@Override
 	public Expression<Boolean> createIsFriend(Expression unit, SourceLocation sourceLocation) {
-		return new isFriend(unit);
+		return new IsFriend(unit);
 	}
 
 	@Override
@@ -138,12 +138,12 @@ public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task>
 
 	@Override
 	public Expression<CubePosition> createLogPosition(SourceLocation sourceLocation) {
-		return new LogExpression();
+		return new LogPosition();
 	}
 
 	@Override
 	public Expression<CubePosition> createBoulderPosition(SourceLocation sourceLocation) {
-		return new BoulderExpression();
+		return new BoulderPosition();
 	}
 
 	@Override

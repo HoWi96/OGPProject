@@ -4,21 +4,19 @@ import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.position.CubePosition;
 
-public class BoulderExpression extends Expression<CubePosition> {
+public class LogPosition extends Expression<CubePosition> {
 
-	public BoulderExpression() {
+	public LogPosition() {
 		super();
 	}
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-	
-		return taskHandler.getWorld().getAllBoulders()
+		return taskHandler.getWorld().getAllLogs()
 				.stream()
 				.findAny()
 				.get()
 				.getCubePosition();
-				
 	}
 
 }

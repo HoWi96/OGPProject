@@ -4,9 +4,9 @@ import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
 
-public class isFriend extends UnitInspector {
+public class IsFriend extends UnitInspector {
 
-	public isFriend(Expression<Unit> unit) {
+	public IsFriend(Expression<Unit> unit) {
 		super(unit);
 	}
 

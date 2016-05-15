@@ -35,4 +35,17 @@ public class CubePosition extends Position<Integer> {
 		
 		return distance;	
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof CubePosition){
+			return (((CubePosition) obj).getX() == getX()) && 
+					(((CubePosition) obj).getY() == getY()) &&
+					(((CubePosition) obj).getZ() == getZ());
+		}
+		return false;
+	}
+	
+	
+	
 }
