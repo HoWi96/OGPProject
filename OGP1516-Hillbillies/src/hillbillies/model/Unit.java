@@ -1181,6 +1181,11 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
     	rest();	
     }
     
+    //if leader assigned, we need to start following him
+    if(hasLeader())
+    	following();
+    
+    
     //if the unit is not connected to solid cubes anymore, he needs to fall
     if(this.getActivity()!=Activity.FALLING && !this.getWorld().hasSolidAdjacents(Utils.getCubePosition(this.getPosition())))
     	this.fall();
@@ -1357,7 +1362,7 @@ private void startRandomActivity() throws IllegalArgumentException, IllegalState
  * @throws IllegalStateException
  */
 private void moving(double dt) throws IllegalArgumentException, IllegalStateException {
-	
+
 	//SPRINTING
 	if(this.isSprinting()){
 		if(this.getStamina()>=10*dt){
@@ -2082,6 +2087,8 @@ private int[] workingPosition;
 public void rest() throws IllegalStateException{
 	if(!this.isAbleToRest())
 		throw new IllegalStateException();
+	if(hasTask())
+		getTaskHandler().interruptTask();
 	
 	this.setActivity(Activity.RESTING);	
 	this.setProgressTime(0);
@@ -2150,6 +2157,9 @@ public void attack(Unit defender) throws IllegalStateException{
  */
 
 public void defend(Unit attacker){
+	
+	if(hasTask())
+		getTaskHandler().interruptTask();
 	
 	this.setActivity(Activity.NOTHING);
 	
@@ -2265,6 +2275,10 @@ public void startSprinting() throws IllegalStateException{
  */
 @Model
 private void fall(){
+	
+	if(hasTask())
+		getTaskHandler().interruptTask();
+	
 	this.setActivity(Activity.FALLING);
 	this.setSpeed(3);
 }
@@ -2855,6 +2869,7 @@ public boolean canHaveAsFaction(Faction faction){
 		if(unit == null ||  unit == this || !unit.isAlive())
 			throw new IllegalArgumentException("invalid unit to follow");
 		this.setLeader(unit);	
+		this.setActivity(Activity.MOVING);
 	}
 	
 	

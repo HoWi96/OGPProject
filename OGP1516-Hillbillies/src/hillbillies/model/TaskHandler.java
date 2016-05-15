@@ -98,6 +98,7 @@ public void interruptTask(){
 		task.removeUnit();
 		task.setPriority(task.getPriority() - 100);
 		task.getActivity().setNext(null);
+		getUnit().setLeader(null);
 }
 
 /**
