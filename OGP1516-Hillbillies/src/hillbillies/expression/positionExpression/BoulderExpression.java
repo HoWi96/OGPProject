@@ -5,19 +5,21 @@ import hillbillies.model.TaskHandler;
 import hillbillies.model.position.CubePosition;
 import hillbillies.part3.programs.SourceLocation;
 
-public class Log extends Expression<CubePosition> {
+public class BoulderExpression extends Expression<CubePosition> {
 
-	public Log(SourceLocation sourceLocation) {
+	public BoulderExpression(SourceLocation sourceLocation) {
 		super(sourceLocation);
 	}
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-		return taskHandler.getWorld().getAllLogs()
+	
+		return taskHandler.getWorld().getAllBoulders()
 				.stream()
 				.findAny()
 				.get()
 				.getCubePosition();
+				
 	}
 
 }

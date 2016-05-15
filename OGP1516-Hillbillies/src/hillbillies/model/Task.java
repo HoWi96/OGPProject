@@ -145,11 +145,11 @@ public String getName() {
  * @param  name
  *         The name to check.
  * @return 
- *       | result == 
+ *       | result == true;
 */
 @Raw
 public boolean canHaveAsName(String name) {
-	return false;
+	return true;
 }
 
 /**

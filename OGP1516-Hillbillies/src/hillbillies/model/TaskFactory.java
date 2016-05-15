@@ -8,9 +8,11 @@ import hillbillies.expression.ReadVariable;
 import hillbillies.expression.booleanExpression.*;
 import hillbillies.expression.positionExpression.*;
 import hillbillies.expression.unitExpression.*;
+
 import hillbillies.model.position.CubePosition;
 import hillbillies.part3.programs.ITaskFactory;
 import hillbillies.part3.programs.SourceLocation;
+
 import hillbillies.statement.Statement;
 import hillbillies.statement.booleanStatement.*;
 import hillbillies.statement.positionStatement.*;
@@ -136,12 +138,12 @@ public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task>
 
 	@Override
 	public Expression<CubePosition> createLogPosition(SourceLocation sourceLocation) {
-		return new Log(sourceLocation);
+		return new LogExpression(sourceLocation);
 	}
 
 	@Override
 	public Expression<CubePosition> createBoulderPosition(SourceLocation sourceLocation) {
-		return new Boulder(sourceLocation);
+		return new BoulderExpression(sourceLocation);
 	}
 
 	@Override
