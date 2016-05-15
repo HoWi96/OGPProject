@@ -20,7 +20,7 @@ public class Follow extends Statement {
 			stalker.follow(leader);
 		
 		} catch(Exception e){
-			stalker.interruptTask();
+			taskHandler.interruptTask();
 			throw new Error("follow not executable");
 		}
 	}

@@ -30,11 +30,11 @@ private Statement currentStatement;
  *         This new TaskHandler cannot have the given Task as its Task.
  *       | ! canHaveAsTask(this.getTask())
  */
-public TaskHandler(Unit unit, World world,Statement activity, Task task) throws IllegalArgumentException {
+public TaskHandler(Unit unit, World world, Task task) throws IllegalArgumentException {
 	this.unit = unit;
 	this.world = world;
 	this.task = task;
-	setCurrentStatement(activity);
+	setCurrentStatement(task.getActivity());
 }
 
 //UNIT
@@ -74,7 +74,7 @@ public void executeTask(double dt){
 	
 	while(dt>0.001){
 		dt-=0.001;
-		if(!getUnit().executingStatement()){
+		if(!getUnit().isExecutingStatement()){
 			getCurrentStatement().execute(this);
 			
 			Statement nextStatement = getCurrentStatement().getNext();
@@ -86,7 +86,7 @@ public void executeTask(double dt){
 				if(previousStatement != null){
 					setCurrentStatement(previousStatement);
 				} else {
-					getUnit().getTask().terminate();
+					getTask().terminate();
 				}
 			}
 		}	

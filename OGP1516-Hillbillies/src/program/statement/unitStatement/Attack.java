@@ -22,7 +22,7 @@ public class Attack extends Statement {
 			attacker.attack(defender);
 			
 		} catch(Exception e){
-			attacker.interruptTask();
+			taskHandler.interruptTask();
 			throw new Error("attack not executable ");
 		}
 		

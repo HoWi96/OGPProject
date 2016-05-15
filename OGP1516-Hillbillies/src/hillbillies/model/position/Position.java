@@ -65,19 +65,21 @@ public class Position<T extends Number> {
 	public String toString() {
 		return "Position(" + this.getX() + ", " + this.getY() + ", " + this.getZ() + ")";
 	}
-	/**
-	 * Two object equal each other when they have the same class
-	 */
-	@Override
-	public boolean equals(Object other){
-		if (other == null) {
-			return false;
-		}
-		if (this.getClass() != other.getClass()) {
-			return false;
-		}
-		return true;
-	}
+	
+	
+//	/**
+//	 * Two object equal each other when they have the same class
+//	 */
+//	@Override
+//	public boolean equals(Object other){
+//		if (other == null) {
+//			return false;
+//		}
+//		if (this.getClass() != other.getClass()) {
+//			return false;
+//		}
+//		return true;
+//	}
 	
 	
 

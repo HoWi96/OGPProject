@@ -678,7 +678,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 */
 	public void advanceTime(double dt) throws IllegalArgumentException, IllegalStateException{
 		
-		if (!(0.0<=dt&&dt<=0.2))
+		if (!isValidDuration(dt))
 			throw new IllegalArgumentException();
 		
 		//UNITS
@@ -690,6 +690,16 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 			item.advanceTime(dt);
 		}
 		
+	}
+
+	/**
+	 * @param dt
+	 * 		the time to progress
+	 * @return
+	 * 		|  (0.0<=dt && dt<=0.2) 
+	 */
+	public static boolean isValidDuration(double dt) {
+		return (0.0<=dt && dt<=0.2);
 	}
 
 	

@@ -1167,7 +1167,7 @@ public CubePosition getCubePosition(){
 
 public void advanceTime(double dt) throws IllegalArgumentException, IllegalStateException {
 
-	if (!(0.0<=dt&&dt<=0.2))
+	if (!World.isValidDuration(dt))
 		throw new IllegalArgumentException();
 	
 	if(!this.isAlive())
@@ -1200,7 +1200,6 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
     		this.setActivity(this.getNextActivity());
     		this.setMovingToNext(false);
     	}
-    	
     }
 	
 	//if the unit is in default mode, it can randomly start to sprint while moving
@@ -1216,11 +1215,12 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 			setActivity(Activity.MOVING);
 	}
 	
-	//Start a random activity
-	if(this.hasDefaultBehavior() && this.getActivity()==Activity.NOTHING){
+	if(this.getActivity()==Activity.NOTHING)
+		if(hasDefaultBehavior())
 			startRandomActivity();
-	}
-	
+		else if(!hasTask())
+			searchTask();
+
 	/*
 	 * HANDEL DIFFERENT ACTIVITIES
 	 */
@@ -1260,12 +1260,32 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
  * 		the time to progress
  */
 private void nothing(double dt) {
-	counterTillDefault = counterTillDefault+dt;
-	if(counterTillDefault >= NOTHING_INTERVAL){
-		counterTillDefault = 0.0;
-		this.startDefaultBehavior();
-		this.setProgressTime(0);	
+	
+	if(hasTask())
+		getTaskHandler().executeTask(dt);
+	
+	else{
+		setCounterTillDefault(getCounterTillDefault()+dt);
+		if(getCounterTillDefault() >= NOTHING_INTERVAL){
+			setCounterTillDefault(0.0);
+			this.startDefaultBehavior();
+			this.setProgressTime(0);	
+		}
 	}
+}
+
+/**
+ * @return the counterTillDefault
+ */
+public double getCounterTillDefault() {
+	return counterTillDefault;
+}
+
+/**
+ * @param counterTillDefault the counterTillDefault to set
+ */
+public void setCounterTillDefault(double counterTillDefault) {
+	this.counterTillDefault = counterTillDefault;
 }
 
 /**
@@ -1279,7 +1299,7 @@ private void attacking(double dt){
 	this.setProgressTime((float)(this.getProgressTime()+dt));
 	if (this.getProgressTime() >= this.getFightingTime()) {
 		this.setActivity(Activity.NOTHING);
-		counterTillDefault = 0;
+		setCounterTillDefault(0);
 	}
 }
 
@@ -1359,7 +1379,7 @@ private void moving(double dt) throws IllegalArgumentException, IllegalStateExce
 		if (this.getPathFinding() == null || getPathFinding().hasPathCompleted()){
 			//TARGET REACHED
 			this.setActivity(Activity.NOTHING);
-			counterTillDefault = 0;
+			setCounterTillDefault(0);
 			this.stopSprinting();
 			this.setSpeed(0);
 			return;
@@ -1396,7 +1416,7 @@ private void moving(double dt) throws IllegalArgumentException, IllegalStateExce
 private void resting(double dt) throws IllegalArgumentException {
 	if (this.isFullyHealed()) {
 		this.setActivity(Activity.NOTHING);
-		counterTillDefault = 0;
+		setCounterTillDefault(0);
 	} else {
 		this.setProgressTime((float)(this.getProgressTime()+dt));
 		
@@ -1467,7 +1487,7 @@ private void working(double dt) throws IllegalArgumentException{
 
 		this.updateXP(10);
 		this.setActivity(Activity.NOTHING);
-		counterTillDefault =0;
+		setCounterTillDefault(0);
 	}
 }
 
@@ -2536,6 +2556,8 @@ public boolean canHaveAsFaction(Faction faction){
 	private Item item;
 
 
+
+
 	/**
 	* Return the item of this Unit.
 	*/
@@ -2694,11 +2716,6 @@ public boolean canHaveAsFaction(Faction faction){
 	public boolean isCarryingLog(){
 		return this.hasItem() && (this.getItem() instanceof Log);
 	}
-
-	public void follow(Unit leader) {
-		// TODO Auto-generated method stub
-		
-	}
 	
 	/*_____________________________________________________________
 	 * ____________________________________________________________
@@ -2764,8 +2781,112 @@ public boolean canHaveAsFaction(Faction faction){
 	 * Variable registering the Task of this Unit.
 	 */
 	private Task task;
+
+	private TaskHandler taskHandler;
 	
 	//TASK ACTIONS
+	
+	/**
+	 * @post gives the unit a new taskHandeler
+	 * @post gives the unit a new task
+	 * 
+	 * @throws IllegalStateException
+	 * 			if a task is already assigned
+	 */
+	public void searchTask() throws IllegalStateException{
+		if(hasTask())
+			throw new IllegalStateException("unit has already task assigned");
+		
+		Task task = getFaction().getScheduler().getHighestPriorityAssignableTask();
+		if(task != null){
+			task.addUnit(this);
+			setTaskHandler(new TaskHandler(this,getWorld(),task));
+		}
+	}
+	
+	public boolean isExecutingStatement(){
+		if(!hasTask())
+			return false;
+		if(!isMoving() && !isAttacking() && !isWorking())
+			return false;
+		return true;
+	}
+	
+	//TASKHANDLER
+
+	/**
+	 * @return the taskHandler
+	 */
+	public TaskHandler getTaskHandler() {
+		return taskHandler;
+	}
+
+	/**
+	 * @param taskHandler the taskHandler to set
+	 */
+	public void setTaskHandler(TaskHandler taskHandler) {
+		this.taskHandler = taskHandler;
+	}
+	
+	/*_____________________________________________________________
+	 * ____________________________________________________________
+	 *-------------------------FOLLOWING---------------------------
+	 * ____________________________________________________________
+	 *_____________________________________________________________
+	 */
+	
+	public void following(){
+		
+		if(getLeader()==null){
+			setLeader(null);
+			return;
+		}
+		
+		int[] leaderPosition = getLeader().getCubePosition().toArray();
+		if(!Utils.areAdjacent(getCubePosition().toArray(), leaderPosition)){
+			if(!Utils.areAdjacent(getPathFinding().getTargetPosition(),leaderPosition))
+				moveTo(leaderPosition);
+		} else
+			setLeader(null);
+		
+	}
+	
+	public void follow(Unit unit) throws IllegalArgumentException{
+		if(unit == null ||  unit == this || !unit.isAlive())
+			throw new IllegalArgumentException("invalid unit to follow");
+		this.setLeader(unit);	
+	}
+	
+	
+	/**
+	 * @return the leader
+	 */
+	public Unit getLeader() {
+		return leader;
+	}
+
+	/**
+	 * @param leader the leader to set
+	 */
+	public void setLeader(Unit leader) {
+		this.leader = leader;
+	}
+	
+	/**
+	 * Checks if the leader is effective
+	 * 
+	 * @return 
+	 * 		| this.getLeader() != null
+	 */
+	public boolean hasLeader(){
+		return getLeader() != null;
+	}
+
+	/**
+	 * The unit to follow
+	 */
+	private Unit leader;
+	
 	
 
 	

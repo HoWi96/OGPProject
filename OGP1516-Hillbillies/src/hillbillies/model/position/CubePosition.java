@@ -1,9 +1,10 @@
 package hillbillies.model.position;
 
+import be.kuleuven.cs.som.annotate.Value;
+
+@Value
 public class CubePosition extends Position<Integer> {
 	
-	
-
 	public CubePosition(int x, int y, int z) {
 		super(x, y, z);
 	}
