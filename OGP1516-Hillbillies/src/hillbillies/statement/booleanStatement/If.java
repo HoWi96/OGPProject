@@ -2,7 +2,6 @@ package hillbillies.statement.booleanStatement;
 
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
-import hillbillies.part3.programs.SourceLocation;
 import hillbillies.statement.Statement;
 
 public class If extends Statement {
@@ -11,8 +10,8 @@ public class If extends Statement {
 	private final Statement elseBody;
 
 
-	public If(Expression<Boolean> condition, Statement ifBody, Statement elseBody, SourceLocation sourceLocation) {
-		super(condition,sourceLocation);
+	public If(Expression<Boolean> condition, Statement ifBody, Statement elseBody) {
+		super(condition);
 		this.ifBody = ifBody;
 		this.elseBody = elseBody;
 	}

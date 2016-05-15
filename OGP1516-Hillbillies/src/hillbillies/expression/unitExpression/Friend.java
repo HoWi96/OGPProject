@@ -3,12 +3,11 @@ package hillbillies.expression.unitExpression;
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
-import hillbillies.part3.programs.SourceLocation;
 
 public class Friend extends Expression<Unit> {
 
-	public Friend(SourceLocation sourceLocation) {
-		super(sourceLocation);
+	public Friend() {
+		super();
 	}
 
 	@Override

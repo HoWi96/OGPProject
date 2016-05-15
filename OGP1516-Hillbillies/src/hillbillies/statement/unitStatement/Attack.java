@@ -3,13 +3,12 @@ package hillbillies.statement.unitStatement;
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
-import hillbillies.part3.programs.SourceLocation;
 import hillbillies.statement.Statement;
 
 public class Attack extends Statement {
 
-	public Attack(Expression<Unit> unit, SourceLocation sourceLocation) {
-		super(unit, sourceLocation);
+	public Attack(Expression<Unit> unit) {
+		super(unit);
 	}
 
 	@Override

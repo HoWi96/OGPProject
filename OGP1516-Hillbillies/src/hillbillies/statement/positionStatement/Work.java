@@ -5,13 +5,12 @@ import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
 import hillbillies.model.position.CubePosition;
-import hillbillies.part3.programs.SourceLocation;
 import hillbillies.statement.Statement;
 
 public class Work extends Statement {
 
-	public Work(Expression<CubePosition> position, SourceLocation sourceLocation) {
-		super(position, sourceLocation);
+	public Work(Expression<CubePosition> position) {
+		super(position);
 	}
 
 	@Override

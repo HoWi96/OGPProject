@@ -3,14 +3,13 @@ package hillbillies.expression.booleanExpression;
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.position.CubePosition;
-import hillbillies.part3.programs.SourceLocation;
 
 public class IsSolid extends Expression<Boolean> {
 
 	private final Expression<CubePosition> position;
 
-	public IsSolid(Expression<CubePosition> position, SourceLocation sourceLocation) {
-		super(sourceLocation);
+	public IsSolid(Expression<CubePosition> position) {
+		super();
 		this.position = position;
 	}
 

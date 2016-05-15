@@ -3,13 +3,12 @@ package hillbillies.statement.unitStatement;
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
-import hillbillies.part3.programs.SourceLocation;
 import hillbillies.statement.Statement;
 
 public class Follow extends Statement {
 
-	public Follow(Expression<Unit> unit, SourceLocation sourceLocation) {
-		super(unit, sourceLocation);
+	public Follow(Expression<Unit> unit) {
+		super(unit);
 	}
 
 	@Override

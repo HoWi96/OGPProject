@@ -1,14 +1,13 @@
 package hillbillies.expression;
 
 import hillbillies.model.TaskHandler;
-import hillbillies.part3.programs.SourceLocation;
 
 public class ReadVariable extends Expression<Object> {
 
 	private final String variableName;
 
-	public ReadVariable(String variableName, SourceLocation sourceLocation) {
-		super(sourceLocation);
+	public ReadVariable(String variableName) {
+		super();
 		this.variableName = variableName;
 	}
 

@@ -11,8 +11,8 @@ public class Sequence extends Statement {
 	private final List<Statement> statements;
 	private int counter;
 
-	public Sequence(List<Statement> statements, SourceLocation sourceLocation) {
-		super(new True(sourceLocation),sourceLocation);
+	public Sequence(List<Statement> statements) {
+		super(new True());
 		this.statements = statements;
 		for(Statement statement: statements)
 			statement.setPrevious(this);

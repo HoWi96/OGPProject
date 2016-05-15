@@ -3,15 +3,14 @@ package hillbillies.expression.positionExpression;
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.position.CubePosition;
-import hillbillies.part3.programs.SourceLocation;
 
 public class LiteralPosition extends Expression<CubePosition> {
 
 	private final int x, y, z;
 
 
-	public LiteralPosition(int x, int y, int z, SourceLocation sourceLocation) {
-		super(sourceLocation);
+	public LiteralPosition(int x, int y, int z) {
+		super();
 		this.x = x;
 		this.y = y;
 		this.z = z;

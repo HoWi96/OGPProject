@@ -3,14 +3,14 @@ package hillbillies.expression.positionExpression;
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.position.CubePosition;
-import hillbillies.part3.programs.SourceLocation;
+
 
 public class NextToPosition extends Expression<CubePosition> {
 
 	private final Expression<CubePosition> position;
 
-	public NextToPosition(Expression<CubePosition> position, SourceLocation sourceLocation) {
-		super(sourceLocation);
+	public NextToPosition(Expression<CubePosition> position) {
+		super();
 		this.position = position;
 	}
 

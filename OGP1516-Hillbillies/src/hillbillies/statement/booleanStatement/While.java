@@ -2,7 +2,6 @@ package hillbillies.statement.booleanStatement;
 
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
-import hillbillies.part3.programs.SourceLocation;
 import hillbillies.statement.Statement;
 
 public class While extends Statement {
@@ -10,8 +9,8 @@ public class While extends Statement {
 
 	private Statement body;
 
-	public While(Expression<Boolean> condition, Statement body, SourceLocation sourceLocation) {
-		super(condition,sourceLocation);
+	public While(Expression<Boolean> condition, Statement body) {
+		super(condition);
 		this.body = body;
 	}
 
