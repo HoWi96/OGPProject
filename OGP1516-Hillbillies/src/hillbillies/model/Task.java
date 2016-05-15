@@ -69,7 +69,6 @@ public Task(String name, int priority,Statement activity)throws IllegalArgumentE
 
 public void terminate(){
 	
-	this.setPriority(Integer.MIN_VALUE);
 	this.removeUnit();
 	for(Scheduler scheduler: getAllSchedulers()){
 		scheduler.removeAsTask(this);
@@ -102,10 +101,10 @@ public int getPriority() {
  * @param  priority
  *         The priority to check.
  * @return 
- *       | result == true
+ *       | result == priority > Integer.MIN_VALUE+200
 */
 public static boolean isValidPriority(int priority) {
-	return priority > Integer.MIN_VALUE+100;
+	return priority >= Integer.MIN_VALUE+200;
 }
 
 /**
@@ -119,7 +118,7 @@ public static boolean isValidPriority(int priority) {
 @Raw
 public void setPriority(int priority) {
 	if (! isValidPriority(priority))
-		this.priority = Integer.MIN_VALUE;
+		this.priority = Integer.MIN_VALUE+200;
 	else
 		this.priority = priority;
 }
@@ -145,11 +144,11 @@ public String getName() {
  * @param  name
  *         The name to check.
  * @return 
- *       | result == true;
+ *       | result == name != null;
 */
 @Raw
 public boolean canHaveAsName(String name) {
-	return true;
+	return name != null;
 }
 
 /**

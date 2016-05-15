@@ -56,7 +56,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testConstructor() {
+	public void testConstructor() throws Exception{
 		Faction f = new Faction();
 		Scheduler s = f.getScheduler();
 		assertEquals(0,s.getNbTasks());
@@ -65,7 +65,7 @@ public class SchedulerTest {
 	}
 	
 	@Test
-	public void testTaskAdder() {
+	public void testTaskAdder() throws Exception {
 		
 		assertFalse(scheduler1.hasAsTask(null));
 		assertFalse(task1.hasAsScheduler(null));
@@ -87,19 +87,19 @@ public class SchedulerTest {
 	}
 	
 	@Test(expected = IllegalStateException.class)
-	public void testSameTaskAdder() {
+	public void testSameTaskAdder() throws Exception {
 		scheduler1.addAsTask(task1);
 		scheduler1.addAsTask(task1);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
-	public void testNullTaskAdder() {
+	public void testNullTaskAdder() throws Exception {
 		scheduler1.addAsTask(null);
 	}
 	
 	
 	@Test
-	public void testTaskRemover(){
+	public void testTaskRemover() throws Exception{
 		Collection<Task> tasks = Arrays.asList(task1, task2);
         scheduler2.addAsTask(task1);
         scheduler2.addAsTask(task2);
@@ -113,14 +113,14 @@ public class SchedulerTest {
 	}
 	
 	@Test
-    public void testCanHaveAsTask() {
+    public void testCanHaveAsTask() throws Exception {
         assertTrue(scheduler1.canHaveAsTask(task1));
         assertTrue(scheduler1.canHaveAsTask(task2));
         assertFalse(scheduler1.canHaveAsTask(null));
     }
 	
 	 @Test
-	 public void testGetNbTasks(){
+	 public void testGetNbTasks() throws Exception{
 	        assertEquals(0, scheduler2.getNbTasks());
 	        scheduler1.addAsTask(task1);
 	        scheduler1.addAsTask(task2);
@@ -130,14 +130,14 @@ public class SchedulerTest {
 	  }
 	 
 	 @Test
-	 public void testGetHighestPriority(){
+	 public void testGetHighestPriority() throws Exception{
 		 scheduler1.addAsTask(task1);
 		 scheduler1.addAsTask(task2);
 		 assertEquals(task2,scheduler1.getHighestPriorityAssignableTask());
 	 }
 	 
 	 @Test
-	 public void testGetAllTasksIterator(){
+	 public void testGetAllTasksIterator() throws Exception{
 		 Task task3 = new Task("task1",300,new Print(new LiteralPosition(0,0,0,null),null));
 	     Task task4 = new Task("task2",400,new Print(new LiteralPosition(0,0,0,null),null));
 		 scheduler1.addAsTask(task4);
@@ -158,7 +158,7 @@ public class SchedulerTest {
 	 }
 	 
 	 @Test
-	 public void testGetAllTasksSatisfying(){
+	 public void testGetAllTasksSatisfying() throws Exception{
 		 Task task3 = new Task("task1",300,new Print(new LiteralPosition(0,0,0,null),null));
 	     Task task4 = new Task("task2",400,new Print(new LiteralPosition(0,0,0,null),null));
 		 scheduler1.addAsTask(task4);
