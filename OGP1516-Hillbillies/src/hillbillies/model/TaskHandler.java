@@ -3,8 +3,8 @@ package hillbillies.model;
 import java.util.HashMap;
 
 import be.kuleuven.cs.som.annotate.*;
-import program.expression.Expression;
-import program.statement.Statement;
+import hillbillies.expression.Expression;
+import hillbillies.statement.Statement;
 
 /**
  * @Invar  Each TaskHandler can have its Task as Task.

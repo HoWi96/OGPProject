@@ -3,23 +3,20 @@ package hillbillies.model;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import hillbillies.expression.Expression;
+import hillbillies.expression.ReadVariable;
+import hillbillies.expression.booleanExpression.*;
+import hillbillies.expression.positionExpression.*;
+import hillbillies.expression.unitExpression.*;
 import hillbillies.model.position.CubePosition;
 import hillbillies.part3.programs.ITaskFactory;
 import hillbillies.part3.programs.SourceLocation;
-import program.expression.Expression;
-import program.expression.ReadVariable;
-import program.expression.booleanExpression.*;
-import program.expression.unitExpression.*;
-import program.expression.positionExpression.*;
-import program.expression.positionExpression.Boulder;
-import program.expression.positionExpression.Log;
-import program.statement.booleanStatement.*;
-import program.statement.positionStatement.*;
-import program.statement.unitStatement.*;
-import program.statement.wildcardStatement.Assignment;
-import program.statement.wildcardStatement.Print;
-import program.statement.Statement;
+import hillbillies.statement.Statement;
+import hillbillies.statement.booleanStatement.*;
+import hillbillies.statement.positionStatement.*;
+import hillbillies.statement.unitStatement.*;
+import hillbillies.statement.wildcardStatement.Assignment;
+import hillbillies.statement.wildcardStatement.Print;
 
 public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task> {
 
@@ -59,7 +56,7 @@ public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task>
 
 	@Override
 	public Statement createSequence(List<Statement> statements, SourceLocation sourceLocation) {
-		return new program.statement.Sequence(statements, sourceLocation);
+		return new hillbillies.statement.Sequence(statements, sourceLocation);
 	}
 
 	@Override

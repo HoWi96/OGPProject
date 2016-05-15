@@ -3,7 +3,7 @@ package hillbillies.model;
 import java.util.HashSet;
 import java.util.Set;
 import be.kuleuven.cs.som.annotate.*;
-import program.statement.Statement;
+import hillbillies.statement.Statement;
 
 /** 
  * ATTRIBUTES
