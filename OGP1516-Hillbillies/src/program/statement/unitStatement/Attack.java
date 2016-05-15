@@ -20,7 +20,6 @@ public class Attack extends Statement {
 		try{
 			
 			attacker.attack(defender);
-			this.setExecuted(true);
 			
 		} catch(Exception e){
 			attacker.interruptTask();

@@ -2767,13 +2767,10 @@ public boolean canHaveAsFaction(Faction faction){
 	
 	//TASK ACTIONS
 	
-	public void interruptTask(){
-		if (this.hasTask()){
-			Task task = this.getTask();
-			task.removeUnit();
-			task.setPriority(task.getPriority() - 100);
-			task.getActivity().setExecuted(false);
-		}
-	}
+
+	
+	
+	
+
 	
 }

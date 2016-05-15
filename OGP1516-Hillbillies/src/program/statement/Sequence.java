@@ -9,38 +9,25 @@ import program.expression.booleanExpression.True;
 public class Sequence extends Statement {
 
 	private final List<Statement> statements;
-
+	private int counter;
 
 	public Sequence(List<Statement> statements, SourceLocation sourceLocation) {
 		super(new True(sourceLocation),sourceLocation);
 		this.statements = statements;
+		for(Statement statement: statements)
+			statement.setPrevious(this);
 	}
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		return;
-			
-	}
-
-	@Override
-	public void setExecuted(boolean executed) {
-		super.setExecuted(executed);
-		if(executed == false)
-			for (Statement statement: statements){
-				statement.setExecuted(false);
-			}
-	}
-	
-	@Override
-	public Statement getNext(TaskHandler taskHandler) {
-		for (Statement statement: statements){
-			if(!statement.isExecuted())
-				return statement;
+		if(getNext() == null){
+			setCounter(0);
 		}
-		this.setExecuted(true);
-		return null;
-		
-		
+		if(getCounter()<statements.size()){
+			setNext(statements.get(getCounter()));
+			setCounter(getCounter() + 1);
+		}else
+			setNext(null);	
 	}
 
 	/**
@@ -49,6 +36,18 @@ public class Sequence extends Statement {
 	public List<Statement> getStatements() {
 		return statements;
 	}
-	
 
+	/**
+	 * @return the counter
+	 */
+	public int getCounter() {
+		return counter;
+	}
+
+	/**
+	 * @param counter the counter to set
+	 */
+	public void setCounter(int counter) {
+		this.counter = counter;
+	}
 }

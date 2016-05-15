@@ -20,9 +20,8 @@ public class Work extends Statement {
 		int[] cube = ((CubePosition) getExpression().evaluate(taskHandler)).toArray();
 		try{
 			unit.workAt(cube);
-			this.setExecuted(true);
 		} catch(Exception e){
-			unit.interruptTask();
+			taskHandler.interruptTask();
 			throw new Error("work not executable");
 		}
 

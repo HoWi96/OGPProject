@@ -10,7 +10,9 @@ public abstract class Statement{
 	
 private final SourceLocation sourceLocation;	
 private final Expression<?> expression;
-private boolean isExecuted;
+private Statement next;
+private Statement previous;
+
 
 /**
  * Initialize this new S with given sourceLocation.
@@ -24,8 +26,11 @@ private boolean isExecuted;
 public Statement(Expression<?> expression, SourceLocation sourceLocation) {
 	this.expression = expression;
 	this.sourceLocation = sourceLocation;
-	this.setExecuted(false);
+	this.setNext(null);
+	this.setPrevious(null);	
 }
+
+//ATTRIBUTES
 
 /**
  * Return the sourceLocation of this S.
@@ -36,6 +41,17 @@ public SourceLocation getSourceLocation() {
 }
 
 /**
+ * @return the expression
+ */
+public Expression<?> getExpression() {
+	return expression;
+}
+
+
+//WORKFLOW
+
+
+/**
  * A method to execute the statement
  * 
  * @param taskHandler
@@ -44,33 +60,31 @@ public SourceLocation getSourceLocation() {
 public abstract void execute(TaskHandler taskHandler);
 
 /**
- * Returns whether the activity is executed
+ * @return the previous
  */
-@Basic @Raw
-public boolean isExecuted(){
-	return this.isExecuted;
+public Statement getPrevious() {
+	return previous;
 }
 
 /**
- * @param executed the isExecuted to set
+ * @param previous the previous to set
  */
-public void setExecuted(boolean executed) {
-	this.isExecuted = executed;
+public void setPrevious(Statement previous) {
+	this.previous = previous;
 }
 
 /**
- * @param taskHandler
- * @return the next Statement
+ * @return the next
  */
-public Statement getNext(TaskHandler taskHandler) {
-	return null;
+public Statement getNext() {
+	return next;
 }
 
 /**
- * @return the expression
+ * @param next the next to set
  */
-public Expression<?> getExpression() {
-	return expression;
+public void setNext(Statement next) {
+	this.next = next;
 }
 
 

@@ -18,7 +18,6 @@ public class Follow extends Statement {
 		Unit stalker = (Unit) getExpression().evaluate(taskHandler);
 		try{
 			stalker.follow(leader);
-			this.setExecuted(true);
 		
 		} catch(Exception e){
 			stalker.interruptTask();

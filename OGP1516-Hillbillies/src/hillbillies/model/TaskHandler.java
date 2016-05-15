@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import be.kuleuven.cs.som.annotate.*;
 import program.expression.Expression;
+import program.statement.Statement;
 
 /**
  * @Invar  Each TaskHandler can have its Task as Task.
@@ -14,6 +15,8 @@ public class TaskHandler {
 
 private final World world;
 private final Unit unit;
+private final Task task;
+private Statement currentStatement;
 
 /**
  * Initialize this new TaskHandler with given Task.
@@ -27,10 +30,11 @@ private final Unit unit;
  *         This new TaskHandler cannot have the given Task as its Task.
  *       | ! canHaveAsTask(this.getTask())
  */
-public TaskHandler(Unit unit, World world) throws IllegalArgumentException {
+public TaskHandler(Unit unit, World world,Statement activity, Task task) throws IllegalArgumentException {
 	this.unit = unit;
 	this.world = world;
-
+	this.task = task;
+	setCurrentStatement(activity);
 }
 
 //UNIT
@@ -64,7 +68,61 @@ public Expression<?> getValueOfVariable(String variableName) {
 	return assignedVariablesMap.get(variableName);
 }
 
+//EXECUTE TASK
 
+public void executeTask(double dt){
 	
+	while(dt>0.001){
+		dt-=0.001;
+		if(!getUnit().executingStatement()){
+			getCurrentStatement().execute(this);
+			
+			Statement nextStatement = getCurrentStatement().getNext();
+			if(nextStatement != null){
+				setCurrentStatement(nextStatement);
+			} else {
+				
+				Statement previousStatement = getCurrentStatement().getPrevious();
+				if(previousStatement != null){
+					setCurrentStatement(previousStatement);
+				} else {
+					getUnit().getTask().terminate();
+				}
+			}
+		}	
+	}	
+}
+
+public void interruptTask(){
+		Task task = this.getTask();
+		task.removeUnit();
+		task.setPriority(task.getPriority() - 100);
+		task.getActivity().setNext(null);
+}
+
+/**
+ * @return the currentStatement
+ */
+public Statement getCurrentStatement() {
+	return currentStatement;
+}
+
+/**
+ * @param currentStatement the currentStatement to set
+ */
+public void setCurrentStatement(Statement currentStatement) {
+	this.currentStatement = currentStatement;
+}
+
+/**
+ * @return the task
+ */
+public Task getTask() {
+	return task;
+}
+
+
+
+
 }
 

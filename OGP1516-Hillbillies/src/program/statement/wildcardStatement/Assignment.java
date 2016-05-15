@@ -17,7 +17,6 @@ public class Assignment extends Statement {
 	@Override
 	public void execute(TaskHandler taskHandler) {
 		taskHandler.assign(getVariableName(), getExpression());
-		setExecuted(true);
 
 	}
 	
