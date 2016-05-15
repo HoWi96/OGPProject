@@ -17,7 +17,9 @@ private Statement previous;
  *         sourceLocation.
  *       | new.getSourceLocation() == sourceLocation
  */ 
-public Statement(Expression<?> expression) {
+public Statement(Expression<?> expression) throws IllegalArgumentException {
+	if (expression == null)
+		throw new IllegalArgumentException("No null expression allowed");
 	this.expression = expression;
 	this.setNext(null);
 	this.setPrevious(null);	

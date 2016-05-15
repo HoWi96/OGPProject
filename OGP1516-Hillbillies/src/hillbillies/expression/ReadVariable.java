@@ -13,15 +13,14 @@ public class ReadVariable extends Expression<Object> {
 
 	@Override
 	public Object evaluate(TaskHandler taskHandler) {
-			Object object =  taskHandler.getValueOfVariable(getVariableName()).evaluate(taskHandler);
-			if(object == null){
-				taskHandler.interruptTask();
-				throw new Error(getVariableName()+" is not present");
-			}else
-				return object;
-				
-
-	}
+		try{
+			return taskHandler.getValueOfVariable(getVariableName()).evaluate(taskHandler);
+		}catch(Exception e){
+			taskHandler.interruptTask();
+			throw new Error(getVariableName()+" is not present");
+			}
+		
+		}
 
 	/**
 	 * @return the variableName

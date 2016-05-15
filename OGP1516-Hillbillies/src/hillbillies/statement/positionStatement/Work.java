@@ -16,8 +16,8 @@ public class Work extends Statement {
 	@Override
 	public void execute(TaskHandler taskHandler) {
 		Unit unit = taskHandler.getUnit();
-		int[] cube = ((CubePosition) getExpression().evaluate(taskHandler)).toArray();
 		try{
+			int[] cube = ((CubePosition) getExpression().evaluate(taskHandler)).toArray();
 			unit.workAt(cube);
 		} catch(Exception e){
 			taskHandler.interruptTask();

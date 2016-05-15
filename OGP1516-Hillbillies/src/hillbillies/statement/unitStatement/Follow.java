@@ -13,11 +13,10 @@ public class Follow extends Statement {
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		Unit leader = taskHandler.getUnit();
-		Unit stalker = (Unit) getExpression().evaluate(taskHandler);
+		Unit stalker = taskHandler.getUnit();
 		try{
+			Unit leader = (Unit) getExpression().evaluate(taskHandler);
 			stalker.follow(leader);
-		
 		} catch(Exception e){
 			taskHandler.interruptTask();
 			throw new Error("follow not executable");

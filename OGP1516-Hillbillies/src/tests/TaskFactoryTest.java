@@ -9,6 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import hillbillies.expression.Expression;
+import hillbillies.expression.ReadVariable;
 import hillbillies.expression.booleanExpression.IsSolid;
 import hillbillies.expression.booleanExpression.Not;
 import hillbillies.expression.booleanExpression.Or;
@@ -39,6 +40,10 @@ import hillbillies.model.World;
 import hillbillies.model.position.CubePosition;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
 import hillbillies.statement.Statement;
+import hillbillies.statement.positionStatement.MoveTo;
+import hillbillies.statement.positionStatement.Work;
+import hillbillies.statement.unitStatement.Attack;
+import hillbillies.statement.unitStatement.Follow;
 import hillbillies.statement.wildcardStatement.Assignment;
 import hillbillies.statement.wildcardStatement.Print;
 
@@ -93,6 +98,8 @@ public class TaskFactoryTest {
 		boulder = new Boulder(new int[] { 2, 3, 0 }, world);
 		task = new Task("Task",100,new Print(new LiteralPosition(0, 0, 0)));
 		taskHandler = new TaskHandler(unit, world, task);
+		
+		
 	}
 
 	@AfterClass
@@ -105,6 +112,7 @@ public class TaskFactoryTest {
 	public void setUp() throws Exception {
 		actionUnit = new Unit("ActionUnit", new int[] { 0, 0, 0 }, 50, 50, 50, 50, false);
 		world.addUnit(actionUnit);
+
 	}
 
 	@After
@@ -112,17 +120,19 @@ public class TaskFactoryTest {
 		if(world.hasAsUnit(actionUnit))
 			world.removeUnit(actionUnit);
 	}
-
-	@Test
-	public final void testCreateTasks() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	//STATEMENTS
 	
+	//STATEMENTS
+
 	@Test
 	public final void testCreateAssignment() {
-		
+		Statement s = new Assignment("True",new True());
+		Task taskTest = new Task("Task",100,s);
+		taskTest.addUnit(actionUnit);
+		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
+		s.execute(handler);
+		Expression<?> e = new ReadVariable("True");
+		assertEquals(true,e.evaluate(handler));
 	}
 
 	@Test
@@ -142,7 +152,14 @@ public class TaskFactoryTest {
 
 	@Test
 	public final void testCreatePrint() {
-		fail("Not yet implemented"); // TODO
+		Statement s = new Print(new True());
+		Task taskTest = new Task("Task",100,s);
+		
+		taskTest.addUnit(actionUnit);
+		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		
+		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
+		s.execute(handler);
 	}
 
 	@Test
@@ -152,29 +169,79 @@ public class TaskFactoryTest {
 
 	@Test
 	public final void testCreateMoveTo() {
-		fail("Not yet implemented"); // TODO
+		Statement s = new MoveTo(new LiteralPosition(1,0,0));
+		Task taskTest = new Task("Task",100,s);	
+		taskTest.addUnit(actionUnit);
+		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		
+		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
+		s.execute(handler);
+		assertTrue(actionUnit.isMoving());
 	}
 
 	@Test
 	public final void testCreateWork() {
-		fail("Not yet implemented"); // TODO
+		Statement s = new Work(new LiteralPosition(0,0,0));
+		Task taskTest = new Task("Task",100,s);	
+		taskTest.addUnit(actionUnit);
+		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		
+		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
+		s.execute(handler);
+		assertTrue(actionUnit.isWorking());
 	}
 
 	@Test
 	public final void testCreateFollow() {
-		fail("Not yet implemented"); // TODO
+		Statement s = new Follow(new Any());
+		Task taskTest = new Task("Task",100,s);	
+		taskTest.addUnit(actionUnit);
+		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		
+		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
+		s.execute(handler);
+		assertTrue(actionUnit.hasLeader());
 	}
 
 	@Test
 	public final void testCreateAttack() {
-		fail("Not yet implemented"); // TODO
+		Statement s = new Attack(new Enemy());
+		Task taskTest = new Task("Task",100,s);	
+		taskTest.addUnit(actionUnit);
+		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		
+		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
+		s.execute(handler);
+		assertTrue(actionUnit.isAttacking());
 	}
-
+	
+	
 	//EXPRESSIONS
 	
 	@Test
 	public final void testCreateReadVariable() {
-		fail("Not yet implemented"); // TODO
+		Statement s = new Assignment("True",new True());
+		Task taskTest = new Task("Task",100,s);
+		taskTest.addUnit(actionUnit);
+		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
+		s.execute(handler);
+		Expression<?> e = new ReadVariable("True");
+		assertEquals(true,e.evaluate(handler));
+	}
+	
+	@Test (expected = Error.class)
+	public final void testCreateIllegalReadVariable() {
+		Statement s = new Assignment("True",new True());
+		Task taskTest = new Task("Task",100,s);
+		taskTest.addUnit(actionUnit);
+		
+		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
+		
+		s.execute(handler);
+		Expression<?> e = new ReadVariable("False");
+		e.evaluate(handler);
 	}
 	
 	@Test

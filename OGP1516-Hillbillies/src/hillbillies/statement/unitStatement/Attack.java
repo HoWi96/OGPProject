@@ -14,10 +14,8 @@ public class Attack extends Statement {
 	@Override
 	public void execute(TaskHandler taskHandler) {
 		Unit attacker = taskHandler.getUnit();
-		Unit defender = (Unit) getExpression().evaluate(taskHandler);
-		
 		try{
-			
+			Unit defender = (Unit) getExpression().evaluate(taskHandler);
 			attacker.attack(defender);
 			
 		} catch(Exception e){
