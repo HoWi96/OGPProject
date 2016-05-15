@@ -1,13 +1,11 @@
 package hillbillies.expression;
 
 import hillbillies.model.TaskHandler;
-import hillbillies.part3.programs.SourceLocation;
 
 public abstract class Expression<T> {
 
 	public Expression() {}
 
-	
 	/**
 	 * Method to evaluate an expression
 	 * 
