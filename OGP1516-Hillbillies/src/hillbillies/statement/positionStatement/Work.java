@@ -21,6 +21,7 @@ public class Work extends Statement {
 			unit.workAt(cube);
 		} catch(Exception e){
 			taskHandler.interruptTask();
+			System.out.println(e.toString());
 			throw new Error("work not executable");
 		}
 

@@ -227,8 +227,7 @@ public boolean canHaveAsUnit(Unit unit) {
  *       | ! isValidUnit(getUnit())
  */
 @Model @Raw
-private void setUnit(Unit unit) 
-		throws IllegalArgumentException {
+private void setUnit(Unit unit) throws IllegalArgumentException {
 	if (! canHaveAsUnit(unit))
 		throw new IllegalArgumentException();
 	this.unit = unit;
@@ -260,10 +259,11 @@ public void addUnit(Unit unit) throws IllegalArgumentException{
  * @throws IllegalStateException
  */
 public void removeUnit() throws IllegalStateException{
-	if(!hasUnit())
-		throw new IllegalStateException("no unit assigned to this task");
 	
-	this.getUnit().setTask(null);
+	if(!hasUnit())
+		throw new IllegalStateException("No unit for this task");
+	
+	unit.setTask(null);
 	this.setUnit(null);
 }
 /**

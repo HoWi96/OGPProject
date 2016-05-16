@@ -1,10 +1,8 @@
 package hillbillies.statement;
 
 import java.util.List;
-
 import hillbillies.expression.booleanExpression.True;
 import hillbillies.model.TaskHandler;
-import hillbillies.part3.programs.SourceLocation;
 
 public class Sequence extends Statement {
 
@@ -26,8 +24,9 @@ public class Sequence extends Statement {
 		if(getCounter()<statements.size()){
 			setNext(statements.get(getCounter()));
 			setCounter(getCounter() + 1);
-		}else
+		}else{
 			setNext(null);	
+		}
 	}
 
 	/**

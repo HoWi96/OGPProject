@@ -45,15 +45,23 @@ public abstract class Item {
 		
 	/**
 	 * Initialize this new GameObject with given position.
+	 * 
+	 * @param position
+	 * @param world
 	 *         
 	 * @post The game object is not terminated
 	 * @post There is no unit assigned to the item
 	 * @post There is no unit assigned to the raw item
-	 * @post The raw material gets a random weight between 10 and 50 (inclusive)
+	 * @post The item gets a random weight between 10 and 50 (inclusive)
+	 * 
+	 * @effect The position is been set to the given position
+	 * @effect the world is been set to the given world
 	 */
-	public Item()throws IllegalArgumentException {
+	public Item(int[] position, World world)throws IllegalArgumentException {
 		this.isTerminated = false;
 		this.weight = Utils.randInt(MIN_WEIGHT, MAX_WEIGHT);
+		world.addItem(this);
+		this.setPosition(Utils.getCubeCenter(position));
 	}
 	
 	/*___________________________________________________________________

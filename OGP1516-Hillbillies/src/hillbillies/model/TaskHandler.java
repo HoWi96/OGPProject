@@ -5,6 +5,7 @@ import java.util.HashMap;
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.expression.Expression;
 import hillbillies.statement.Statement;
+import hillbillies.statement.wildcardStatement.Print;
 
 /**
  * @Invar  Each TaskHandler can have its Task as Task.
@@ -70,28 +71,31 @@ public Expression<?> getValueOfVariable(String variableName) {
 
 //EXECUTE TASK
 
-public void executeTask(double dt){
+public void executeTask(){
 	
-	while(dt>0.001){
-		dt-=0.001;
-		if(!getUnit().isExecutingStatement()){
-			getCurrentStatement().execute(this);
+	if(getCurrentStatement()==null){
+		getTask().terminate();
+		
+	}	else {
+	
+		System.out.println("execute statement"+getCurrentStatement().getClass());
+		getCurrentStatement().execute(this);
+		
+		if(getUnit().hasTask()){
+			if(getCurrentStatement().getNext() != null)
+				setCurrentStatement(getCurrentStatement().getNext());
 			
-			Statement nextStatement = getCurrentStatement().getNext();
-			if(nextStatement != null){
-				setCurrentStatement(nextStatement);
-			} else {
-				
-				Statement previousStatement = getCurrentStatement().getPrevious();
-				if(previousStatement != null){
-					setCurrentStatement(previousStatement);
-				} else {
-					getTask().terminate();
-				}
+			else if(getCurrentStatement().getPrevious() != null)
+					setCurrentStatement(getCurrentStatement().getPrevious());
+			
+			else 
+				setCurrentStatement(null);
 			}
-		}	
-	}	
 }
+	}
+
+
+
 
 public void interruptTask(){
 		Task task = this.getTask();

@@ -19,6 +19,7 @@ public class Follow extends Statement {
 			stalker.follow(leader);
 		} catch(Exception e){
 			taskHandler.interruptTask();
+			System.out.println(e.toString());
 			throw new Error("follow not executable");
 		}
 	}

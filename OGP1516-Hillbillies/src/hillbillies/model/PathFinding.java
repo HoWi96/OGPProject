@@ -115,7 +115,7 @@ public class PathFinding {
 		openSet.add(new Node(start,0,getEstimatedTimeTo(start,target),null));
 		
 		//We set a maximum on the items of the closed set so we don't have to calculate exhaustively long
-		while (openSet.size()>0 && closedSet.size()<250){
+		while (openSet.size()>0 && closedSet.size()<750){
 			
 			Node current = openSet.pollFirst();
 			closedSet.add(current.getPosition());

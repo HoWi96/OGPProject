@@ -1181,14 +1181,13 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
     	rest();	
     }
     
-    //if leader assigned, we need to start following him
-    if(hasLeader())
-    	following();
-    
-    
     //if the unit is not connected to solid cubes anymore, he needs to fall
     if(this.getActivity()!=Activity.FALLING && !this.getWorld().hasSolidAdjacents(Utils.getCubePosition(this.getPosition())))
     	this.fall();
+    
+    //if leader assigned, we need to start following him
+    if(hasLeader())
+    	following();
     
     // if the unit gets a new task, he first have to move to the next position
     if(this.getActivity() != Activity.FALLING &&
@@ -1220,11 +1219,12 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 			setActivity(Activity.MOVING);
 	}
 	
-	if(this.getActivity()==Activity.NOTHING)
-		if(hasDefaultBehavior())
-			startRandomActivity();
-		else if(!hasTask())
+	if(this.getActivity()==Activity.NOTHING){
+		if(!hasTask())
 			searchTask();
+		if (!hasTask() && hasDefaultBehavior())
+			startRandomActivity();
+	}
 
 	/*
 	 * HANDEL DIFFERENT ACTIVITIES
@@ -1266,10 +1266,13 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
  */
 private void nothing(double dt) {
 	
-	if(hasTask())
-		getTaskHandler().executeTask(dt);
+	if(hasTask()){
+		while(dt>0 && hasTask() && !isExecutingStatement()){
+			dt-=0.001;
+			getTaskHandler().executeTask();
+		}
 	
-	else{
+	} else {
 		setCounterTillDefault(getCounterTillDefault()+dt);
 		if(getCounterTillDefault() >= NOTHING_INTERVAL){
 			setCounterTillDefault(0.0);
@@ -1526,7 +1529,7 @@ private void falling(double dt) {
 		int heightFalled = (int) Math.floor(startedFallingPosition[2]-currentFallingPosition[2]);
 		//double[] nextPosition = Utils.getCubeCenter(Utils.getCubePosition(currentFallingPosition));
 		
-		
+		this.setActivity(Activity.NOTHING);
 		this.moveToAdjacent(0, 0, 0);
 		this.takeDamage(heightFalled*10);
 		
@@ -2005,6 +2008,8 @@ public boolean isDoingNothing(){
 public void workAt(int[] workingPosition) throws IllegalStateException, IllegalArgumentException{
 	if (!this.isAbleToWork())
 			throw new IllegalStateException();
+	if(!getWorld().isValidPosition(workingPosition))
+		throw new IllegalArgumentException();
 	
 	this.setActivity(Activity.WORKING);
 	this.setProgressTime(0);
@@ -2569,9 +2574,6 @@ public boolean canHaveAsFaction(Faction faction){
 	*/
 	private Item item;
 
-
-
-
 	/**
 	* Return the item of this Unit.
 	*/
@@ -2815,6 +2817,8 @@ public boolean canHaveAsFaction(Faction faction){
 		if(task != null){
 			task.addUnit(this);
 			setTaskHandler(new TaskHandler(this,getWorld(),task));
+			if(hasDefaultBehavior())
+				stopDefaultBehaviour();
 		}
 	}
 	
@@ -2851,7 +2855,7 @@ public boolean canHaveAsFaction(Faction faction){
 	
 	public void following(){
 		
-		if(getLeader()==null){
+		if(getLeader()==null || !getLeader().isAlive()){
 			setLeader(null);
 			return;
 		}

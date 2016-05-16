@@ -2,6 +2,9 @@ package tests;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,7 +42,10 @@ import hillbillies.model.Utils;
 import hillbillies.model.World;
 import hillbillies.model.position.CubePosition;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
+import hillbillies.statement.Sequence;
 import hillbillies.statement.Statement;
+import hillbillies.statement.booleanStatement.If;
+import hillbillies.statement.booleanStatement.While;
 import hillbillies.statement.positionStatement.MoveTo;
 import hillbillies.statement.positionStatement.Work;
 import hillbillies.statement.unitStatement.Attack;
@@ -130,24 +136,68 @@ public class TaskFactoryTest {
 		taskTest.addUnit(actionUnit);
 		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
 		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
-		s.execute(handler);
+		handler.executeTask();
 		Expression<?> e = new ReadVariable("True");
 		assertEquals(true,e.evaluate(handler));
 	}
 
 	@Test
 	public final void testCreateWhile() {
-		fail("Not yet implemented"); // TODO
+		Statement inner = new Print(new True());
+		Statement s = new While(new True(),inner);
+		Task taskTest = new Task("Task",100,s);
+		taskTest.addUnit(actionUnit);
+		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
+		handler.executeTask();
+		assertEquals(inner,handler.getCurrentStatement());
+		handler.executeTask();
+		assertEquals(s,handler.getCurrentStatement());
+		handler.executeTask();
+		assertEquals(inner,handler.getCurrentStatement());
+		handler.executeTask();
+		assertEquals(s,handler.getCurrentStatement());
+		handler.executeTask();
+		assertTrue(actionUnit.hasTask());
 	}
 
 	@Test
 	public final void testCreateIf() {
-		fail("Not yet implemented"); // TODO
+		Statement ifS = new Print(new True());
+		Statement elseS = new Print(new Not(new True()));
+		Statement s1 = new If(new True(),ifS,elseS);
+		
+		Task taskTest1 = new Task("Task",100,s1);
+		taskTest1.addUnit(actionUnit);
+		actionUnit.getFaction().getScheduler().addAsTask(taskTest1);;
+		TaskHandler handler1 = new TaskHandler(actionUnit,world,taskTest1);
+		
+		handler1.executeTask();
+		assertEquals(ifS,handler1.getCurrentStatement());
+		handler1.executeTask();
+		assertEquals(null,handler1.getCurrentStatement());
+		handler1.executeTask();
+		assertFalse(actionUnit.hasTask());
+		
+		Statement s2 = new If(new Not(new True()),ifS,elseS);
+		Task taskTest2 = new Task("Task",100,s2);
+		taskTest2.addUnit(actionUnit);
+		actionUnit.getFaction().getScheduler().addAsTask(taskTest2);;
+		TaskHandler handler2 = new TaskHandler(actionUnit,world,taskTest2);
+		
+		
+		handler2.executeTask();
+		assertEquals(elseS,handler2.getCurrentStatement());
+		handler2.executeTask();
+		assertEquals(null,handler2.getCurrentStatement());
+		handler2.executeTask();
+		assertFalse(actionUnit.hasTask());
+		
 	}
 
 //	@Test
 //	public final void testCreateBreak() {
-//		fail("Not yet implemented"); // TODO
+//		fail("Not yet implemented");
 //	}
 
 	@Test
@@ -164,7 +214,30 @@ public class TaskFactoryTest {
 
 	@Test
 	public final void testCreateSequence() {
-		fail("Not yet implemented"); // TODO
+		Statement ifS = new Print(new True());
+		Statement elseS = new Print(new Not(new True()));
+		List<Statement> list = Arrays.asList(ifS,elseS);
+		Statement s1 = new Sequence(list);
+		
+		Task taskTest1 = new Task("Task",100,s1);
+		taskTest1.addUnit(actionUnit);
+		actionUnit.getFaction().getScheduler().addAsTask(taskTest1);;
+		TaskHandler handler1 = new TaskHandler(actionUnit,world,taskTest1);
+		
+		handler1.executeTask();
+		assertEquals(ifS,handler1.getCurrentStatement());
+		handler1.executeTask();
+		assertEquals(s1,handler1.getCurrentStatement());
+		handler1.executeTask();
+		assertEquals(elseS,handler1.getCurrentStatement());
+		handler1.executeTask();
+		assertEquals(s1,handler1.getCurrentStatement());
+		handler1.executeTask();
+		assertEquals(null,handler1.getCurrentStatement());
+		handler1.executeTask();
+		assertFalse(actionUnit.hasTask());
+		
+		
 	}
 
 	@Test
@@ -172,11 +245,14 @@ public class TaskFactoryTest {
 		Statement s = new MoveTo(new LiteralPosition(1,0,0));
 		Task taskTest = new Task("Task",100,s);	
 		taskTest.addUnit(actionUnit);
-		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		actionUnit.getFaction().getScheduler().addAsTask(taskTest);
 		
 		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
-		s.execute(handler);
+		handler.executeTask();
+		assertEquals(null,handler.getCurrentStatement());
 		assertTrue(actionUnit.isMoving());
+		
+		handler.executeTask();
 	}
 
 	@Test
@@ -184,11 +260,14 @@ public class TaskFactoryTest {
 		Statement s = new Work(new LiteralPosition(0,0,0));
 		Task taskTest = new Task("Task",100,s);	
 		taskTest.addUnit(actionUnit);
-		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		actionUnit.getFaction().getScheduler().addAsTask(taskTest);
 		
 		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
-		s.execute(handler);
+		handler.executeTask();
+		assertEquals(null,handler.getCurrentStatement());
+
 		assertTrue(actionUnit.isWorking());
+		handler.executeTask();
 	}
 
 	@Test
@@ -196,11 +275,14 @@ public class TaskFactoryTest {
 		Statement s = new Follow(new Any());
 		Task taskTest = new Task("Task",100,s);	
 		taskTest.addUnit(actionUnit);
-		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		actionUnit.getFaction().getScheduler().addAsTask(taskTest);
 		
 		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
-		s.execute(handler);
+		handler.executeTask();
+		assertEquals(null,handler.getCurrentStatement());
+
 		assertTrue(actionUnit.hasLeader());
+		handler.executeTask();
 	}
 
 	@Test
@@ -208,11 +290,14 @@ public class TaskFactoryTest {
 		Statement s = new Attack(new Enemy());
 		Task taskTest = new Task("Task",100,s);	
 		taskTest.addUnit(actionUnit);
-		taskTest.addAsScheduler(actionUnit.getFaction().getScheduler());
+		actionUnit.getFaction().getScheduler().addAsTask(taskTest);
 		
 		TaskHandler handler = new TaskHandler(actionUnit,world,taskTest);
-		s.execute(handler);
+		handler.executeTask();
+		assertEquals(null,handler.getCurrentStatement());
+
 		assertTrue(actionUnit.isAttacking());
+		handler.executeTask();
 	}
 	
 	
@@ -403,14 +488,14 @@ public class TaskFactoryTest {
 	@Test
 	public final void testCreateEnemy() {
 		Expression<Unit> e1 = new Enemy();
-		assertEquals(enemy,e1.evaluate(taskHandler));
+		assertTrue(enemy == e1.evaluate(taskHandler)|| actionUnit == e1.evaluate(taskHandler));
 	}
 
 	@Test
 	public final void testCreateAny() {
 		Expression<Unit> e1 = new Any();
 		Unit u = e1.evaluate(taskHandler);
-		assertTrue((u==unit)||(u ==friend) || (u== enemy));
+		assertTrue((u==unit)||(u ==friend) || (u== enemy) || (u==actionUnit));
 	}
 
 	@Test

@@ -1,7 +1,9 @@
 package hillbillies.model;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Predicate;
@@ -39,6 +41,18 @@ public class Scheduler{
     private final SortedSet<Task> tasks = new TreeSet<>(
     		(Task t1, Task t2) -> t2.getPriority()-t1.getPriority()
     );
+    
+    
+    /**
+     * Gives back all the tasks in no particular order
+     * 
+     * @return
+     * 		All the tasks scheduled by the scheduler
+     */
+    @Basic @Raw
+    public Set<Task> getAllTasks(){
+    	return new HashSet<>(this.tasks);
+    }
     
     /**
      * Check whether this scheduler has the given task as one of its

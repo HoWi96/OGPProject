@@ -20,6 +20,7 @@ public class MoveTo extends Statement {
 			unit.moveTo(cube);
 		}catch(Exception e){
 			taskHandler.interruptTask();
+			System.out.println(e.toString());
 			throw new Error("moveTo not executable");
 		}
 	}

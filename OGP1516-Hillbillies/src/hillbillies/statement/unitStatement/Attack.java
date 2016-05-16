@@ -20,6 +20,7 @@ public class Attack extends Statement {
 			
 		} catch(Exception e){
 			taskHandler.interruptTask();
+			System.out.println(e.toString());
 			throw new Error("attack not executable ");
 		}
 		

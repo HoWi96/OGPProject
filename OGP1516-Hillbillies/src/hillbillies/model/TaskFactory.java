@@ -20,18 +20,24 @@ import hillbillies.statement.unitStatement.*;
 import hillbillies.statement.wildcardStatement.Assignment;
 import hillbillies.statement.wildcardStatement.Print;
 
-public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task> {
+public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
 
 	@Override
 	public List<Task> createTasks(String name, int priority, Statement activity, List<int[]> selectedCubes) {
-		 List<Task> tasks = new ArrayList<>();
-//	        for(int[] cube : selectedCubes)
-	            tasks.add(new Task(name, priority, activity));
-	        return tasks;
+		List<Task> result = new ArrayList<>();
+		if (selectedCubes.isEmpty()){
+			result.add(new Task(name, priority, activity));
+		}
+		else {
+			// for (int[] cube: selectedCubes)
+			//	result.add(new Task(name, priority, activity, cube));
+			
+		}
+		return result;
 	}
 
 	@Override
-	public Statement createAssignment(String variableName, Expression<?> value, SourceLocation sourceLocation) {
+	public Statement createAssignment(String variableName, Expression value, SourceLocation sourceLocation) {
 		return new Assignment(variableName, value);
 	}
 
@@ -52,7 +58,7 @@ public class TaskFactory implements ITaskFactory<Expression<?>, Statement, Task>
 	}
 
 	@Override
-	public Statement createPrint(Expression<?> value, SourceLocation sourceLocation) {
+	public Statement createPrint(Expression value, SourceLocation sourceLocation) {
 		return new Print(value);
 	}
 

@@ -63,7 +63,7 @@ public class Part3TestPartial {
 		assertEquals(1, facade.getPriority(task));
 
 		facade.schedule(scheduler, task);
-		advanceTimeFor(facade, world, 100, 0.02);
+		advanceTimeFor(facade, world, 500, 0.02);
 
 		// work task has been executed
 		assertEquals(TYPE_AIR, facade.getCubeType(world, 1, 1, 1));
