@@ -20,6 +20,14 @@ import hillbillies.statement.unitStatement.*;
 import hillbillies.statement.wildcardStatement.Assignment;
 import hillbillies.statement.wildcardStatement.Print;
 
+/**
+ * A class about the taskFactory of the game
+ * 
+ * @author Holger Willems | 2e bach. ing. OOP
+ * @date 16/05/2016
+ * @Version 3.0
+ * 
+ */
 public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
 
 	@Override

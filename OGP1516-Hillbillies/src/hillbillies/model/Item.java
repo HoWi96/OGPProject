@@ -3,10 +3,16 @@ package hillbillies.model;
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.position.CubePosition;
 
-/** 
- * @author Holger Willems |2e bach. ing.: OOP
- * @date 10/04/2016
- * @Version 2.0
+/**
+ * A class about the items of the game
+ * 
+ * @author Holger Willems | 2e bach. ing. OOP
+ * @date 16/05/2016
+ * @Version 3.0
+ * 
+ */
+
+/**
  *  
  * 
  * ATTRIBUTES
@@ -47,7 +53,9 @@ public abstract class Item {
 	 * Initialize this new GameObject with given position.
 	 * 
 	 * @param position
+	 * 		the position of this item
 	 * @param world
+	 * 		the new world of this item
 	 *         
 	 * @post The game object is not terminated
 	 * @post There is no unit assigned to the item
@@ -77,6 +85,7 @@ public abstract class Item {
 	 * 
 	 * @effect if the item has still a world
 	 * 		the item will be removed from the world
+	 * 
 	 * @effect if the item has still a world 
 	 * 		the item will be removed from the unit
 	 */
@@ -91,7 +100,7 @@ public abstract class Item {
 	}
 	
 	/**
-	 * Check whether this unit is terminated
+	 * Checks whether this unit is terminated
 	 */
 	@Basic @Raw
 	public boolean isTerminated(){
@@ -153,6 +162,9 @@ public abstract class Item {
 		this.position = position;
 	}
 	
+	/**
+	 * Returns a CubePosition representation of the position of this item
+	 */
 	@Raw
 	public CubePosition getCubePosition(){
 		int[] cube = Utils.getCubePosition(this.getPosition());

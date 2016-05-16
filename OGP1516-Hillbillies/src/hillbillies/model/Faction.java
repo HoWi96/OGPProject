@@ -36,9 +36,9 @@ public class Faction {
 	 * Variable referencing a set collecting all the units
 	 * of this faction.
 	 * 
-	 * @invar  The referenced set is effective.
+	 * @Invar  The referenced set is effective.
 	 *       | Units != null
-	 * @invar  Each unit registered in the referenced list is
+	 * @Invar  Each unit registered in the referenced list is
 	 *         effective and not yet terminated.
 	 *       | for each Unit in Units:
 	 *       |   ( (Unit != null) &&
@@ -79,8 +79,9 @@ public class Faction {
 	/**
 	 * Terminates the faction
 	 * 
+	 * @effect the scheduler of this faction will be terminated
+	 * 
 	 * @post this faction is now terminated
-	 * @post this faction references no units anymore
 	 * 
 	 * @throws IllegalStateException
 	 * 		if there are still units part of this faction
@@ -88,8 +89,8 @@ public class Faction {
 	public void terminate() throws IllegalStateException {
 		if(this.getNbUnits()!=0)
 			throw new IllegalStateException();
+		this.getScheduler().terminate();
 		this.isTerminated = true;
-		this.units = null;
 	}
 	/**
 	 * Check whether this faction is terminated
@@ -98,9 +99,7 @@ public class Faction {
 	public boolean isTerminated(){
 		return isTerminated;
 	}
-	
 
-	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
 	 * -----------------------UNITS--------------------------------------
@@ -126,17 +125,19 @@ public class Faction {
 
 	//-----------------------SETTERS
 	/**
-	 * Add the given unit to the set of units of this faction.
+	 * Set up a bidirectional association between the given unit and this faction
 	 * 
 	 * @param  unit
 	 *         The unit to be added.
 	 *         
-	 * @pre    The given unit is alive and
-	 * 			 the given unit does not reference any faction.
-	 * 
 	 * @post   This faction has the given unit as one of its units. 
 	 * 
 	 * @effect The unit will have this faction as faction
+	 * 
+	 * @throws IllegalArgumentException
+	 * 		|!(this.canHaveAsUnit(unit) &&
+	 * 		| unit.getFaction() == null &&
+	 * 		|  this.getNbUnits() < MAX_UNITS_IN_FACTION)
 	 */
 	public void addUnit(Unit unit) throws IllegalArgumentException {
 		if (!(this.canHaveAsUnit(unit) &&  unit.getFaction() == null && this.getNbUnits() < MAX_UNITS_IN_FACTION))
@@ -147,19 +148,19 @@ public class Faction {
 	}
 
 	/**
-	 * Remove the given unit from the set of units of this faction.
+	 * Break down the bidirectional association between the given unit and this faction
 	 * 
 	 * @param  unit
 	 *         The unit to be removed.
-	 *         
-	 * @pre    This faction has the given unit as one of
-	 *         its units, and the given unit does 
-	 *         reference this faction.
 	 *      
 	 * @post   This faction no longer has the given unit as
 	 *         one of its units.
 	 *         
 	 * @effect The unit will no longer have this faction as faction  
+	 * 
+	 * @throws IllegalArgumentException
+	 * 		| !this.hasAsUnit(unit) ||
+	 * 		| unit.getFaction() != this
 	 */
 	@Raw
 	public void removeUnit(Unit unit) throws IllegalArgumentException{
@@ -202,7 +203,7 @@ public class Faction {
 	 *         units attached to it as one of its units,
 	 *         and if each of these units references this faction as
 	 *         the faction to which they are attached.
-	 *         And if the amount of units does not exceed the max amount
+	 *         And if the amount of units does not exceed the max amount.
 	 */
 	public boolean hasProperUnits() {
 		
@@ -218,8 +219,8 @@ public class Faction {
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
-	 * -----------------------SCHEDULER--------------------------------------
-	 * ------------------CONTROLLING CLASS-------------------------------
+	 * -----------------------SCHEDULER----------------------------------
+	 * ------------------UNIDIRECTIONAL----------------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 	

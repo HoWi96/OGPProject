@@ -99,7 +99,7 @@ public void executeTask(){
 
 public void interruptTask(){
 		Task task = this.getTask();
-		task.removeUnit();
+		task.removeUnit(getUnit());
 		task.setPriority(task.getPriority() - 100);
 		task.getActivity().setNext(null);
 		getUnit().setLeader(null);

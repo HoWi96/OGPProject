@@ -5,6 +5,16 @@ import java.util.Set;
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.statement.Statement;
 
+/**
+ * A class about the tasks of the game
+ * 
+ * @author Holger Willems | 2e bach. ing. OOP
+ * @date 16/05/2016
+ * @Version 3.0
+ * 
+ */
+
+
 /** 
  * ATTRIBUTES
  * 
@@ -20,10 +30,17 @@ import hillbillies.statement.Statement;
  * @Invar  The Unit of each Task must be a valid Unit for any
  *         Task.
  *       | isValidUnit(getUnit())  
+ * @Invar The schedulers that belong to this task must be proper schedulers
+ * 		 | hasProperSchedulers()    
  */
 
 public class Task {
-
+	
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * ------------------CONSTRUCTOR-------------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
 
 
 /**
@@ -40,12 +57,18 @@ public class Task {
  * @effect The priority of this new Task is set to
  *         the given priority.
  *       | this.setPriority(priority)
+ *       
  * @post   The name of this new Task is equal to the given
  *         name.
  *       | new.getName() == name
  * @post   The Activity of this new Task is equal to the given
  *         Activity.
  *       | new.getActivity() == activity
+ * @post The task is not yet terminated
+ * 		| isTerminated() == false
+ * @post The task has not yet schedulers assigned to it
+ * 		| getSchedulers().isEmpty()
+ *       
  * @throws IllegalArgumentException
  *         This new Task cannot have the given name as its name.
  *       | ! canHaveAsName(this.getName())
@@ -67,6 +90,26 @@ public Task(String name, int priority,Statement activity)throws IllegalArgumentE
 	this.isTerminated = false;
 }
 
+/*___________________________________________________________________
+ * __________________________________________________________________
+ * ------------------DESTRUCTOR--------------------------------------
+ *___________________________________________________________________
+ *___________________________________________________________________*/
+
+/**
+ * Terminates the task
+ * 
+ * @effect the bidirectional association with the unit will be broken down
+ * 		|this.removeUnit(getUnit());
+ * 
+ * @effect the bidirectional association with each scheduler will be broken down
+ * 		| for each scheduler in getAllSchedulers()
+ * 		| 	scheduler.removeAsTask(this);
+ * 
+ * @post the task is terminated
+ * 		| this.isTerminated() == true
+ * 
+ */
 public void terminate(){
 	
 	this.removeUnit(getUnit());
@@ -77,14 +120,25 @@ public void terminate(){
 	this.isTerminated = true;
 	
 }
-
+/**
+ * Boolean registering if the task is terminated
+ */
 private boolean isTerminated;
-
+/**
+ * Returns whether the task is terminated
+ */
+@Basic @Raw
 public boolean isTerminated(){
 	return this.isTerminated;
 }
 
-//PRIORITY
+/*___________________________________________________________________
+ * __________________________________________________________________
+ * ------------------ATTRIBUTES-------------------------------------
+ *___________________________________________________________________
+ *___________________________________________________________________*/
+
+//--------------------PRIORITY
 
 /**
  * Return the priority of this Task.
@@ -113,7 +167,11 @@ public static boolean isValidPriority(int priority) {
  * @param  priority
  *         The new priority for this Task.
  * @post   The priority of this new Task is equal to
- *         the given priority or if invalid the min value of integer.      
+ *         the given priority or if invalid the min value of integer.    
+ *          |  if (! isValidPriority(priority))
+ *		 	|	  gePriority() = Integer.MIN_VALUE+200;
+ *		    |  else 
+ *			|     gePriority() = priority
  */
 @Raw
 public void setPriority(int priority) {
@@ -128,7 +186,7 @@ public void setPriority(int priority) {
  */
 private int priority;
 	
-//NAME
+//-------------------------NAME
 
 /**
  * Return the name of this Task.
@@ -156,7 +214,7 @@ public boolean canHaveAsName(String name) {
  */
 private final String name;
 
-// ACTIVITIES
+//---------------------ACTIVITIES
 
 /**
  * Return the Activity of this Task.
@@ -167,7 +225,7 @@ public Statement getActivity() {
 }
 
 /**
- * Check whether this Task can have the given Activity as its Activity.
+ * Check whether this Task can have the given activity as its Activity.
  *  
  * @param  activity
  *         The Activity to check.
@@ -186,7 +244,7 @@ private final Statement activity;
 
 /*___________________________________________________________________
  * __________________________________________________________________
- * -----------------------UNITS--------------------------------------
+ * -----------------------UNIT---------------------------------------
  * ------------------CONTROLLING CLASS-------------------------------
  *___________________________________________________________________
  *___________________________________________________________________*/
@@ -244,8 +302,17 @@ private Unit unit;
  * Set up a bidirectional association between the task and unit.
  * 
  * @param unit
+ * 		The unit to be added
+ * 
+ * @effect the task will set this unit as unit
+ * 		|this.setUnit(unit);
+ * @effect The unit will set this task as task
+ * 		|unit.setTask(this);
+ * 
  * @throws IllegalArgumentException
+ * 		|(unit == null || unit.hasTask())
  */
+@Raw
 public void addUnit(Unit unit) throws IllegalArgumentException{
 	
 	if (unit == null || unit.hasTask())
@@ -257,8 +324,18 @@ public void addUnit(Unit unit) throws IllegalArgumentException{
 /**
  * Tears down the bidirectional association between the task and unit.
  * 
- * @throws IllegalStateException
+ * @param unit
+ * 		the unit to be removed
+ * 
+ * @effect the task wil set his unit to null
+ * 		|this.setUnit(null);
+ * @effect the unit will set his task to null
+ * 		|unit.setTask(null);
+ * 
+ * @throws IllegalArgumentException
+ * 		|(unit == null || unit != getUnit())
  */
+@Raw
 public void removeUnit(Unit unit) throws IllegalArgumentException{
 	
 	if(unit == null || unit != getUnit())
@@ -273,6 +350,7 @@ public void removeUnit(Unit unit) throws IllegalArgumentException{
  * @return 
  * 		|this.getUnit() != null
  */
+@Basic @Raw
 public boolean hasUnit(){
 	return this.getUnit() != null;
 }
@@ -291,7 +369,7 @@ public boolean hasUnit(){
  * @Invar The referenced set is effective.
  * 		| schedulers != null
  * @Invar Each scheduler registered in the referenced list is
- * effective and not yet terminated.
+ * 		effective and not yet terminated.
  * 		| for each scheduler in schedulers:
  * 		| ( (scheduler != null) &&
  * 		| (! scheduler.isTerminated()) )
@@ -300,20 +378,51 @@ private final Set<Scheduler> schedulers;
 
 //BASIC INSPECTOR
 
+
+/**
+ * Checks whether the given scheduler is part of the schedulers of this task
+ * 
+ * @param scheduler
+ * 		the scheduler to check
+ * @return whether the given scheduler is part of the schedulers of this task
+ * 		|schedulers.contains(scheduler);
+ */
+@Basic @Raw
 public boolean hasAsScheduler(Scheduler scheduler){
 	return schedulers.contains(scheduler);
 }
-
+/**
+ * Returns the set with all schedulers belonging to this task
+ */
+@Basic @Raw
 public Set<Scheduler> getAllSchedulers(){
 	return new HashSet<Scheduler>(schedulers);
 }
 
 //CHECKERS
 
+/**
+ * Checks whether the given scheduler can be part of this task
+ * 
+ * @param scheduler
+ * 		the scheduler to check
+ * @return
+ * 		|scheduler != null
+ */
 public boolean canHaveAsScheduler(Scheduler scheduler){
 	return scheduler != null;
 }
 
+/**
+ * Checks whether all the schedulers that belong
+ *  to this task are proper schedulers
+ * 
+ * @return each scheduler must be a valid scheduler for this task
+ *  and each scheduler should have this task as scheduler
+ *  	| for each scheduler in getAllSchedulers()
+ *      | 	canHaveAsScheduler(scheduler) &&
+ *      |	scheduler.hasAsTask(this)
+ */
 public boolean hasProperSchedulers(){
 	for(Scheduler scheduler: schedulers){
 		if(!canHaveAsScheduler(scheduler))
@@ -326,34 +435,40 @@ public boolean hasProperSchedulers(){
 
 //ASSOCIATION
 
+
+/**
+ * Add the given scheduler to this task
+ * 
+ * @param scheduler
+ * 		the scheduler to add
+ * @post
+ * 		the scheduler will now be part of this task
+ * 		|schedulers.add(scheduler)
+ * @throws IllegalArgumentException
+ * 		| if !canHaveAsScheduler(scheduler)
+ */
 public void addAsScheduler(Scheduler scheduler) throws IllegalArgumentException{
 	if(!canHaveAsScheduler(scheduler))
 		throw new IllegalArgumentException("invalid scheduler for task");
 	schedulers.add(scheduler);
 }
 
+/**
+ * Remove the given scheduler from this task
+ * 
+ * @param scheduler
+ * 		the scheduler to remove
+ * @post 
+ * 		the scheduler will be removed from this task
+ * 		| schedulers.remove(scheduler);
+ * 
+ * @throws IllegalArgumentException
+ * 		| if !hasAsScheduler(scheduler)
+ */
 public void removeAsScheduler(Scheduler scheduler) throws IllegalArgumentException{
 	if(!hasAsScheduler(scheduler))
 		throw new IllegalArgumentException("scheduler is not part of task");
 	schedulers.remove(scheduler);
 }
-
-//STATIC TASKS CONSTRUCTOR
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

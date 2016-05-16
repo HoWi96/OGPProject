@@ -7,9 +7,11 @@ import hillbillies.part2.listener.TerrainChangeListener;
 import hillbillies.util.ConnectedToBorder;
 
 /**
- * @author Holger Willems |2e bach. ing.: OOP
- * @date 10/04/2016
- * @Version 2.0
+ * A class about the world of the game
+ * 
+ * @author Holger Willems | 2e bach. ing. OOP
+ * @date 16/05/2016
+ * @Version 3.0
  * 
  */
 
@@ -99,7 +101,7 @@ public class World {
 	 *       | workshops != null
 	 * @Invar  Each CubePosition registered in the referenced list is
 	 *         effective
-	 *       | for each CubePosition in workshops:
+	 *       | for each CubePosition workshop in workshops:
 	 *       |   (workshop != null)     
 	 */
 	@Model
@@ -618,11 +620,11 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 				if (rand.nextDouble() <= probability){
 					
 					if (type == TYPE_ROCK){
-						this.createBoulder(caveInPosition);
+						new Boulder(caveInPosition,this);
 						//System.out.println("spawn boulder");
 						
 					}else if(type == TYPE_TREE){
-						this.createLog(caveInPosition);
+						new Log(caveInPosition,this);
 						//System.out.println("spawn log");
 					}
 				}
@@ -706,7 +708,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	/*___________________________________________________________________
 	 *___________________________________________________________________
 	 * -----------------------FACTIONS-----------------------------------
-	 * -----------------UNI DIRECTIONAL----------------------------------
+	 * -----------------UNIDIRECTIONAL----------------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________
 	/**
@@ -729,12 +731,11 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	/**
 	 * Gives back the active factions of this world
 	 * 
-	 * @return a new hashset with all factions
+	 * @return a new hashSet with all factions
 	 */
 	@Basic @Raw
 	public Set<Faction> getAllFactions(){
-		Set<Faction> allFactions = new HashSet<>(factions);
-		return allFactions;
+		return new HashSet<>(factions);
 	}
 	
 	/**
@@ -865,22 +866,24 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 
 	/*___________________________________________________________________
 	 *___________________________________________________________________
-	 * -----------------------UNITS-----------------------------------
+	 * -----------------------UNITS--------------------------------------
+	 * -----------------CONTROLLING CLASS--------------------------------
 	 *___________________________________________________________________
 	 *___________________________________________________________________*/
 	 /**
 	 * Variable referencing a set collecting all the units
 	 * of this world.
 	 * 
-	 * @invar  The referenced set is effective.
+	 * @Invar  The referenced set is effective.
 	 *       | units != null
-	 * @invar  Each unit registered in the referenced list is
+	 * @Invar  Each unit registered in the referenced list is
 	 *         effective and not yet terminated.
 	 *       | for each unit in units:
 	 *       |   ( (unit != null) &&
 	 *       |     (! unit.isTerminated()) )
 	 */
 	private Set<Unit> units;
+	
 	//------------------------GETTERS
 	
 	/**
@@ -898,6 +901,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	public int getNbUnits(){
 		return this.units.size();
 	}
+	
 	//------------------------SETTERS
 	/**
 	 * Adds the unit to this world and gives the unit a faction
@@ -946,19 +950,18 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 
 	 * @param  unit
 	 *         The Unit to be removed.
-	 * @pre    This World has the given Unit as one of
-	 *         its Units, and the given Unit does not
-	 *         reference any World.
-	 *       | this.hasAsUnit(unit) &&
-	 *       | (unit.getWorld() == null)
 	 * @post   This World no longer has the given Unit as
 	 *         one of its Units.
 	 *       | ! new.hasAsUnit(unit)
 	 * @effect The unit has no longer this world as world
+	 * 
+	 * @throws IllegalArgumentException
+	 * 		|!this.hasAsUnit(unit) || !(unit.getWorld() == this)
 	 */
 	@Raw
-	public void removeUnit(Unit unit) {
-		assert this.hasAsUnit(unit) && unit.getWorld() == this;
+	public void removeUnit(Unit unit) throws IllegalArgumentException {
+		if(!this.hasAsUnit(unit) || !(unit.getWorld() == this))
+			throw new IllegalArgumentException("invalid unit to remove from this world");
 		units.remove(unit);
 		unit.setWorld(null);
 
@@ -1272,8 +1275,6 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 
 	 * @effect
 	 * 		| getAllItemsOnPosition(position)
-	 * 		
-	 * 		
 	 */
 	@Raw 
 	public Item getItemOnPosition(int[] position) throws IllegalArgumentException{
@@ -1286,23 +1287,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	
 	}
 
-	
-	
 	//-------------------BOULDERS
-	
-	
-	/**
-	 * Creates a new Boulder in this World, on the position given.
-	 * 
-	 * @param position
-	 * 		the position for the boulder
-	 * @effect
-	 * 		a new boulder is created
-	 */
-	@Raw
-	public void createBoulder(int[] position) throws IllegalArgumentException {
-		new Boulder(position, this);
-	}
 	
 	/**
 	 * Gives back all Boulders in this World.
@@ -1311,25 +1296,23 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 		A new HashSet of all Boulders in this World. 
 	 */
 	public Set<Boulder> getAllBoulders() {
-		Set<Boulder> allBoulders = new HashSet<Boulder>();
+		Set<Boulder> result = new HashSet<Boulder>();
 		
 		for (Item item : this.items) {
 			if (item instanceof Boulder) {
-				allBoulders.add((Boulder)item);
+				result.add((Boulder)item);
 			}
 		}
-		return allBoulders;
+		return result;
 	}
 
-
-	
 	//--------------------LOGS
 	
 	/**
 	 * Gives back all Logs in this World.
+	 * 
 	 * @return
-	 * 		A new (Hash)Set of all Logs in this World. That makes this a
-	 * 		shallow copy.
+	 * 		A new HashSet of all Logs in this World.
 	 */
 	public Set<Log> getAllLogs() {
 		Set<Log> result = new HashSet<Log>();
@@ -1340,19 +1323,5 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		}
 		return result;
 	}
-
-	/**
-	 * Creates a new Log in this World, on the given position
-	 * 
-	 * @param position
-	 * 		the position for the log
-	 * @effect
-	 * 		a new log is created
-	 */
-	@Raw
-	public void createLog(int[] position) {
-		new Log(position, this);	
-	}
-
 
 }

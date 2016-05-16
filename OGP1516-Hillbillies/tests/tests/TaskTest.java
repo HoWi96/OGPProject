@@ -103,7 +103,7 @@ public class TaskTest {
 		assertEquals(task,unit.getTask());
 		assertTrue(task.hasUnit());
 		assertTrue(unit.hasTask());
-		task.removeUnit();
+		task.removeUnit(unit);
 		assertEquals(null,task.getUnit());
 		assertEquals(null,unit.getTask());
 		assertTrue(!task.hasUnit());

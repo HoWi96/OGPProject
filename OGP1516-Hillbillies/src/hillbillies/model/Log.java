@@ -1,9 +1,11 @@
 package hillbillies.model;
 
 /**
- * @author Holger Willems |2e bach. ing.: OOP
- * @date 10/04/2016
- * @Version 2.0
+ * A class about the logs of the game
+ * 
+ * @author Holger Willems | 2e bach. ing. OOP
+ * @date 16/05/2016
+ * @Version 3.0
  * 
  */
 

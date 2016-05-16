@@ -13,8 +13,9 @@ import java.util.stream.Collectors;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
- * This class is all about the schedulers of the game.
- * @author Holger Willems |2e bach. ing.: OOP
+ * A class about the schedulers of the game
+ * 
+ * @author Holger Willems | 2e bach. ing. OOP
  * @date 16/05/2016
  * @Version 3.0
  * 
@@ -27,7 +28,7 @@ import be.kuleuven.cs.som.annotate.*;
  * 		| hasProperTasks()
  */
 public class Scheduler{
-	
+
 	/*_____________________________________________________________
 	 * ____________________________________________________________
 	 *---------------------CONSTRUCTOR-----------------------------
@@ -42,11 +43,39 @@ public class Scheduler{
 	 * 		sorted according to priority
 	 * 		| tasks = new TreeSet<>(
 	 * 					(Task t1, Task t2) -> t2.getPriority()-t1.getPriority())
+	 * @post the scheduler is not yet terminated
+	 * 		|	this.isTerminated() == false;
 	 */
 	public Scheduler(){
 		tasks = new TreeSet<>(
 				(Task t1, Task t2) -> t2.getPriority()-t1.getPriority());
+		this.isTerminated = false;
 	}
+	
+	/**
+	 * Terminates the scheduler
+	 * 
+	 * @effect All the tasks this scheduler has, will be removed
+	 * 		| removeAsTasks(getAllTasks());
+	 * @post the scheduler will be terminated
+	 * 		|this.isTerminated() == true
+	 */
+	public void terminate(){
+		removeAsTasks(getAllTasks());
+		this.isTerminated = true;
+	}
+	/**
+	 * Returns whether the scheduler is terminated
+	 */
+	@Basic @Raw
+	public boolean isTerminated(){
+		return isTerminated;
+	}
+	
+	/**
+	 * Boolean indicating whether the scheduler is terminated
+	 */
+	private boolean isTerminated;
 	
 	/*_____________________________________________________________
 	 * ____________________________________________________________

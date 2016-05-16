@@ -9,10 +9,11 @@ import hillbillies.model.position.CubePosition;
 
 
 /**
- * This class is all about the units of the game.
- * @author Holger Willems |2e bach. ing.: OOP
- * @date 10/04/2016
- * @Version 2.0
+ * A class about the units of the game
+ * 
+ * @author Holger Willems | 2e bach. ing. OOP
+ * @date 16/05/2016
+ * @Version 3.0
  * 
  */
 
@@ -76,7 +77,6 @@ import hillbillies.model.position.CubePosition;
  * @invar Each unit can have his task as task
  * 		| canHaveAsTask(getTask())
  * 
- * 
  */            
 
 public class Unit { 
@@ -94,7 +94,7 @@ public class Unit {
 	private static final float PI = (float) Math.PI;
 	
 	private static final double REST_INTERVAL = 60*3;
-	private static final double NOTHING_INTERVAL = 10;
+	private static final double NOTHING_INTERVAL = 60*1;
 	
 	
 	/*___________________________________________________________________
@@ -1163,8 +1163,20 @@ public CubePosition getCubePosition(){
  *___________________________________________________________________
  *___________________________________________________________________*/
 
-//TODO further optimize advanceTime
 
+/**
+ * A method to let the time advance for this unit
+
+ * @param dt
+ * 		the amount of time to let the time advance with
+ * 
+ * @post The unit can fall, move, work, attack, rest or do nothing
+ * 
+ * @throws IllegalArgumentException
+ * 		| !World.isValidDuration(dt)
+ * @throws IllegalStateException
+ * 		| !this.isAlive()
+ */
 public void advanceTime(double dt) throws IllegalArgumentException, IllegalStateException {
 
 	if (!World.isValidDuration(dt))
@@ -1210,20 +1222,40 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 }
 
 /**
+ * Counts down till the moment to rest is mandatory
+ * 
  * @param dt
- * @throws IllegalStateException
  */
-public void countTillRest(double dt) throws IllegalStateException {
-	counterTillRest += dt;
-    
-    //set counter to the moment the unit needs to rest
-    if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
-    	counterTillRest = 0.0;
+public void countTillRest(double dt){
+	
+	setCounterTillRest(getCounterTillRest() + dt);
+    if(getCounterTillRest() >= REST_INTERVAL && this.isAbleToRest()){
+    	setCounterTillRest(0.0);
     	rest();	
     }
 }
 
 /**
+ * @return the counterTillRest
+ */
+public double getCounterTillRest() {
+	return counterTillRest;
+}
+
+/**
+ * @param counterTillRest the counterTillRest to set
+ */
+public void setCounterTillRest(double counterTillRest) {
+	this.counterTillRest = counterTillRest;
+}
+
+/**
+ * Checks a bunch of situation the unit has to react to
+ * 
+ * @post the unit can fall, follow, finish movement to the next position, 
+ * 			randomly start sprinting, continue moving,
+ * 			 search for a task, start a random activity
+ * 
  * @throws IllegalArgumentException
  * @throws IllegalStateException
  */
@@ -1257,7 +1289,7 @@ public void advanceTimeSituationCheckers() throws IllegalArgumentException, Ille
 	//if the unit is in default mode, it can randomly start to sprint while moving
 	if(this.hasDefaultBehavior() && !this.isSprinting() && this.isAbleToSprint()){
 		double randomSprint = Math.random();
-		if(randomSprint<0.01)
+		if(randomSprint<0.005)
 			this.startSprinting();
 	}
 	
@@ -1267,6 +1299,7 @@ public void advanceTimeSituationCheckers() throws IllegalArgumentException, Ille
 			setActivity(Activity.MOVING);
 	}
 	
+	// search for a task or start default behavior if none can be found
 	if(this.getActivity()==Activity.NOTHING){
 		if(!hasTask())
 			searchTask();
@@ -1503,10 +1536,10 @@ private void working(double dt) throws IllegalArgumentException{
 			this.getWorld().caveIn(workingPosition);
 			
 			if (cubeType == World.TYPE_ROCK){
-				this.getWorld().createBoulder(workingPosition);
+				new Boulder(workingPosition,getWorld());
 				
 			}else if(cubeType == World.TYPE_TREE){
-				this.getWorld().createLog(workingPosition);
+				new Log(workingPosition,getWorld());
 			}
 		}
 
@@ -2095,7 +2128,6 @@ private int[] workingPosition;
 /** 
 * The unit starts resting
 * 
-* 
 * @post the activity of the unit is switched off to nothing
 * 		 | new.getCurrentAcivity() == Activity.RESTING
 * 
@@ -2104,7 +2136,7 @@ private int[] workingPosition;
 * 
 * @throws IllegalStateException
 * 			if the  unit is not able to rest
-* 			| !this.isAbleToRest()&&!this.hasDefaultBehavior()
+* 			| !this.isAbleToRest()
 */
 public void rest() throws IllegalStateException{
 	if(!this.isAbleToRest())
@@ -2783,7 +2815,7 @@ public boolean canHaveAsFaction(Faction faction){
  	* @param task
  	* 		The task to check.
  	* @return
- 	* 		result == (task == null) || (task.getUnit() == this)
+ 	* 		| result == (task == null) || (task.getUnit() == this)
  	*/
 	@Raw
 	public boolean canHaveAsTask(Task task){
@@ -2820,11 +2852,20 @@ public boolean canHaveAsFaction(Faction faction){
 	//TASK ACTIONS
 	
 	/**
-	 * @post gives the unit a new taskHandeler
-	 * @post gives the unit a new task
+	 * Let the unit search for a task and upon completion
+	 * 		 set up a bidirectional association
+	 * 
+	 * @effect gives the unit a new taskHandeler
+	 * 		| setTaskHandler(new TaskHandler(this,getWorld(),task));
+	 * @effect set up a bidirectional association between task and unit
+	 * 		| task.addUnit(this);
+	 * @effect if the unit has default behavior enabled, it will be terminated
+	 * 		|if(hasDefaultBehavior())
+				stopDefaultBehaviour()
 	 * 
 	 * @throws IllegalStateException
-	 * 			if a task is already assigned
+	 * 		if a task is already assigned
+	 * 		| hasTask()
 	 */
 	public void searchTask() throws IllegalStateException{
 		if(hasTask())
@@ -2839,6 +2880,12 @@ public boolean canHaveAsFaction(Faction faction){
 		}
 	}
 	
+	/**
+	 * Checks whether the unit is executing a statement
+	 * 
+	 * @return
+	 * 		| result == hasTask() && (isMoving() || isAttacking() || isWorking())
+	 */
 	public boolean isExecutingStatement(){
 		if(!hasTask())
 			return false;
@@ -2870,6 +2917,13 @@ public boolean canHaveAsFaction(Faction faction){
 	 *_____________________________________________________________
 	 */
 	
+	/**
+	 * @advanceTimeMethod
+	 * 
+	 * @post if the leader is null or dead or reached, the leader will be set to null
+	 * 
+	 * @effect the next position will be the position of the leader or an adjacent position
+	 */
 	public void following(){
 		
 		if(getLeader()==null || !getLeader().isAlive()){
@@ -2886,6 +2940,22 @@ public boolean canHaveAsFaction(Faction faction){
 		
 	}
 	
+	
+	/**
+	 * Let the unit follow a given unit
+	 * 
+	 * @param unit
+	 * 		the unit to follow
+	 * 
+	 * @effect
+	 * 		the leader will be set to the given unit
+	 * 		|this.setLeader(unit);	
+	 * @effect
+	 * 		the activity will be set to moving
+	 * 		|this.setActivity(Activity.MOVING);
+	 * @throws IllegalArgumentException
+	 * 		|if (unit == null ||  unit == this || !unit.isAlive())
+	 */
 	public void follow(Unit unit) throws IllegalArgumentException{
 		if(unit == null ||  unit == this || !unit.isAlive())
 			throw new IllegalArgumentException("invalid unit to follow");

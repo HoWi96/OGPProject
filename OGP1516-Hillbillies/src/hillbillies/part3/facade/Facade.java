@@ -36,9 +36,7 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade {
 
 	@Override
 	public void replace(Scheduler scheduler, Task original, Task replacement) throws ModelException {
-		scheduler.removeAsTask(original);
-		scheduler.addAsTask(replacement);
-
+		scheduler.replaceTask(original, replacement);
 	}
 
 	@Override
