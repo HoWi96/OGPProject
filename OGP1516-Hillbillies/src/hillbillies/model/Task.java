@@ -69,7 +69,7 @@ public Task(String name, int priority,Statement activity)throws IllegalArgumentE
 
 public void terminate(){
 	
-	this.removeUnit();
+	this.removeUnit(getUnit());
 	for(Scheduler scheduler: getAllSchedulers()){
 		scheduler.removeAsTask(this);
 	}
@@ -247,6 +247,7 @@ private Unit unit;
  * @throws IllegalArgumentException
  */
 public void addUnit(Unit unit) throws IllegalArgumentException{
+	
 	if (unit == null || unit.hasTask())
 		throw new IllegalArgumentException("invalid unit for task");
 	
@@ -258,10 +259,10 @@ public void addUnit(Unit unit) throws IllegalArgumentException{
  * 
  * @throws IllegalStateException
  */
-public void removeUnit() throws IllegalStateException{
+public void removeUnit(Unit unit) throws IllegalArgumentException{
 	
-	if(!hasUnit())
-		throw new IllegalStateException("No unit for this task");
+	if(unit == null || unit != getUnit())
+		throw new IllegalArgumentException("invalid unit for task");
 	
 	unit.setTask(null);
 	this.setUnit(null);

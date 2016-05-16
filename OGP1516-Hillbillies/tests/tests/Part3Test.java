@@ -12,11 +12,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import hillbillies.expression.Expression;
+import hillbillies.expression.unitExpression.Any;
 import hillbillies.model.Faction;
 import hillbillies.model.Scheduler;
 import hillbillies.model.Task;
 import hillbillies.model.TaskFactory;
 import hillbillies.model.Unit;
+import hillbillies.model.Utils;
 import hillbillies.model.World;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
 import hillbillies.part3.facade.Facade;
@@ -24,6 +26,7 @@ import hillbillies.part3.facade.IFacade;
 import hillbillies.part3.programs.ITaskFactory;
 import hillbillies.part3.programs.TaskParser;
 import hillbillies.statement.Statement;
+import hillbillies.statement.unitStatement.Follow;
 import ogp.framework.util.ModelException;
 
 public class Part3Test {
@@ -60,7 +63,7 @@ public class Part3Test {
 	}
 
 	@Test
-	public final void test() throws Exception{
+	public final void testDigging() throws Exception{
 		int[][][] types = new int[16][16][16];
 		for(int i=0; i<=15;i++){
 			types[i][10][9] = TYPE_ROCK;
@@ -71,8 +74,6 @@ public class Part3Test {
 
 		World world = new World(types, new DefaultTerrainChangeListener());
 		Unit unit = new Unit("Test", new int[] { 0, 10, 10 }, 50, 50, 50, 50, true);
-		assertFalse(unit == null);
-		assertFalse(world == null);
 		
 		world.addUnit(unit);
 		Faction faction = facade.getFaction(unit);
@@ -99,6 +100,35 @@ public class Part3Test {
 		for(int i=11; i<=14;i++)
 			assertEquals(TYPE_AIR, facade.getCubeType(world, i, 10, 10));
 		// work task is removed from scheduler
+		assertFalse(facade.areTasksPartOf(scheduler, Collections.singleton(task)));
+	}
+	
+	@Test
+	public final void testFollowing() throws Exception{
+		int[][][] types = new int[16][16][16];
+		for(int i=0; i<=15;i++){
+			types[i][10][9] = TYPE_ROCK;
+		}
+		World world = new World(types, new DefaultTerrainChangeListener());
+		Unit unit = new Unit("Test", new int[] { 0, 10, 10 }, 50, 50, 50, 50, true);
+		Unit leader = new Unit("Test", new int[] { 14, 10, 10 }, 50, 50, 50, 50, false);
+		
+		world.addUnit(unit);
+		world.addUnit(leader);
+		
+		Faction faction = facade.getFaction(unit);
+		Scheduler scheduler = facade.getScheduler(faction);
+		
+		
+		Statement statement = new Follow(new Any());
+		Task task = new Task("follow", 200, statement);
+		
+		facade.schedule(scheduler, task);
+		advanceTimeFor(facade, world, 50, 0.02);
+
+		// follow task has been executed
+		assertTrue(Utils.areAdjacent(unit.getCubePosition().toArray(),leader.getCubePosition().toArray()));
+		// follow task is removed from scheduler
 		assertFalse(facade.areTasksPartOf(scheduler, Collections.singleton(task)));
 	}
 	

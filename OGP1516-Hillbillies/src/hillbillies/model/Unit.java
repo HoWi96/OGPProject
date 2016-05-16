@@ -1173,15 +1173,63 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 	if(!this.isAlive())
 		throw new IllegalStateException();
 
-    counterTillRest += dt;
+    countTillRest(dt);
+    
+    advanceTimeSituationCheckers();
+
+	/*
+	 * HANDEL DIFFERENT ACTIVITIES
+	 */
+	
+	switch(getActivity()) {
+	
+	case FALLING:
+		falling(dt);
+		break;
+		
+	case MOVING: 
+		moving(dt);
+		break;
+	
+	case WORKING:
+		working(dt);
+		break;
+	
+	case ATTACKING: 
+		attacking(dt);
+		break;
+	
+	case RESTING: 
+		resting(dt);
+		break;
+	
+	case NOTHING: 
+		nothing(dt);
+		break;
+	}
+}
+
+/**
+ * @param dt
+ * @throws IllegalStateException
+ */
+public void countTillRest(double dt) throws IllegalStateException {
+	counterTillRest += dt;
     
     //set counter to the moment the unit needs to rest
     if(counterTillRest >= REST_INTERVAL && this.isAbleToRest()){
     	counterTillRest = 0.0;
     	rest();	
     }
-    
-    //if the unit is not connected to solid cubes anymore, he needs to fall
+}
+
+/**
+ * @throws IllegalArgumentException
+ * @throws IllegalStateException
+ */
+public void advanceTimeSituationCheckers() throws IllegalArgumentException, IllegalStateException {
+	
+	//if the unit is not connected to solid cubes anymore, he needs to fall
     if(this.getActivity()!=Activity.FALLING && !this.getWorld().hasSolidAdjacents(Utils.getCubePosition(this.getPosition())))
     	this.fall();
     
@@ -1224,37 +1272,6 @@ public void advanceTime(double dt) throws IllegalArgumentException, IllegalState
 			searchTask();
 		if (!hasTask() && hasDefaultBehavior())
 			startRandomActivity();
-	}
-
-	/*
-	 * HANDEL DIFFERENT ACTIVITIES
-	 */
-	
-	switch(getActivity()) {
-	
-	case FALLING:
-		falling(dt);
-		break;
-		
-	case MOVING: 
-		moving(dt);
-		break;
-	
-	case WORKING:
-		working(dt);
-		break;
-	
-	case ATTACKING: 
-		attacking(dt);
-		break;
-	
-	case RESTING: 
-		resting(dt);
-		break;
-	
-	case NOTHING: 
-		nothing(dt);
-		break;
 	}
 }
 
@@ -2862,7 +2879,7 @@ public boolean canHaveAsFaction(Faction faction){
 		
 		int[] leaderPosition = getLeader().getCubePosition().toArray();
 		if(!Utils.areAdjacent(getCubePosition().toArray(), leaderPosition)){
-			if(!Utils.areAdjacent(getPathFinding().getTargetPosition(),leaderPosition))
+			if(getPathFinding() == null || !Utils.areAdjacent(getPathFinding().getTargetPosition(),leaderPosition))
 				moveTo(leaderPosition);
 		} else
 			setLeader(null);

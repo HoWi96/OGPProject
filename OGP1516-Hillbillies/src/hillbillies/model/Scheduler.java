@@ -1,6 +1,7 @@
 package hillbillies.model;
 
 import java.util.Collection;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -11,13 +12,42 @@ import java.util.stream.Collectors;
 
 import be.kuleuven.cs.som.annotate.*;
 
-/** 
- * @Invar  Each Scheduler can have its Faction as Faction.
- *       | canHaveAsFaction(this.getFaction())
+/**
+ * This class is all about the schedulers of the game.
+ * @author Holger Willems |2e bach. ing.: OOP
+ * @date 16/05/2016
+ * @Version 3.0
+ * 
  */
 
+/**
+ * ASSOCIATIONS
+ * @Invar The tasks of this scheduler must be 
+ * 		  proper tasks for this scheduler.
+ * 		| hasProperTasks()
+ */
 public class Scheduler{
-
+	
+	/*_____________________________________________________________
+	 * ____________________________________________________________
+	 *---------------------CONSTRUCTOR-----------------------------
+	 * ____________________________________________________________
+	 *_____________________________________________________________
+	 */
+	
+	/**
+	 * Creates a new scheduler without any tasks
+	 * 
+	 * @post A new treeSet of tasks is created, 
+	 * 		sorted according to priority
+	 * 		| tasks = new TreeSet<>(
+	 * 					(Task t1, Task t2) -> t2.getPriority()-t1.getPriority())
+	 */
+	public Scheduler(){
+		tasks = new TreeSet<>(
+				(Task t1, Task t2) -> t2.getPriority()-t1.getPriority());
+	}
+	
 	/*_____________________________________________________________
 	 * ____________________________________________________________
 	 *-------------------------TASKS-------------------------------
@@ -38,9 +68,7 @@ public class Scheduler{
      * 			  	( (task != null) &&
      * 			 	(! task.isTerminated()) )
      */
-    private final SortedSet<Task> tasks = new TreeSet<>(
-    		(Task t1, Task t2) -> t2.getPriority()-t1.getPriority()
-    );
+    private final SortedSet<Task> tasks;
     
     
     /**
@@ -48,6 +76,7 @@ public class Scheduler{
      * 
      * @return
      * 		All the tasks scheduled by the scheduler
+     * 		| result == tasks
      */
     @Basic @Raw
     public Set<Task> getAllTasks(){
@@ -127,25 +156,86 @@ public class Scheduler{
     public int getNbTasks() {
     	return tasks.size();
     }
-
-    public void addAsTask(Task task)
-    		throws IllegalArgumentException, IllegalStateException{
+    
+    
+    /**
+     * Add a collection of tasks
+     * 
+     * @param tasks
+     * 		the tasks to add
+     * @effect set up a bidirectional association for each task
+     * 		| for each task in tasks
+     * 		| 	addAsTask(task)
+     * 		
+     */
+    public void addAsTasks(Collection<Task> tasks) throws IllegalArgumentException{
+    	for(Task task: tasks)
+    		addAsTask(task);
+    }
+    
+    /**
+     * Remove a collection of tasks
+     * 
+     * @param tasks
+     * 		the tasks to remove
+     * @effect break down a bidirectional association for each task
+     * 		| for each task in tasks
+     * 		| 	removeAsTask(task)
+     * 		
+     */
+    public void removeAsTasks(Collection<Task> tasks) throws IllegalArgumentException{
+    	for(Task task: tasks)
+    		removeAsTask(task);
+    }
+    
+    /**
+     * Set up a bidirectional association between
+     *  this scheduler and the given task
+     * 
+     * @param task
+     * 			The task to add
+     * 
+     * @effect the scheduler has this task as task
+     * 		|this.tasks.add(task);
+     * @effect the task has this scheduler as scheduler
+     * 		|task.addAsScheduler(this);
+     * 		
+     * 
+     * @throws IllegalArgumentException
+     * 		| !canHaveAsTask(task)
+     * @throws IllegalArgumentException
+     * 		| hasAsTask(task)
+     */
+    public void addAsTask(Task task) throws IllegalArgumentException{
     	
        	if(!canHaveAsTask(task))
     		throw new IllegalArgumentException("invalid task");
     	if(hasAsTask(task))
-    		throw new IllegalStateException("Task already scheduled");
+    		throw new IllegalArgumentException("Task already scheduled");
     	
     	this.tasks.add(task);
     	task.addAsScheduler(this);
     	
     }
     
-    public void removeAsTask(Task task) 
-    		throws IllegalArgumentException{
+    /**
+     * Breaks down the bidirectional association between
+     *  this scheduler and the given task
+     *  
+     * @param task
+     * 		the task to remove
+     * 
+     * @effect The scheduler is removed from the given task
+     * 		|task.removeAsScheduler(this);
+     * @effect The task is removed from this scheduler
+     * 		|this.tasks.remove(task);
+     * 
+     * @throws IllegalArgumentException
+     * 		| !hasAsTask(task)
+     * 
+     */
+    public void removeAsTask(Task task) throws IllegalArgumentException{
     	
-       	if(!canHaveAsTask(task))
-    		throw new IllegalArgumentException("invalid task");
     	if(!hasAsTask(task))
     		throw new IllegalStateException("Task not scheduled");
     	
@@ -153,21 +243,97 @@ public class Scheduler{
     	this.tasks.remove(task);	
     }
     
+    /**
+     * Replace task by another task
+     * 
+     * @param original
+     * 		the original task
+     * @param replacement
+     * 		the task to replace with
+     * 
+     * @effect the original task will be removed
+     * 		|removeAsTask(original);
+     * @effect The execution of the original task will stop
+     * 		| original.getUnit().getTaskHandler().interruptTask();
+     * @effect the replacement task will be added
+     * 		|removeAsTask(original);
+     * 
+     */
+    public void replaceTask(Task original, Task replacement) throws IllegalArgumentException{
+    	
+    	removeAsTask(original);
+    	original.getUnit().getTaskHandler().interruptTask();
+    	removeAsTask(original);
+    }
+    
+    /**
+     * Returns an iterator of all the tasks
+     * 
+     * @return an iterator of all the tasks of this scheduler
+     *  	ordered with descending priority
+     *  	| tasks.iterator();
+     */
     public Iterator<Task> getAllTasksIterator(){
     	return tasks.iterator();
     }
     
+    /**
+     * Returns the highest priority task that has no unit
+     * 
+     * @return the highest priority task without unit
+     * 		| for each task in tasks
+     * 		| 	if (!task.hasUnit)
+     * 		|  	then return task
+     * 		
+     */
     public Task getHighestPriorityAssignableTask(){
     	for(Task task : tasks)
-    		if (task.getUnit() == null)
+    		if (!task.hasUnit())
     			return task;
     	return null;
     }
     
+    /**
+     * Get all the tasks that satisfy some predicate
+     * 
+     * @param condition
+     * 		The predicate to filter this tasks upon
+     * @return
+     * 		the tasks satisfying this condition
+     * 		| tasks.filter(condition)
+     */
     public Collection<Task> getAllTasksSatisfying(Predicate<Task> condition){
     	return  tasks
     			.stream()
     			.filter(condition)
     			.collect(Collectors.toSet());
+    };
+    
+    /**
+     * Connect the given task to the given unit
+     * 
+     * @param task
+     * 		the task to connect
+     * @param unit
+     * 		the unit to connect with
+     * @effect a bidirectional association will be set
+     * 		| task.addUnit(unit);
+     */
+    public void markTaskByUnit(Task task, Unit unit) throws IllegalArgumentException {
+    	task.addUnit(unit);
+    };
+    
+    /**
+     * Disconnect the given task to the given unit
+     * 
+     * @param task
+     * 		the task to disconnect
+     * @param unit
+     * 		the unit to disconnect with
+     * @effect a bidirectional association will be broken down
+     * 		| task.removeUnit(unit);
+     */
+    public void resetMarkTaskByUnit(Task task, Unit unit) throws IllegalArgumentException {
+    	task.removeUnit(unit);
     };
 }
