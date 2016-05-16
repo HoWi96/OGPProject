@@ -3,7 +3,7 @@ package hillbillies.statement;
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 
-public abstract class Statement{	
+public abstract class Statement implements Istatement{	
 	
 private final Expression<?> expression;
 private Statement next;
@@ -42,11 +42,13 @@ public Expression<?> getExpression() {
  * @param taskHandler
  * 		the handler of the task
  */
+@Override
 public abstract void execute(TaskHandler taskHandler);
 
 /**
  * @return the previous
  */
+@Override
 public Statement getPrevious() {
 	return previous;
 }
@@ -61,6 +63,7 @@ public void setPrevious(Statement previous) {
 /**
  * @return the next
  */
+@Override
 public Statement getNext() {
 	return next;
 }

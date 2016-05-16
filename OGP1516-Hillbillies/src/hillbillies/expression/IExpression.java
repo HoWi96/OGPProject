@@ -2,9 +2,7 @@ package hillbillies.expression;
 
 import hillbillies.model.TaskHandler;
 
-public abstract class Expression<T> implements IExpression<T> {
-
-	public Expression() {};
+public interface IExpression<T> {
 
 	/**
 	 * Method to evaluate an expression
@@ -13,7 +11,6 @@ public abstract class Expression<T> implements IExpression<T> {
 	 * 		the class who handles the task
 	 * @return T t
 	 */
-	@Override
-	public abstract T evaluate(TaskHandler taskHandler);
+	T evaluate(TaskHandler taskHandler);
 
 }

@@ -30,7 +30,7 @@ import hillbillies.model.position.CubePosition;
  *         GameObject.
  *       | isValidWorld(getWorld())    
  */
-public abstract class Item {
+public abstract class Item implements IGameObject {
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -89,6 +89,7 @@ public abstract class Item {
 	 * @effect if the item has still a world 
 	 * 		the item will be removed from the unit
 	 */
+	@Override
 	public void terminate(){
 		
 		if(this.hasWorld())
@@ -122,6 +123,7 @@ public abstract class Item {
 	/**
 	 * Return the position of this GameObject.
 	 */
+	@Override
 	@Basic @Raw
 	public double[] getPosition() {
 		return this.position.clone();
@@ -165,6 +167,7 @@ public abstract class Item {
 	/**
 	 * Returns a CubePosition representation of the position of this item
 	 */
+	@Override
 	@Raw
 	public CubePosition getCubePosition(){
 		int[] cube = Utils.getCubePosition(this.getPosition());
@@ -187,6 +190,7 @@ public abstract class Item {
 	/**
 	 * Return the World of this GameObject.
 	 */
+	@Override
 	@Basic @Raw
 	public World getWorld() {
 		return this.world;
@@ -195,6 +199,7 @@ public abstract class Item {
 	/**
 	 * check whether this Item has a world
 	 */
+	@Override
 	public boolean hasWorld(){
 		return this.getWorld() != null;
 	}
@@ -208,6 +213,7 @@ public abstract class Item {
 	 * @return 
 	 *       | result == true;
 	*/
+	@Override
 	public boolean canHaveAsWorld(World world) {
 		return true;
 	}
@@ -225,6 +231,7 @@ public abstract class Item {
 	 *         GameObject.
 	 *       | ! isValidWorld(getWorld())
 	 */
+	@Override
 	@Raw
 	public void setWorld(World world) throws IllegalArgumentException {
 		if (!canHaveAsWorld(world))
@@ -310,6 +317,7 @@ public abstract class Item {
 	 * 
 	 * @effect if the object is not directly above ground it will falling
 	 */
+	@Override
 	public void advanceTime(double dt) throws IllegalArgumentException {
 		if(!this.getWorld().isSolidUnder(Utils.getCubePosition(this.getPosition())))
 			falling(dt);
@@ -338,6 +346,7 @@ public abstract class Item {
 	/**
 	 * Return the weight of this rawMaterial.
 	 */
+	@Override
 	@Basic @Raw @Immutable
 	public int getWeight() {
 		return this.weight;

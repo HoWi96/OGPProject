@@ -103,7 +103,7 @@ public class FactionTest {
 		
 		faction2.terminate();
 		assertTrue(faction2.isTerminated());
-		assertTrue(faction2.getAllUnits() == null);
+		assertEquals(0, faction2.getNbUnits());
 	}
 	
 

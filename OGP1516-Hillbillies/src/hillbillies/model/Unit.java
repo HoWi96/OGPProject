@@ -79,7 +79,7 @@ import hillbillies.model.position.CubePosition;
  * 
  */            
 
-public class Unit { 
+public class Unit implements IGameObject { 
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -412,7 +412,6 @@ public void terminate() {
 	 this.isAlive = false;
  }
 
- 
  /**
   * Returns a boolean indicating whether this unit is alive.
   */
@@ -2521,6 +2520,19 @@ public boolean isAbleToAttack(Unit defender){
 public World getWorld() {
 	return this.world;
 }
+
+
+/**
+ * Checks whether this unit has a world assigned to it
+ * 
+ * @return
+ * 		| result == this.getWorld != null;
+ */
+@Override
+public boolean hasWorld() {
+	return getWorld() != null;
+}
+
 /**
  * 
  * @param world
@@ -2530,7 +2542,7 @@ public World getWorld() {
  */
 
 @Raw @Model
-protected void setWorld(World world){
+public void setWorld(World world){
 	this.world = world;
 }
 
@@ -2548,7 +2560,6 @@ public boolean canHaveAsWorld(World world){
 	return world == null || this.getWorld() == world;
 }
 
-
 /**
  * Returns whether the cube on the position is passable
  * 
@@ -2562,7 +2573,6 @@ private boolean isPassable(int[] position){
 	return !this.getWorld().isSolidCube(position);
 	
 }
-
 
 /*_____________________________________________________________
  * ____________________________________________________________
@@ -2992,12 +3002,5 @@ public boolean canHaveAsFaction(Faction faction){
 	 * The unit to follow
 	 */
 	private Unit leader;
-	
-	
 
-	
-	
-	
-
-	
 }
