@@ -8,6 +8,7 @@ import java.util.TreeSet;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Raw;
+import be.kuleuven.cs.som.annotate.Value;
 
 /**
  * A class used to find paths for units in the game world
@@ -267,6 +268,13 @@ public class PathFinding {
 		return target;
 	}
 
+	/*___________________________________________________________________
+	 * __________________________________________________________________
+	 * --------------------------NODE------------------------------------
+	 * -----------------------NESTED CLASS-------------------------------
+	 *___________________________________________________________________
+	 *___________________________________________________________________*/
+	
 	
 	/**
 	 * 
@@ -276,6 +284,7 @@ public class PathFinding {
 	 * with a natural ordering for the nodes used in the treeSet
 	 *
 	 */
+	@Value
 	public class Node implements Comparable<Node>{
 		
 		
