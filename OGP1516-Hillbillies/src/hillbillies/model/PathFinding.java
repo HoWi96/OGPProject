@@ -1,7 +1,7 @@
 package hillbillies.model;
 
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -36,9 +36,9 @@ public class PathFinding {
 	
 	//---------A* algorithm
 	/*
-	 * Resize able list, ideal to store the path
+	 * linked list: ideal to remove/add last element in constant time
 	 */
-	private ArrayList<int[]> path = new ArrayList<>();
+	private LinkedList<int[]> path = new LinkedList<>();
 	/*
 	 * HashSet for the closedSet: ideal to access information in constant time
 	 */
@@ -114,19 +114,20 @@ public class PathFinding {
 		if(!this.getWorld().isValidPosition(start) || !this.getWorld().isValidPosition(target))
 			throw new IllegalArgumentException();
 		
-		openSet.add(new Node(start,0,getEstimatedTimeTo(start,target),null));
+		openSet.add(new Node(start,0,getHeuristicCostEstimate(start,target),null));
 		
 		//We set a maximum on the items of the closed set so we don't have to calculate exhaustively long
-		while (openSet.size()>0 && closedSet.size()<750){
+		while (!openSet.isEmpty() && closedSet.size()<800){
 			
 			Node current = openSet.pollFirst();
 			closedSet.add(current.getPosition());
 			
 			//TERMINATE PATHFINDING
 			if (Utils.equals(current.getPosition(), target)){
-				calculatePathTo(current);
+				reconstructPathTo(current);
 				break;
 			}
+			
 			//CONTINUE SEARCHING
 			for (int[] pos : this.getWorld().quickFindReachableAdjacents((current.getPosition()))){
 				// time consuming factor!!!!!
@@ -136,22 +137,42 @@ public class PathFinding {
 					continue;
 				}
 				
-				double tempGscore = current.getGScore()+getExactTimeToAdjacent(current.getPosition(),pos);
-				Node matchingNode = getNodeFromOpenSetCorrespondigWith(pos);
+				double tentativeGscore = current.getGScore()+getDistanceBetween(current.getPosition(),pos);
+				Node neighbor = getCorrespondingNodeFrom(pos);
 				
-				if (matchingNode!=null && tempGscore >= matchingNode.getGScore()){
-					continue;
-				} else if (matchingNode != null){
-					openSet.remove(matchingNode);
-				}
+				if(neighbor !=null){
+					if(tentativeGscore >= neighbor.getGScore())
+						continue;
+					else
+						openSet.remove(neighbor);
+				} 
 				
-				matchingNode = new Node(pos, tempGscore, tempGscore+getEstimatedTimeTo(pos,target), current);
-				openSet.add(matchingNode);
+				neighbor = new Node(pos, tentativeGscore, tentativeGscore+getHeuristicCostEstimate(pos,target), current);
+				openSet.add(neighbor);
 			}
 		}
 	}
 	
 	//---------------------------------------HELPERS
+	
+	/**
+	 * Calculates the fastest path, storing it in the path variable
+	 * 
+	 * @param target
+	 * 		The target node
+	 * 
+	 * @post
+	 * 		the path is stored in the path variable
+	 * 		while the first node is not reached, 
+	 * 		the position of the current node will be added to the path
+	 */
+	private void reconstructPathTo(Node target){
+		Node currentNode = target;
+		while (currentNode.getParent()!=null){
+			path.addLast(currentNode.getPosition());
+			currentNode = currentNode.getParent();
+		}
+	}
 	
 	/**
 	 * Returns the exact time to move to an adjacent
@@ -163,8 +184,8 @@ public class PathFinding {
 	 * @return
 	 * 		getEstimatedTimeTo(start,target)
 	 */
-	private double getExactTimeToAdjacent(int[] start, int[] target) {
-		return getEstimatedTimeTo(start,target);
+	private double getDistanceBetween(int[] start, int[] target) {
+		return getHeuristicCostEstimate(start,target);
 	}
 
 
@@ -178,7 +199,7 @@ public class PathFinding {
 	 * @return
 	 * 		the maximal change in direction, taking in mind that moves in z direction change the time slightly
 	 */
-	private double getEstimatedTimeTo(int[] start, int[] target) {
+	private double getHeuristicCostEstimate(int[] start, int[] target) {
 		double dx = Math.abs(target[0]-start[0]);
 		double dy = Math.abs(target[0]-start[0]);
 		double dz = target[0]-start[0];
@@ -201,7 +222,7 @@ public class PathFinding {
 	 * @return
 	 * 		the matching node or null
 	 */
-	private Node getNodeFromOpenSetCorrespondigWith(int[] position){
+	private Node getCorrespondingNodeFrom(int[] position){
 		for (Node node : openSet){
 			if (Utils.equals(node.getPosition(),position)){
 				return node;
@@ -209,28 +230,7 @@ public class PathFinding {
 		}
 		return null;
 	}
-	/**
-	 * Calculates the fastest path, storing it in the path variable
-	 * 
-	 * @param target
-	 * 		The target node
-	 * 
-	 * @post
-	 * 		the path is stored in the path variable
-	 * 		while the first node is not reached, 
-	 * 		the position of the current node will be added to the path
-	 */
-	private void calculatePathTo(Node target){
-		
-		Node currentNode = target;
-		
-		while (currentNode.getParent()!=null){
-			
-			path.add(currentNode.getPosition());
-			currentNode = currentNode.getParent();
-		}
-	}
-	
+
 	/**
 	 * Returns the next position, and deleting it at the same time from the path
 	 * 
@@ -239,20 +239,18 @@ public class PathFinding {
 	 * @post
 	 * 		the next position if removed from the path
 	 */
-	public int[] moveToNextPos(){
+	public int[] getNextPosition(){
 		if (hasPathCompleted()){
 			return null;
 		}
-		int[] nextPos = this.path.get(this.path.size()-1);
-		this.path.remove(nextPos);
-		return nextPos;
+		return path.removeLast();
 	}
 
 	/**
 	 * @return whether the path is completed
 	 */
 	public boolean hasPathCompleted() {
-		return this.path.isEmpty();
+		return path.isEmpty();
 	}
 	
 	/**
@@ -265,7 +263,7 @@ public class PathFinding {
 		if (hasPathCompleted()){
 			return null;
 		}
-		int[] target = this.path.get(0);
+		int[] target = path.get(0);
 		return target;
 	}
 

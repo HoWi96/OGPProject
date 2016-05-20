@@ -1456,7 +1456,7 @@ private void moving(double dt) throws IllegalArgumentException, IllegalStateExce
 			
 		} else{
 			//TARGET NOT YET REACHED
-			int[] nextPos = getPathFinding().moveToNextPos();
+			int[] nextPos = getPathFinding().getNextPosition();
 			int[] step = Utils.getStep(Utils.getCubePosition(cPosition),nextPos);
 			moveToAdjacent(step[0], step[1], step[2]);
 			} 

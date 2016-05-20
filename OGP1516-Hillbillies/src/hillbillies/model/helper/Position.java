@@ -70,6 +70,7 @@ public abstract class Position<T extends Number> {
 	/**
 	 * Two object equal each other when they have the same class
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object other){
 		if (other == null) {

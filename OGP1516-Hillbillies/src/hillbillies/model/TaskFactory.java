@@ -27,6 +27,7 @@ import hillbillies.statement.wildcardStatement.Print;
  * @Version 3.0
  * 
  */
+@SuppressWarnings("rawtypes")
 public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
 
 	/**
