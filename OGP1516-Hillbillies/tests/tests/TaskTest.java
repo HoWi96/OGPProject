@@ -12,6 +12,7 @@ import hillbillies.expression.positionExpression.LiteralPosition;
 import hillbillies.model.Scheduler;
 import hillbillies.model.Task;
 import hillbillies.model.Unit;
+import hillbillies.statement.Statement;
 import hillbillies.statement.wildcardStatement.Print;
 
 public class TaskTest {
@@ -30,10 +31,12 @@ public class TaskTest {
 	}
 
 	private Task task;
+	private Print s;
 
 	@Before
 	public void setUp() throws Exception {
-		 task = new Task("task",100,new Print(new LiteralPosition(0,0,0)));
+		s = new Print(new LiteralPosition(0,0,0));
+		task = new Task("task",100,new Print(new LiteralPosition(0,0,0)));
 	}
 
 	@After
@@ -46,6 +49,7 @@ public class TaskTest {
 		assertTrue(task.getAllSchedulers().isEmpty());
 		assertEquals("task",task.getName());
 		assertEquals(100,task.getPriority());
+		assertEquals(s, task.getActivity());
 	}
 
 	@Test
@@ -109,5 +113,6 @@ public class TaskTest {
 		assertTrue(!task.hasUnit());
 		assertTrue(!unit.hasTask());
 	}
+	
 
 }

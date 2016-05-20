@@ -1311,10 +1311,10 @@ public void advanceTimeSituationCheckers() throws IllegalArgumentException, Ille
 	}
 	
 	// search for a task or start default behavior if none can be found
-	if(this.getActivity()==Activity.NOTHING){
+	if(this.getActivity()==Activity.NOTHING && hasDefaultBehavior()){
 		if(!hasTask())
 			searchTask();
-		if (!hasTask() && hasDefaultBehavior())
+		if (!hasTask())
 			startRandomActivity();
 	}
 }
@@ -2438,40 +2438,43 @@ private final float getFightingTime(){
  * Checks if this unit can move.
  * A unit can move if it is not attacking and if it is not working.
  * @return	true if unit is not attacking and not working.
- * 			| result == this.getCurrentActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING
+ * 			| result == this.getCurrentActivity()!=Activity.ATTACKING 
+ * 				&& this.getActivity() != Activity.FALLING && this.isAlive()
  */
 public boolean isAbleToMove(){
-	return this.getActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING ;
+	return this.getActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING && this.isAlive() ;
 }
 
 /**
  * Checks if this unit can move further.
  * A unit can move further if it has no activity
  * @return	true if unit is not attacking and not working.
- * 			| result == this.getCurrentActivity()!=Activity.NOTHING
+ * 			| result == this.getCurrentActivity()!=Activity.NOTHING && this.isAlive()
  */
 public boolean isAbleToMoveFurther(){
-	return this.getActivity()==Activity.NOTHING;
+	return this.getActivity()==Activity.NOTHING && this.isAlive;
 }
 
 /**
  * Checks if this unit can rest.
  * A unit can rest if it is not attacking and it needs to recover
  * @return	true if unit is not attacking or falling
- * 			| result ==  this.getActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING;
+ * 			| result ==  this.getActivity()!=Activity.ATTACKING 
+ * 			&& this.getActivity() != Activity.FALLING && this.isAlive()
  */
 public boolean isAbleToRest(){
-	return this.getActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING;
+	return this.getActivity()!=Activity.ATTACKING && this.getActivity() != Activity.FALLING && this.isAlive();
 }
 
 /**
  * Checks if this unit is currently able to sprint.
  * A unit can sprint if its stamina is above 0 and if it is already moving.
  * @return	true if the unit is moving and its stamina is higher than 0.
- * 			| result == this.isMoving() && getStamina()>0 && this.getActivity() != Activity.FALLING
+ * 			| result == this.isMoving() && getStamina()>0 
+ * 			&& this.getActivity() != Activity.FALLING && this.isAlive()
  */
 public boolean isAbleToSprint(){
-	return this.isMoving() && getStamina()>0 &&this.getActivity() != Activity.FALLING;
+	return this.isMoving() && getStamina()>0 &&this.getActivity() != Activity.FALLING && this.isAlive();
 }
 
 /**
@@ -2479,11 +2482,11 @@ public boolean isAbleToSprint(){
  * A unit can work if it is not attacking.
  * @return	true if this unit is not attacking.
  * 			| result == this.getCurrentActivity() != Activity.ATTACKING&& 
- * 						this.getActivity() != Activity.FALLING
+ * 						this.getActivity() != Activity.FALLING && this.isAlive()
  */
 public boolean isAbleToWork(){
 	return this.getActivity() != Activity.ATTACKING 
-			&& this.getActivity() != Activity.FALLING;
+			&& this.getActivity() != Activity.FALLING && this.isAlive();
 }
 /**
  * Checks if this unit is currently able to attack.
@@ -2493,9 +2496,9 @@ public boolean isAbleToWork(){
  * 		AND the faction of defender and attacker are different
  * 		AND they are positioned on the same or on adjacent cubes
  * 
- * 	 |	!(this.getActivity() == Activity.FALLING
+ * 	 |	result == !(this.getActivity() == Activity.FALLING
  *		|| this.getActivity() == Activity.ATTACKING
- *			|| defender.getActivity() == Activity.FALLING)
+ *			|| defender.getActivity() == Activity.FALLING && this.isAlive())
  *		&& !(this.getFaction() == defender.getFaction())
  *		&& (Utils.areAdjacent(aPosition, dPosition) || Utils.equals(aPosition, dPosition))
  */
@@ -2503,7 +2506,7 @@ public boolean isAbleToWork(){
 public boolean isAbleToAttack(Unit defender){
 	if(this.getActivity() == Activity.FALLING
 			|| this.getActivity() == Activity.ATTACKING
-			|| defender.getActivity() == Activity.FALLING)
+			|| defender.getActivity() == Activity.FALLING && this.isAlive())
 		return false;
 	
 	//they must belong to different factions

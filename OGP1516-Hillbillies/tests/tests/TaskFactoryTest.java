@@ -21,11 +21,9 @@ import hillbillies.expression.booleanExpression.And;
 import hillbillies.expression.booleanExpression.CarriesItem;
 import hillbillies.expression.booleanExpression.IsAlive;
 import hillbillies.expression.booleanExpression.IsFriend;
-import hillbillies.expression.positionExpression.BoulderPosition;
 import hillbillies.expression.positionExpression.Here;
 import hillbillies.expression.positionExpression.ItemPosition;
 import hillbillies.expression.positionExpression.LiteralPosition;
-import hillbillies.expression.positionExpression.LogPosition;
 import hillbillies.expression.positionExpression.NextToPosition;
 import hillbillies.expression.positionExpression.PositionOfUnit;
 import hillbillies.expression.positionExpression.Workshop;
@@ -35,6 +33,7 @@ import hillbillies.expression.unitExpression.Friend;
 import hillbillies.expression.unitExpression.This;
 import hillbillies.model.Boulder;
 import hillbillies.model.Faction;
+import hillbillies.model.ITerrainType;
 import hillbillies.model.Log;
 import hillbillies.model.Task;
 import hillbillies.model.TaskHandler;
@@ -54,12 +53,8 @@ import hillbillies.statement.unitStatement.Follow;
 import hillbillies.statement.wildcardStatement.Assignment;
 import hillbillies.statement.wildcardStatement.Print;
 
-public class TaskFactoryTest {
+public class TaskFactoryTest implements ITerrainType {
 	
-	//private static final int TYPE_AIR = 0;
-	private static final int TYPE_ROCK = 1;
-	private static final int TYPE_TREE = 2;
-	private static final int TYPE_WORKSHOP = 3;
 	private static World world;
 	private static Unit unit;
 	private static Unit enemy;
@@ -69,7 +64,7 @@ public class TaskFactoryTest {
 	private static Boulder boulder;
 	private static TaskHandler taskHandler;
 	private static CubePosition rock;
-	private static CubePosition tree;
+//	private static CubePosition tree;
 	private static CubePosition workshop;
 	private static CubePosition unitPosition;
 	private static Task task;
@@ -81,7 +76,7 @@ public class TaskFactoryTest {
 		types[1][1][1] = TYPE_TREE;
 		types[1][1][2] = TYPE_WORKSHOP;
 		rock = new CubePosition(1,1,0);
-		tree = new CubePosition(1,1,1);
+//		tree = new CubePosition(1,1,1);
 		workshop = new CubePosition(1,1,2);
 		unitPosition = new CubePosition(0,0,0);
 		
@@ -130,6 +125,9 @@ public class TaskFactoryTest {
 	
 	//STATEMENTS
 
+	/**
+	 * Create an assignment and read it
+	 */
 	@Test
 	public final void testCreateAssignment() {
 		Statement s = new Assignment("True",new True());
@@ -141,7 +139,10 @@ public class TaskFactoryTest {
 		Expression<?> e = new ReadVariable("True");
 		assertEquals(true,e.evaluate(handler));
 	}
-
+	
+	/**
+	 * Create a basic while and end it
+	 */
 	@Test
 	public final void testCreateWhile() {
 		Statement inner = new Print(new True());
@@ -162,6 +163,9 @@ public class TaskFactoryTest {
 		assertTrue(actionUnit.hasTask());
 	}
 
+	/**
+	 * Create an if and test if it responses correctly to the given boolean
+	 */
 	@Test
 	public final void testCreateIf() {
 		Statement ifS = new Print(new True());
@@ -201,6 +205,9 @@ public class TaskFactoryTest {
 //		fail("Not yet implemented");
 //	}
 
+	/**
+	 * Print an expression
+	 */
 	@Test
 	public final void testCreatePrint() {
 		Statement s = new Print(new True());
@@ -213,6 +220,9 @@ public class TaskFactoryTest {
 		s.execute(handler);
 	}
 
+	/**
+	 * Create a sequence and let it run completely
+	 */
 	@Test
 	public final void testCreateSequence() {
 		Statement ifS = new Print(new True());
@@ -241,6 +251,9 @@ public class TaskFactoryTest {
 		
 	}
 
+	/**
+	 * create a move to and test the effect on a unit
+	 */
 	@Test
 	public final void testCreateMoveTo() {
 		Statement s = new MoveTo(new LiteralPosition(1,0,0));
@@ -256,6 +269,9 @@ public class TaskFactoryTest {
 		handler.executeTask();
 	}
 
+	/**
+	 * create a work and test the effect on a unit
+	 */
 	@Test
 	public final void testCreateWork() {
 		Statement s = new Work(new LiteralPosition(0,0,0));
@@ -271,6 +287,9 @@ public class TaskFactoryTest {
 		handler.executeTask();
 	}
 
+	/**
+	 * create a follow and test the effect on a unit
+	 */
 	@Test
 	public final void testCreateFollow() {
 		Statement s = new Follow(new Any());
@@ -285,7 +304,10 @@ public class TaskFactoryTest {
 		assertTrue(actionUnit.hasLeader());
 		handler.executeTask();
 	}
-
+	
+	/**
+	 * create an attack statement and test the effect on a unit
+	 */
 	@Test
 	public final void testCreateAttack() {
 		Statement s = new Attack(new Enemy());
@@ -304,6 +326,9 @@ public class TaskFactoryTest {
 	
 	//EXPRESSIONS
 	
+	/**
+	 * create an assignement and read it out
+	 */
 	@Test
 	public final void testCreateReadVariable() {
 		Statement s = new Assignment("True",new True());
@@ -316,6 +341,9 @@ public class TaskFactoryTest {
 		assertEquals(true,e.evaluate(handler));
 	}
 	
+	/**
+	 * Try to read an unexisting variable
+	 */
 	@Test (expected = Error.class)
 	public final void testCreateIllegalReadVariable() {
 		Statement s = new Assignment("True",new True());

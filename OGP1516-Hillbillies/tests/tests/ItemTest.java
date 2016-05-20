@@ -71,7 +71,9 @@ public class ItemTest {
 		assertEquals(world.getNbItems(),0);
 
 	}
-	
+	/**
+	 * Let the unit add an item, and remove it again
+	 */
 	@Test
 	public void testItemWithUnit(){
 		
@@ -96,6 +98,9 @@ public class ItemTest {
 
 	}
 	
+	/**
+	 * Let unit pick up an item, and let it drop again
+	 */
 	@Test
 	public void testItemWithUnitInWorld(){
 		Log log = new Log(new int[] { 0, 0, 0 },world);
@@ -129,6 +134,9 @@ public class ItemTest {
 		assertTrue(Utils.equals(Utils.getCubePosition(log.getPosition()),new int[] { 0, 0, 0 }));
 	}
 	
+	/**
+	 * Let unit pick up an item, let him die. It has to be dropped
+	 */
 	@Test
 	public void testUnitDiesDropsItem(){
 		Log log = new Log(new int[] { 0, 0, 0 },world);

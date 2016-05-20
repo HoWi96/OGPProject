@@ -57,7 +57,7 @@ public class FactionTest {
 		assertFalse(units.isEmpty());
 		
 		for(Unit unit: units){
-			System.out.println(""+unit);
+			System.out.println(unit);
 			unit.terminate();
 		}
 		assertTrue(world1.getAllFactions().isEmpty());

@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hillbillies.model.Log;
 import hillbillies.model.Unit;
 import hillbillies.model.Utils;
 import hillbillies.model.World;
@@ -78,7 +79,7 @@ public class UnitTest {
 	 *  handles the given strings correctly
 	 */
 	@Test
-	public final void testIsValidName() {
+	public void testIsValidName() {
 		assertTrue(Unit.isValidName("Baba 'O Reily"));
 		assertTrue(Unit.isValidName("A '\"\'"));
 		
@@ -385,8 +386,7 @@ public class UnitTest {
 	    	unit3.moveTo(groundPosition2);
 	    	assertTrue(unit3.isAbleToSprint());
 	    	unit3.startSprinting();
-	    	while(unit3.getStamina()>0)
-	    		unit3.advanceTime(0.1);
+	    	unit3.terminate();
 	    	assertFalse(unit3.isAbleToSprint());
 	    	
 	    }
@@ -489,4 +489,114 @@ public class UnitTest {
 	    public void testStartSprinting(){
 	    	unit1.startSprinting();
 	    }
+	    
+	    /**
+	     * Let the unit pick up an item and afterwards, let it drop
+	     */
+		@Test
+		public void testWorkingPickingUpDroppingDown(){
+			int[][][] types = new int[2][2][2];
+			types[1][1][0] = World.TYPE_ROCK;
+			types[0][1][0] = World.TYPE_TREE;
+			types[1][0][0] = World.TYPE_WORKSHOP;
+
+			world = new World(types, new DefaultTerrainChangeListener());
+			Unit unit = new Unit("Test", new int[] { 0, 0, 0 }, 50, 50, 50, 50, false);
+			world.addUnit(unit);
+			
+			Log log = new Log(new int[] { 0, 0, 0 },world);
+			unit.workAt(new int[] { 0, 0, 0 });
+			double timeToWork = 600/unit.getStrength();
+			advanceTimeFor(world, timeToWork, 0.2);
+			
+			assertTrue(unit.hasItem());
+			assertTrue(unit.getItem() == log);
+			
+			unit.workAt(new int[] { 0, 0, 0 });
+			advanceTimeFor(world, timeToWork, 0.2);
+			
+			assertFalse(unit.hasItem());
+			assertTrue(unit.getItem() == null);
+			assertTrue(Utils.equals(unit.getPosition(),log.getPosition()));
+
+		}
+		
+		/**
+		 * Let the unit work on a workshop with an item an let him upgrade his armour
+		 */
+		@Test
+		public void testWorkingUpgradeWorkshop(){
+			int[][][] types = new int[2][2][2];
+			types[1][1][0] = World.TYPE_ROCK;
+			types[0][1][0] = World.TYPE_TREE;
+			types[1][0][0] = World.TYPE_WORKSHOP;
+
+			world = new World(types, new DefaultTerrainChangeListener());
+			Unit unit = new Unit("Test", new int[] { 0, 0, 0 }, 50, 50, 50, 50, false);
+			world.addUnit(unit);
+			
+			Log log = new Log(new int[] { 1, 0, 0 },world);
+			
+			double timeToWork = 550/unit.getStrength();
+			
+			unit.workAt(new int[] { 1, 0, 0 });
+			int weight = unit.getWeight();
+			int toughness = unit.getToughness();
+			
+			advanceTimeFor(world, timeToWork, 0.2);
+			
+			assertTrue(log.isTerminated());
+			assertFalse(world.hasAsItem(log));
+			
+			assertTrue(weight+1 == unit.getWeight());
+			System.out.println("toughness: "+unit.getToughness());
+			assertTrue(toughness+1 == unit.getToughness() || 
+					toughness+2 == unit.getToughness() ||
+					toughness+3 == unit.getToughness());
+		}
+		
+		/**
+		 * Let the unit search for a path and let him go this place
+		 */
+		@Test
+		public void testPathFound(){
+			int[][][] types = new int[4][4][4];
+			types[0][0][0] = 1;
+			types[1][0][0] = 1;
+			types[1][0][1] = 1;
+			types[1][1][1] = 1;
+			types[1][2][1] = 1;
+			types[2][2][1] = 1;
+			types[2][2][2] = 1;
+			World world = new World(types, new DefaultTerrainChangeListener());
+			Unit unit = new Unit("TestUnit", new int[] { 0, 0, 1 }, 50, 50, 50, 50, false);
+			world.addUnit(unit);
+			unit.moveTo(new int[] {3,3,3});
+			advanceTimeFor(world, 10, 0.1);
+			System.out.println(unit.getCubePosition().toString());
+			boolean reachedEnd = (
+					Util.fuzzyEquals(unit.getPosition()[0],3.5) && 
+					Util.fuzzyEquals(unit.getPosition()[1],3.5) && 
+					Util.fuzzyEquals(unit.getPosition()[2],3.5));
+			assertTrue("end position reached", reachedEnd);
+		}
+		
+		/**
+		 * Helper method to advance time for the given world by some time.
+		 * 
+		 * @param time
+		 *            The time, in seconds, to advance.
+		 * @param step
+		 *            The step size, in seconds, by which to advance.
+		 */
+		private static void advanceTimeFor(World world, double time, double step) throws IllegalArgumentException{
+			int n = (int) (time / step);
+			for (int i = 0; i < n; i++)
+				world.advanceTime(step);
+			world.advanceTime(time - n * step);
+		}
+		
+		
+
+
 }

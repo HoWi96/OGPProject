@@ -48,7 +48,7 @@ import hillbillies.util.ConnectedToBorder;
  *       
  */
 
-public class World {
+public class World implements ITerrainType {
 	
 	/*___________________________________________________________________
 	 * __________________________________________________________________
@@ -58,10 +58,6 @@ public class World {
 	
 	
 	//PUBLIC
-	public static final int TYPE_AIR = 0;
-	public static final int TYPE_ROCK = 1;
-	public static final int TYPE_TREE = 2;
-	public static final int TYPE_WORKSHOP = 3;
 	public static final int[] VALID_CUBE_TYPES = {TYPE_AIR,TYPE_ROCK,TYPE_TREE,TYPE_WORKSHOP};
 	
 	public static final int MAX_UNITS_IN_WORLD = 100;

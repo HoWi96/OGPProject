@@ -8,16 +8,12 @@ import org.junit.Before;
 //import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hillbillies.model.ITerrainType;
 import hillbillies.model.Unit;
 import hillbillies.model.World;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
 
-public class WorldTest {
-	
-	private static final int TYPE_AIR = 0;
-	private static final int TYPE_ROCK = 1;
-	private static final int TYPE_TREE = 2;
-	private static final int TYPE_WORKSHOP = 3;
+public class WorldTest implements ITerrainType {
 
 	private World world1;
 	private Unit unit1;

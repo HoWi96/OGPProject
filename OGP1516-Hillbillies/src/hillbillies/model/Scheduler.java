@@ -299,8 +299,9 @@ public class Scheduler{
     public void replaceTask(Task original, Task replacement) throws IllegalArgumentException{
     	
     	removeAsTask(original);
-    	original.getUnit().getTaskHandler().interruptTask();
-    	removeAsTask(original);
+    	if(original.hasUnit())
+    		original.getUnit().getTaskHandler().interruptTask();
+    	addAsTask(replacement);
     }
     
     /**
@@ -355,8 +356,12 @@ public class Scheduler{
      * 		the unit to connect with
      * @effect a bidirectional association will be set
      * 		| task.addUnit(unit);
+     * @throws IllegalArgumentException
+     * 		| if(!hasAsTask(task) && unit.getFaction().getScheduler() != this)
      */
     public void markTaskByUnit(Task task, Unit unit) throws IllegalArgumentException {
+    	if(!hasAsTask(task) || unit.getFaction().getScheduler() != this)
+    		throw new IllegalArgumentException("task not scheduled");
     	task.addUnit(unit);
     };
     
@@ -369,8 +374,12 @@ public class Scheduler{
      * 		the unit to disconnect with
      * @effect a bidirectional association will be broken down
      * 		| task.removeUnit(unit);
+     * @throws IllegalArgumentException
+     * 		| if(!hasAsTask(task) && unit.getFaction().getScheduler() != this)
      */
     public void resetMarkTaskByUnit(Task task, Unit unit) throws IllegalArgumentException {
+    	if(!hasAsTask(task) && unit.getFaction().getScheduler() != this)
+    		throw new IllegalArgumentException("task not scheduled");
     	task.removeUnit(unit);
     };
 }

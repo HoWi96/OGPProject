@@ -5,12 +5,14 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hillbillies.expression.booleanExpression.True;
 import hillbillies.expression.positionExpression.LiteralPosition;
 import hillbillies.model.Faction;
 import hillbillies.model.Scheduler;
@@ -55,8 +57,11 @@ public class SchedulerTest {
 	public void tearDown() throws Exception {
 	}
 
+	/**
+	 * Test the constructor of scheduler
+	 */
 	@Test
-	public void testConstructor() throws Exception{
+	public void testConstructor(){
 		Faction f = new Faction();
 		Scheduler s = f.getScheduler();
 		assertEquals(0,s.getNbTasks());
@@ -64,8 +69,11 @@ public class SchedulerTest {
 		assertFalse(s.getAllTasksIterator().hasNext());	
 	}
 	
+	/**
+	 * Test the method to add a task
+	 */
 	@Test
-	public void testTaskAdder() throws Exception {
+	public void testTaskAdder(){
 		
 		assertFalse(scheduler1.hasAsTask(null));
 		assertFalse(task1.hasAsScheduler(null));
@@ -97,9 +105,11 @@ public class SchedulerTest {
 		scheduler1.addAsTask(null);
 	}
 	
-	
+	/**
+	 * Method to test if a task is succesfully removed
+	 */
 	@Test
-	public void testTaskRemover() throws Exception{
+	public void testTaskRemover(){
 		Collection<Task> tasks = Arrays.asList(task1, task2);
         scheduler2.addAsTask(task1);
         scheduler2.addAsTask(task2);
@@ -112,6 +122,23 @@ public class SchedulerTest {
         assertTrue(task2.hasAsScheduler(scheduler2));
 	}
 	
+	/**
+	 * Method to test if a task is succesfully replaced
+	 */
+	@Test
+	public void testTaskReplacer(){
+        scheduler2.addAsTask(task1);
+        assertTrue(scheduler2.hasAsTask(task1));
+        Task task3 = new Task("task3", 300, new Print(new True()));
+        scheduler2.replaceTask(task1, task3);
+        assertFalse(scheduler2.hasAsTask(task1));
+        assertTrue(scheduler2.hasAsTask(task3));
+        scheduler2.removeAsTask(task3);
+        assertFalse(scheduler2.hasAsTask(task3));
+
+	}
+	
+
 	@Test
     public void testCanHaveAsTask() throws Exception {
         assertTrue(scheduler1.canHaveAsTask(task1));
@@ -136,6 +163,9 @@ public class SchedulerTest {
 		 assertEquals(task2,scheduler1.getHighestPriorityAssignableTask());
 	 }
 	 
+	 /**
+	  * test if the iterator returns everything in descending order
+	  */
 	 @Test
 	 public void testGetAllTasksIterator() throws Exception{
 		 Task task3 = new Task("task1",300,new Print(new LiteralPosition(0,0,0)));
@@ -151,24 +181,53 @@ public class SchedulerTest {
 			 Task t = i.next();
 			 assertTrue(t.getPriority()<priority);
 			 priority = t.getPriority();
-			 System.out.println(priority);
 		 }
 		 //DO NOT FORGET REMOVAL!
 		 scheduler1.removeAsTask(task3);
 		 scheduler1.removeAsTask(task4);
 	 }
 	 
+	 
+	 //CONDITIONS TO TEST
+	 	public final Predicate<Task> priorityIsHigherThan200() {
+	        return t-> t.getPriority() > 200 ;
+	    }
+	     
+	    public final  Predicate<Task> priorityIsLowerThan200() {
+	        return t-> t.getPriority() < 200 ;
+	    }
+	     
+	    public final Predicate<Task> priorityIs200() {
+	        return t-> t.getPriority()==200;
+	    }
+	 	
+	 /**
+	  * Test the conditions given by the predicates
+	  */
 	 @Test
 	 public void testGetAllTasksSatisfying() throws Exception{
-		 Task task3 = new Task("task1",300,new Print(new LiteralPosition(0,0,0)));
-	     Task task4 = new Task("task2",400,new Print(new LiteralPosition(0,0,0)));
+
+		 
+		 Task task3 = new Task("task3",300,new Print(new LiteralPosition(0,0,0)));
+	     Task task4 = new Task("task4",400,new Print(new LiteralPosition(0,0,0)));
 		 scheduler1.addAsTask(task4);
 		 scheduler1.addAsTask(task2);
 		 scheduler1.addAsTask(task3);
 		 scheduler1.addAsTask(task1);
 		 
-		 Collection<Task> c = scheduler1.getAllTasksSatisfying((Task t)-> t.getPriority()>200);
+		 Collection<Task> c = scheduler1.getAllTasksSatisfying(priorityIsHigherThan200());
+		 assertTrue(c.contains(task3));
+		 assertTrue(c.contains(task4));
 		 assertEquals(2, c.size());
+		 
+		 Collection<Task> c2 = scheduler1.getAllTasksSatisfying(priorityIsLowerThan200());
+		 assertTrue(c2.contains(task1));
+		 assertEquals(1, c2.size());
+		 
+		 Collection<Task> c3 = scheduler1.getAllTasksSatisfying(priorityIs200());
+		 assertTrue(c3.contains(task2));
+		 assertEquals(1, c3.size());
+		 
 		 //DO NOT FORGET REMOVAL!
 		 scheduler1.removeAsTask(task3);
 		 scheduler1.removeAsTask(task4);

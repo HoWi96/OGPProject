@@ -27,10 +27,9 @@ public class Facade extends hillbillies.part1.facade.Facade implements IFacade {
 	@Override
 	public World createWorld(int[][][] terrainTypes, TerrainChangeListener modelListener) throws ModelException {
 		try {
-			World world = new World(terrainTypes,modelListener);
-			return world;
+			return new World(terrainTypes,modelListener);
 		} catch (IllegalArgumentException e) {
-			throw new ModelException();
+			throw new ModelException(e);
 		}
 	}
 
@@ -50,12 +49,12 @@ public class Facade extends hillbillies.part1.facade.Facade implements IFacade {
 	}
 
 	@Override
-	public void advanceTime(World world, double dt) throws IllegalArgumentException, IllegalStateException {
-		//try {
+	public void advanceTime(World world, double dt) throws ModelException {
+		try {
 			world.advanceTime(dt);
-		//} catch (Exception e) {
-		//	throw new ModelException();
-		//}
+		} catch (Exception e) {
+			throw new ModelException(e);
+		}
 		
 	}
 
@@ -65,7 +64,7 @@ public class Facade extends hillbillies.part1.facade.Facade implements IFacade {
 			int[] position = {x,y,z};
 			return world.getCubeType(position);
 		} catch (IllegalArgumentException e) {
-			throw new ModelException();
+			throw new ModelException(e);
 		}
 	}
 
@@ -75,9 +74,8 @@ public class Facade extends hillbillies.part1.facade.Facade implements IFacade {
 			int[] position = {x,y,z};
 			world.setcubeType(value, position);
 		} catch (IllegalArgumentException e) {
-			throw new ModelException();
-		}
-		
+			throw new ModelException(e);
+		}	
 	}
 
 	@Override
@@ -89,7 +87,6 @@ public class Facade extends hillbillies.part1.facade.Facade implements IFacade {
 	public Unit spawnUnit(World world, boolean enableDefaultBehavior) throws ModelException {
 		Unit unit = world.createRandomUnit(enableDefaultBehavior);
 		world.addUnit(unit);
-		System.out.println("Spawn unit "+unit.getName());
 		return unit;
 		
 	}
@@ -97,12 +94,10 @@ public class Facade extends hillbillies.part1.facade.Facade implements IFacade {
 	@Override
 	public void addUnit(Unit unit, World world) throws ModelException {
 		try {
-			System.out.println("add unit "+unit.getName());
 			world.addUnit(unit);
 		} catch (IllegalArgumentException e) {
-			throw new ModelException();
-		}
-		
+			throw new ModelException(e);
+		}	
 	}
 
 	@Override
@@ -136,7 +131,7 @@ public class Facade extends hillbillies.part1.facade.Facade implements IFacade {
 			int[] position = new int[]{x, y, z};
 			unit.workAt(position);
 		} catch (Exception e) {
-			throw new ModelException();
+			throw new ModelException(e);
 		}
 	}
 

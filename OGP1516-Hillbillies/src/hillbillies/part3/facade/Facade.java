@@ -19,6 +19,9 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade {
 		return new TaskFactory();
 	}
 
+	/**
+	 * @Alone does not need to be implemented
+	 */
 	@Override
 	public boolean isWellFormed(Task task) throws ModelException {
 		return true;
@@ -31,12 +34,20 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade {
 
 	@Override
 	public void schedule(Scheduler scheduler, Task task) throws ModelException {
-		scheduler.addAsTask(task);
+		try {
+			scheduler.addAsTask(task);
+		} catch (IllegalArgumentException e) {
+			throw new ModelException(e);
+		}
 	}
 
 	@Override
 	public void replace(Scheduler scheduler, Task original, Task replacement) throws ModelException {
-		scheduler.replaceTask(original, replacement);
+		try {
+			scheduler.replaceTask(original, replacement);
+		} catch (IllegalArgumentException e) {
+			throw new ModelException(e);
+		}
 	}
 
 	@Override

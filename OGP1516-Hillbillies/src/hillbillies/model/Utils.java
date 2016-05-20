@@ -2,6 +2,8 @@ package hillbillies.model;
 
 import java.util.Random;
 
+import ogp.framework.util.Util;
+
 /**
  * @author Holger Willems |2e bach. ing.: OOP
  * @date 10/04/2016
@@ -20,10 +22,17 @@ public class Utils {
 	 * 			| result == (position[0] == position2[0]) && (position1[1] == position2[1])
 	 * 						&& (position1[2] == position2[2])
 	 */
+//	public static boolean equals(double[] position1, double[] position2) {
+//		return (position1[0] == position2[0])&&
+//				(position1[1] == position2[1])&&
+//				(position1[2] == position2[2]);
+//	}
+	
 	public static boolean equals(double[] position1, double[] position2) {
-		return (position1[0] == position2[0])&&
-				(position1[1] == position2[1])&&
-				(position1[2] == position2[2]);
+		return Util.fuzzyEquals(position1[0], position2[0]) &&
+				Util.fuzzyEquals(position1[1], position2[1]) &&
+				Util.fuzzyEquals(position1[2], position2[2]);
+				
 	}
 	
 	public static boolean equals(int[] position1, int[] position2) {

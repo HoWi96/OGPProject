@@ -12,7 +12,7 @@ import hillbillies.expression.unitExpression.*;
 import hillbillies.model.position.CubePosition;
 import hillbillies.part3.programs.ITaskFactory;
 import hillbillies.part3.programs.SourceLocation;
-
+import hillbillies.statement.Sequence;
 import hillbillies.statement.Statement;
 import hillbillies.statement.booleanStatement.*;
 import hillbillies.statement.positionStatement.*;
@@ -30,17 +30,13 @@ import hillbillies.statement.wildcardStatement.Print;
  */
 public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
 
+	/**
+	 * @Alone implementation of selected is not mandatory
+	 */
 	@Override
 	public List<Task> createTasks(String name, int priority, Statement activity, List<int[]> selectedCubes) {
 		List<Task> result = new ArrayList<>();
-		if (selectedCubes.isEmpty()){
 			result.add(new Task(name, priority, activity));
-		}
-		else {
-			// for (int[] cube: selectedCubes)
-			//	result.add(new Task(name, priority, activity, cube));
-			
-		}
 		return result;
 	}
 
@@ -60,6 +56,9 @@ public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
 		return new If(condition, ifBody, elseBody);
 	}
 
+	/**
+	 * @Alone implementation of break is not mandatory
+	 */
 	@Override
 	public Statement createBreak(SourceLocation sourceLocation) {
 		return null;
@@ -72,7 +71,7 @@ public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
 
 	@Override
 	public Statement createSequence(List<Statement> statements, SourceLocation sourceLocation) {
-		return new hillbillies.statement.Sequence(statements);
+		return new Sequence(statements);
 	}
 
 	@Override
@@ -165,6 +164,9 @@ public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
 		return new Workshop();
 	}
 
+	/**
+	 * @Alone implementation of selected is not mandatory
+	 */
 	@Override
 	public Expression<CubePosition> createSelectedPosition(SourceLocation sourceLocation) {
 		return null;
