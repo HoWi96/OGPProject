@@ -8,16 +8,14 @@ public class Assignment extends Statement {
 	
 	private final String variableName;
 
-	public Assignment(String variableName, Expression<?> value) throws IllegalArgumentException {
+	public Assignment(String variableName, Expression<?> value) {
 		super(value);
-		if(variableName == null)
-			throw new IllegalArgumentException("variable name can't be null");
 		this.variableName = variableName;
 	}
 
 	@Override
 	public void execute(TaskHandler taskHandler) {
-		System.out.println(getVariableName()+getExpression().getClass());
+		System.out.println(getVariableName()+ getExpression().getClass());
 		taskHandler.assign(getVariableName(), getExpression());
 	}
 	

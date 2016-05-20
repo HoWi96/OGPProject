@@ -1,7 +1,7 @@
 package hillbillies.model;
 
 import java.util.Collection;
-
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -47,8 +47,16 @@ public class Scheduler{
 	 * 		|	this.isTerminated() == false;
 	 */
 	public Scheduler(){
-		tasks = new TreeSet<>(
-				(Task t1, Task t2) -> t2.getPriority()-t1.getPriority());
+		tasks = new TreeSet<>( new Comparator<Task>() {
+
+			@Override
+			public int compare(Task t1, Task t2) {
+				// reverse order
+				return t2.getPriority()-t1.getPriority();
+			}
+		}
+		);
+		
 		this.isTerminated = false;
 	}
 	

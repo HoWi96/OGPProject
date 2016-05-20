@@ -5,7 +5,6 @@ import java.util.HashMap;
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.expression.Expression;
 import hillbillies.statement.Statement;
-import hillbillies.statement.wildcardStatement.Print;
 
 /**
  * @Invar  Each TaskHandler can have its Task as Task.
@@ -61,10 +60,23 @@ public World getWorld() {
 
 private HashMap<String,Expression<?>> assignedVariablesMap = new  HashMap<String,Expression<?>>();
 
+/**
+ * 
+ * @param variableName
+ * @param expression
+ * @post 
+ * 		|assignedVariablesMap.put(variableName, expression);
+ */
 public void assign(String variableName, Expression<?> expression) {
 	assignedVariablesMap.put(variableName, expression);
 }
 
+/**
+ * 
+ * @param variableName
+ * @return Expression<?>
+ * 		|assignedVariablesMap.get(variableName);
+ */
 public Expression<?> getValueOfVariable(String variableName) {
 	return assignedVariablesMap.get(variableName);
 }

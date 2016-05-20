@@ -1,10 +1,9 @@
 package hillbillies.expression.unitExpression;
 
-import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
 
-public class Enemy extends Expression<Unit> {
+public class Enemy extends Any {
 
 	public Enemy() {
 		super();

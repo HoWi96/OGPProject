@@ -86,7 +86,7 @@ public class SchedulerTest {
         assertTrue(task1.hasAsScheduler(scheduler2));
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSameTaskAdder() throws Exception {
 		scheduler1.addAsTask(task1);
 		scheduler1.addAsTask(task1);
@@ -151,6 +151,7 @@ public class SchedulerTest {
 			 Task t = i.next();
 			 assertTrue(t.getPriority()<priority);
 			 priority = t.getPriority();
+			 System.out.println(priority);
 		 }
 		 //DO NOT FORGET REMOVAL!
 		 scheduler1.removeAsTask(task3);

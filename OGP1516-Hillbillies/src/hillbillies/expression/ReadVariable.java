@@ -13,14 +13,20 @@ public class ReadVariable extends Expression<Object> {
 
 	@Override
 	public Object evaluate(TaskHandler taskHandler) {
+		System.out.println(getVariableName());
 		try{
-			System.out.println(getVariableName());
-			return taskHandler.getValueOfVariable(getVariableName()).evaluate(taskHandler);
-		}catch(Exception e){
+			Expression<?> e = taskHandler.getValueOfVariable(getVariableName());
+			
+			if (e == null)
+				throw new IllegalStateException();
+			else
+				return e.evaluate(taskHandler);
+		
+		} catch(IllegalStateException e){
 			taskHandler.interruptTask();
-			throw new Error(getVariableName()+" is not present");
-			}
+			throw new Error("variable does not exist");
 		}
+	}
 
 	/**
 	 * @return the variableName
