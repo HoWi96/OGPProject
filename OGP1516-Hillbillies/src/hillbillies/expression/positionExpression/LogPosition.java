@@ -3,7 +3,7 @@ package hillbillies.expression.positionExpression;
 import hillbillies.model.Item;
 import hillbillies.model.Log;
 import hillbillies.model.TaskHandler;
-import hillbillies.model.position.CubePosition;
+import hillbillies.model.helper.CubePosition;
 
 @Deprecated
 public class LogPosition extends ItemPosition<Log> {

@@ -8,8 +8,7 @@ import hillbillies.expression.ReadVariable;
 import hillbillies.expression.booleanExpression.*;
 import hillbillies.expression.positionExpression.*;
 import hillbillies.expression.unitExpression.*;
-
-import hillbillies.model.position.CubePosition;
+import hillbillies.model.helper.CubePosition;
 import hillbillies.part3.programs.ITaskFactory;
 import hillbillies.part3.programs.SourceLocation;
 import hillbillies.statement.Sequence;

@@ -2,7 +2,7 @@ package hillbillies.expression.booleanExpression;
 
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
-import hillbillies.model.position.CubePosition;
+import hillbillies.model.helper.CubePosition;
 
 public class IsSolid extends Expression<Boolean> {
 

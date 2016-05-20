@@ -1,4 +1,4 @@
-package hillbillies.model.position;
+package hillbillies.model.helper;
 
 import be.kuleuven.cs.som.annotate.*;
 

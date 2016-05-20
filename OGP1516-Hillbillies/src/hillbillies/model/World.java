@@ -2,7 +2,8 @@ package hillbillies.model;
 
 import java.util.*;
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.position.CubePosition;
+import hillbillies.model.helper.CubePosition;
+import hillbillies.model.helper.Utils;
 import hillbillies.part2.listener.TerrainChangeListener;
 import hillbillies.util.ConnectedToBorder;
 

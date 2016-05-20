@@ -8,9 +8,12 @@ import org.junit.Before;
 //import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hillbillies.model.Boulder;
 import hillbillies.model.ITerrainType;
+import hillbillies.model.Log;
 import hillbillies.model.Unit;
 import hillbillies.model.World;
+import hillbillies.model.helper.CubePosition;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
 
 public class WorldTest implements ITerrainType {
@@ -148,7 +151,7 @@ public class WorldTest implements ITerrainType {
 	}
 	
 	@Test
-	public void canMoveDirectlyTest(){
+	public void testcanMoveDirectly(){
 		int[][][] types = new int[3][3][3];
 		types[0][1][0] = TYPE_ROCK;
 		types[1][0][0] = TYPE_ROCK;
@@ -159,7 +162,7 @@ public class WorldTest implements ITerrainType {
 	}
 
 	@Test
-	public void caveIn(){
+	public void caveInTest(){
 		int[][][] types = new int[3][3][3];
 		types[0][1][0] = TYPE_ROCK;
 		types[1][0][0] = TYPE_ROCK;
@@ -170,6 +173,39 @@ public class WorldTest implements ITerrainType {
 		assertEquals(TYPE_AIR,world.getCubeType(new int[] {1,0,0}));
 	}
 	
+	@Test
+	public void getLogTest(){
+		Log l = new Log(new int[]{0,0,0}, world1);
+		assertEquals(1,world1.getAllItems().size());
+		assertEquals(1,world1.getAllLogs().size());
+		assertEquals(l, world1.getItemOnPosition(new int[]{0,0,0}));
+	}
 	
+	@Test
+	public void getBoulderTest(){
+		Boulder b = new Boulder(new int[]{0,0,0}, world1);
+		assertEquals(1,world1.getAllItems().size());
+		assertEquals(1,world1.getAllBoulders().size());
+		assertEquals(b, world1.getItemOnPosition(new int[]{0,0,0}));
+	}
+	
+	@Test
+	public void removeItemTest(){
+		Log l = new Log(new int[]{0,0,0}, world1);
+		assertTrue(world1.hasAsItem(l));
+		world1.removeItem(l);
+		assertFalse(world1.hasAsItem(l));
+	}
+	
+	@Test
+	public void UnitsOnPositionTest(){
+		world1.addUnit(unit1);
+		assertEquals(unit1,world1.getAllUnitsOnPosition(new int[]{0,0,0}).get(0));
+	}
+	
+	@Test
+	public void getAllWorkshopsTest(){
+		assertTrue(world1.getAllWorkshops().contains(new CubePosition(1,1,2)));
+	}
 
 }

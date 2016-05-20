@@ -1,4 +1,4 @@
-package hillbillies.model;
+package hillbillies.model.helper;
 
 import java.util.Random;
 

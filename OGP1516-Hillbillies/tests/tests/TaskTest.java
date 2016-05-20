@@ -12,7 +12,6 @@ import hillbillies.expression.positionExpression.LiteralPosition;
 import hillbillies.model.Scheduler;
 import hillbillies.model.Task;
 import hillbillies.model.Unit;
-import hillbillies.statement.Statement;
 import hillbillies.statement.wildcardStatement.Print;
 
 public class TaskTest {
@@ -36,7 +35,7 @@ public class TaskTest {
 	@Before
 	public void setUp() throws Exception {
 		s = new Print(new LiteralPosition(0,0,0));
-		task = new Task("task",100,new Print(new LiteralPosition(0,0,0)));
+		task = new Task("task",100,s);
 	}
 
 	@After

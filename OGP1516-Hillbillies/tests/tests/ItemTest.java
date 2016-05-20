@@ -11,8 +11,8 @@ import org.junit.Test;
 import hillbillies.model.Item;
 import hillbillies.model.Log;
 import hillbillies.model.Unit;
-import hillbillies.model.Utils;
 import hillbillies.model.World;
+import hillbillies.model.helper.Utils;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
 
 public class ItemTest {

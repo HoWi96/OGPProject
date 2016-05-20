@@ -1,6 +1,6 @@
 package hillbillies.model;
 
-import hillbillies.model.position.CubePosition;
+import hillbillies.model.helper.CubePosition;
 
 public interface IGameObject {
 

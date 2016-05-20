@@ -1,7 +1,7 @@
 package hillbillies.expression.positionExpression;
 
 import hillbillies.model.TaskHandler;
-import hillbillies.model.position.CubePosition;
+import hillbillies.model.helper.CubePosition;
 import hillbillies.model.Boulder;
 import hillbillies.model.Item;
 

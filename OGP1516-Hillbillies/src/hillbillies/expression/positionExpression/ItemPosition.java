@@ -4,7 +4,7 @@ import be.kuleuven.cs.som.annotate.Model;
 import hillbillies.expression.Expression;
 import hillbillies.model.Item;
 import hillbillies.model.TaskHandler;
-import hillbillies.model.position.CubePosition;
+import hillbillies.model.helper.CubePosition;
 
 public class ItemPosition<T extends Item> extends Expression<CubePosition> {
 

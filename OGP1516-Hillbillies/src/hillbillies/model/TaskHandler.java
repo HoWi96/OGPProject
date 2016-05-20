@@ -7,6 +7,9 @@ import hillbillies.expression.Expression;
 import hillbillies.statement.Statement;
 
 /**
+ * A class to handle a task that belongs to a unit
+ * 
+ * 
  * @Invar  Each TaskHandler can have its Task as Task.
  *       | canHaveAsTask(this.getTask())
  */
@@ -83,6 +86,9 @@ public Expression<?> getValueOfVariable(String variableName) {
 
 //EXECUTE TASK
 
+/**
+ * Execute one statement of a task
+ */
 public void executeTask(){
 	
 	if(getCurrentStatement()==null){
@@ -108,13 +114,16 @@ public void executeTask(){
 
 
 
-
+/**
+ * Interrupt a task if it can not be completed
+ */
 public void interruptTask(){
 		Task task = this.getTask();
 		task.removeUnit(getUnit());
 		task.setPriority(task.getPriority() - 100);
 		task.getActivity().setNext(null);
 		getUnit().setLeader(null);
+		getUnit().setTaskHandler(null);
 }
 
 /**

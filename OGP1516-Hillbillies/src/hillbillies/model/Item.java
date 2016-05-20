@@ -1,7 +1,8 @@
 package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.position.CubePosition;
+import hillbillies.model.helper.CubePosition;
+import hillbillies.model.helper.Utils;
 
 /**
  * A class about the items of the game

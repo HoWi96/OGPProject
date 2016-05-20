@@ -473,4 +473,12 @@ public void removeAsScheduler(Scheduler scheduler) throws IllegalArgumentExcepti
  */
 private final Set<Scheduler> schedulers;
 
+
+/*
+ * Returns a human readable representation of string consisting of the name and the priority
+ */
+@Override
+public String toString() {
+	return "Task( "+getName()+", "+getPriority()+")";
+}
 }

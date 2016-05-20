@@ -9,6 +9,7 @@ import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Raw;
 import be.kuleuven.cs.som.annotate.Value;
+import hillbillies.model.helper.Utils;
 
 /**
  * A class used to find paths for units in the game world

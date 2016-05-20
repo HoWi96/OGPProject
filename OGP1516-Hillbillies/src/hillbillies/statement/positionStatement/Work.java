@@ -4,7 +4,7 @@ package hillbillies.statement.positionStatement;
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.Unit;
-import hillbillies.model.position.CubePosition;
+import hillbillies.model.helper.CubePosition;
 import hillbillies.statement.Statement;
 
 public class Work extends Statement {

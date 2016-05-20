@@ -4,7 +4,8 @@ package hillbillies.model;
 import java.util.List;
 
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.position.CubePosition;
+import hillbillies.model.helper.CubePosition;
+import hillbillies.model.helper.Utils;
 
 
 
