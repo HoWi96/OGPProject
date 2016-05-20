@@ -350,19 +350,37 @@ public class PathFinding {
 				return this.fScore;
 			}
 			
-			//INTERFACE
 			/**
 			 * Override functional method for natural ordering of nodes (used in TreeSet)
 			 */
 			@Override
 			public int compareTo(Node otherNode) {
-				if (this.equals(otherNode)){
+				if (this.equals(otherNode))
 					return 0;
-				}
-				if (this.getFScore()<otherNode.getFScore()){
+				if (this.getFScore()<otherNode.getFScore())
 					return -1;
-				} else return 1;
+				else 
+					return 1;
 			}
+
+			/* 
+			 * Returns if two nodes are equal
+			 */
+			@Override
+			public boolean equals(Object obj) {
+				return super.equals(obj);
+			}
+
+			/* 
+			 * Returns the hashcode for the node
+			 */
+			@Override
+			public int hashCode() {
+				return super.hashCode();
+			}
+			
+			
+
 		}
 	
 }

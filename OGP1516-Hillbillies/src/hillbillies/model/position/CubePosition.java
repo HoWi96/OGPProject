@@ -36,14 +36,12 @@ public class CubePosition extends Position<Integer> {
 		return distance;	
 	}
 
+	/* 
+	 * The hashcode for each CubePosition
+	 */
 	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof CubePosition){
-			return (((CubePosition) obj).getX() == getX()) && 
-					(((CubePosition) obj).getY() == getY()) &&
-					(((CubePosition) obj).getZ() == getZ());
-		}
-		return false;
+	public int hashCode() {
+		return getX()+getY()*getY()+getZ()*getZ()*getZ();
 	}
 	
 	

@@ -8,7 +8,6 @@ public abstract class BinairyOperation extends Expression<Boolean> {
 	private final Expression<Boolean> right;
 
 	public BinairyOperation(Expression<Boolean> left, Expression<Boolean> right) {
-		super();
 		this.left = left;
 		this.right = right;
 	}

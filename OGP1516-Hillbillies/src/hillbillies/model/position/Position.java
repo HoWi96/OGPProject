@@ -3,7 +3,7 @@ package hillbillies.model.position;
 import be.kuleuven.cs.som.annotate.*;
 
 @Value
-public class Position<T extends Number> {
+public abstract class Position<T extends Number> {
 
 	private final T x, y, z;
 
@@ -67,19 +67,23 @@ public class Position<T extends Number> {
 	}
 	
 	
-//	/**
-//	 * Two object equal each other when they have the same class
-//	 */
-//	@Override
-//	public boolean equals(Object other){
-//		if (other == null) {
-//			return false;
-//		}
-//		if (this.getClass() != other.getClass()) {
-//			return false;
-//		}
-//		return true;
-//	}
+	/**
+	 * Two object equal each other when they have the same class
+	 */
+	@Override
+	public boolean equals(Object other){
+		if (other == null) {
+			return false;
+		}
+		if (this.getClass() != other.getClass()) {
+			return false;
+		}
+		return (((Position<T>) other).getX() == getX()) && 
+				(((Position<T>) other).getY() == getY()) &&
+				(((Position<T>) other).getZ() == getZ());
+	}
+	
+	
 	
 	
 

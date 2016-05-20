@@ -7,7 +7,6 @@ public abstract class UnairyOperation extends Expression<Boolean> {
 	private final Expression<Boolean> expression;
 
 	public UnairyOperation(Expression<Boolean> expression) {
-		super();
 		this.expression = expression;
 	}
 

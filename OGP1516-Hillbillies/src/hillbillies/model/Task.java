@@ -107,7 +107,7 @@ public Task(String name, int priority,Statement activity)throws IllegalArgumentE
  * 		| 	scheduler.removeAsTask(this);
  * 
  * @post the task is terminated
- * 		| this.isTerminated() == true
+ * 		| new.isTerminated()
  * 
  */
 public void terminate(){
@@ -362,19 +362,7 @@ public boolean hasUnit(){
  *___________________________________________________________________
  *___________________________________________________________________*/
 
-/**
- * Variable referencing a set collecting all the schedulers
- * of this task.
- *
- * @Invar The referenced set is effective.
- * 		| schedulers != null
- * @Invar Each scheduler registered in the referenced list is
- * 		effective and not yet terminated.
- * 		| for each scheduler in schedulers:
- * 		| ( (scheduler != null) &&
- * 		| (! scheduler.isTerminated()) )
- */
-private final Set<Scheduler> schedulers;
+
 
 //BASIC INSPECTOR
 
@@ -470,5 +458,19 @@ public void removeAsScheduler(Scheduler scheduler) throws IllegalArgumentExcepti
 		throw new IllegalArgumentException("scheduler is not part of task");
 	schedulers.remove(scheduler);
 }
+
+/**
+ * Variable referencing a set collecting all the schedulers
+ * of this task.
+ *
+ * @Invar The referenced set is effective.
+ * 		| schedulers != null
+ * @Invar Each scheduler registered in the referenced list is
+ * 		effective and not yet terminated.
+ * 		| for each scheduler in schedulers:
+ * 		| ( (scheduler != null) &&
+ * 		| (! scheduler.isTerminated()) )
+ */
+private final Set<Scheduler> schedulers;
 
 }

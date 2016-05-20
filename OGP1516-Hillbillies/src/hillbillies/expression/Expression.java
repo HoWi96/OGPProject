@@ -1,10 +1,12 @@
 package hillbillies.expression;
 
+import be.kuleuven.cs.som.annotate.Model;
 import hillbillies.model.TaskHandler;
 
 public abstract class Expression<T> implements IExpression<T> {
-
-	public Expression() {};
+	
+	@Model
+	protected Expression() {};
 
 	/**
 	 * Method to evaluate an expression

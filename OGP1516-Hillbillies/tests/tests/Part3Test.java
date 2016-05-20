@@ -23,7 +23,7 @@ import hillbillies.model.World;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
 import hillbillies.part3.facade.Facade;
 import hillbillies.part3.facade.IFacade;
-import hillbillies.part3.programs.ITaskFactory;
+
 import hillbillies.part3.programs.TaskParser;
 import hillbillies.statement.Statement;
 import hillbillies.statement.unitStatement.Follow;
@@ -33,7 +33,6 @@ public class Part3Test {
 	
 
 	private TaskFactory  factory;
-	private TaskParser<Expression, Statement, Task> parser;
 	private  Facade facade;
 
 	private static final int TYPE_AIR = 0;
@@ -50,11 +49,13 @@ public class Part3Test {
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 	}
-
+	
+	/**
+	 *Set up before each test a new Facade and TaskFactory
+	 */
 	@Before
 	public void setUp() throws Exception {
 		factory = new TaskFactory();
-		parser = TaskParser.create(factory);
 		facade = new Facade();
 	}
 
@@ -62,6 +63,10 @@ public class Part3Test {
 	public void tearDown() throws Exception {
 	}
 
+	/**
+	 * A test to let the unit dig a certain amount of blocks, controlled by statements
+	 * (White box testing)
+	 */
 	@Test
 	public final void testDigging() throws Exception{
 		int[][][] types = new int[16][16][16];
@@ -103,6 +108,10 @@ public class Part3Test {
 		assertFalse(facade.areTasksPartOf(scheduler, Collections.singleton(task)));
 	}
 	
+	/**
+	 * A test to let the unit follow another unit, controlled by statements
+	 * (white box testing)
+	 */
 	@Test
 	public final void testFollowing() throws Exception{
 		int[][][] types = new int[16][16][16];

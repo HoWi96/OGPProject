@@ -18,5 +18,4 @@ public class Boulder extends Item {
 		super(position, world);
 	}
 
-
 }

@@ -40,6 +40,18 @@ public class UnitTest {
 	public static void tearDownAfterClass() throws Exception {
 	}
 
+	/**
+	 * Set up a collection of mutable units in a mutable world,
+	 *  which are added to the world
+	 * 
+	 * @post a unit 1 is created and added to the world
+	 * @post a unit 2 is created and added to the world
+	 * @post a unit 3 is created and added to the world
+	 * @post a unit 4 is created
+	 * @post a unit defender is created and added to the world
+	 * @post a new world is created
+	 * 
+	 */
 	@Before
 	public void setUp() throws Exception {
 		unit1 = new Unit("Baba 'O Reily", position, 50, 50, 50, 50, false);
@@ -60,9 +72,13 @@ public class UnitTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
+	
+	/**
+	 * Test to check if the static method isValidName
+	 *  handles the given strings correctly
+	 */
 	@Test
-	public final void testisValidName() {
+	public final void testIsValidName() {
 		assertTrue(Unit.isValidName("Baba 'O Reily"));
 		assertTrue(Unit.isValidName("A '\"\'"));
 		
@@ -72,15 +88,25 @@ public class UnitTest {
 		assertFalse(Unit.isValidName("lol"));
 	}
 	
+	/**
+	 * Test to check if the instance method isValidPosition handles the
+	 * given positions correctly
+	 */
 	 @Test
 	    public void testIsValidPosition(){
 		 	assertTrue(unit1.isValidPosition(new double[]{0,0,0}));
 	        assertTrue(unit1.isValidPosition(new double[]{4,4,4}));
 	        
 	        assertFalse(unit1.isValidPosition(new double[]{-1,0,0}));
-	        assertFalse(unit1.isValidPosition(new double[]{5,5,5}));   
+	        assertFalse(unit1.isValidPosition(new double[]{5,5,5})); 
+	        // unit4 does not belong to a world
+	        assertTrue(unit4.isValidPosition(new double[]{-1,-10,-5}));
 	    }
 	 
+	 /**
+		 * Test to check if the static method isValidStrength
+		 *  handles the given weights correctly
+		 */
 	 @Test
 	    public void testIsValidStrength(){
 		 	assertTrue(Unit.isValidStrength(1));
@@ -377,8 +403,12 @@ public class UnitTest {
 	    	assertFalse(unit1.isAbleToAttack(defender4));
 	    }
 	    
+	    /**
+	     * Test to check if the right exception is thrown
+	     *  when an invalid argument is given
+	     */
 	    @Test(expected = IllegalArgumentException.class)
-	    public void testSetNameException(){
+	    public void testSetNameIllegalArgumentException(){
 	    	unit1.setName("3azerty");
 	    }
 	    

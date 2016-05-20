@@ -1,5 +1,6 @@
 package hillbillies.statement;
 
+import be.kuleuven.cs.som.annotate.Model;
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 
@@ -17,7 +18,8 @@ private Statement previous;
  *         sourceLocation.
  *       | new.getSourceLocation() == sourceLocation
  */ 
-public Statement(Expression<?> expression){
+@Model
+protected Statement(Expression<?> expression){
 	this.expression = expression;
 	this.setNext(null);
 	this.setPrevious(null);	

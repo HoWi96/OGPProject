@@ -65,7 +65,8 @@ public abstract class Item implements IGameObject {
 	 * @effect The position is been set to the given position
 	 * @effect the world is been set to the given world
 	 */
-	public Item(int[] position, World world)throws IllegalArgumentException {
+	@Model
+	protected Item(int[] position, World world)throws IllegalArgumentException {
 		this.isTerminated = false;
 		this.weight = Utils.randInt(MIN_WEIGHT, MAX_WEIGHT);
 		world.addItem(this);

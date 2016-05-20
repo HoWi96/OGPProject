@@ -18,6 +18,15 @@ import hillbillies.model.position.CubePosition;
  */
 
 /**  
+ * A class of units 
+ * 
+ * involving the following properties:
+ * 		name, position, strength, weight, agility, toughness,
+ *  	hitpoints, stamina, orientation, activitiy, XP
+ *  
+ * involving the following associations:
+ * 		faction, world, item, task
+ * 
  * ATTRIBUTES
  * 
  * @invar  The Name of each Unit must be a valid Name for any
@@ -39,6 +48,7 @@ import hillbillies.model.position.CubePosition;
  * @invar  The Agility of each Unit must be a valid Agility for any
  *         Unit.
  *       | isValidAgility(getAgility())
+ *       
  * @invar  The toughness of each Unit must be a valid toughness for any
  *         Unit.
  *       | isValidToughness(getToughness())
@@ -81,6 +91,8 @@ import hillbillies.model.position.CubePosition;
 
 public class Unit implements IGameObject { 
 	
+	
+
 	/*___________________________________________________________________
 	 * __________________________________________________________________
 	 * -----------------------CONSTANTS---------------------------------
@@ -95,6 +107,7 @@ public class Unit implements IGameObject {
 	
 	private static final double REST_INTERVAL = 60*3;
 	private static final double NOTHING_INTERVAL = 60*1;
+	private static final int FIGHTING_TIME = 1;
 	
 	
 	/*___________________________________________________________________
@@ -370,23 +383,22 @@ public Unit(String name, int[] initialPosition, int weight, int agility,
  * @post The unit is now dead
  * 		|!new.isAlive()
  * @post The unit will no longer belong to a faction
- * 		| new.getFaction == null;
+ * 		| !new.hasFaction();
  * @post The unit will no longer belong to a world
- * 		| new.getWorld == null;
+ * 		| !new.hasWorld();
  * 
  * @effect The unit will drop the item he is carrying
- * 		|this.dropItem();
- * 
+ * 		| this.dropItem();
  * @effect The world of this unit will not have the unit as unit anymore
- * 		| (new this.getWorld()).removeAsUnit(this)
+ * 		| this.getWorld().removeAsUnit(this)
  * @effect The faction of this unit will not have the unit as unit anymor
- * 		| (new this.getFaction()).removeAsUnit(this)
+ * 		| this.getFaction().removeAsUnit(this)
  * @effect The unit hitpoints will be brought to 0
- * 		|this.setHitpoints(0);
+ * 		|  this.setHitpoints(0);
  * @effect the units speed will be brought to 0
- * 		|this.setSpeed(0);
+ * 		|	this.setSpeed(0);
  * @effect The unit will stop sprinting
- * 		|this.stopSprinting();
+ * 		|	this.stopSprinting();
  */
 public void terminate() {
 	 
@@ -621,7 +633,7 @@ public void setName(String name) throws IllegalArgumentException {
  *       | ! isValidPosition(getPosition())
  */	
 @Raw
-public void setPosition( @Raw double[] position) throws IllegalArgumentException {
+public void setPosition(@Raw double[] position) throws IllegalArgumentException {
 	
 	if (! isValidPosition(position))
 		throw new IllegalArgumentException();
@@ -2408,14 +2420,14 @@ private float getWorkingTime(){
 }
 
 /**
- * Gives the time it takes for a unit to attack
+ * Gives the time duration it takes for a unit to attack
  * 
  * @return The time it takes for a unit to attack
  * 		| result == 1
  */
-@Immutable
+@Basic @Raw @Immutable @Model
 private final float getFightingTime(){
-	return (float)1;
+	return (float)FIGHTING_TIME;
 }
 
 /*
@@ -2516,7 +2528,7 @@ public boolean isAbleToAttack(Unit defender){
 /**
  * Return the world of this unit.
  */
-@Basic @Raw @Immutable
+@Basic @Raw
 public World getWorld() {
 	return this.world;
 }
@@ -3002,5 +3014,15 @@ public boolean canHaveAsFaction(Faction faction){
 	 * The unit to follow
 	 */
 	private Unit leader;
+
+	/**
+	 * Make a human comprehensible representation of a unit with its name, position and activity
+	 */
+	@Override
+	public String toString() {
+		return "Unit( "+getName()+ ", " +getCubePosition().toString() + ", "+getActivity().toString() + ")";
+	}
+	
+	
 
 }

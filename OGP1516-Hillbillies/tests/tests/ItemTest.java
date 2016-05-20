@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import hillbillies.model.Item;
 import hillbillies.model.Log;
 import hillbillies.model.Unit;
 import hillbillies.model.Utils;
@@ -42,6 +43,15 @@ public class ItemTest {
 	@After
 	public void tearDown() throws Exception {
 	}
+	
+	@Test
+	public void testItemConstructor(){
+		Item i = new Log(world.getRandomPositionForUnit(),world);
+		assertEquals(world, i.getWorld());
+		assertTrue(Item.isValidWeight(i.getWeight()));
+	}
+
+	
 
 	@Test
 	public void testItemInWorld() {

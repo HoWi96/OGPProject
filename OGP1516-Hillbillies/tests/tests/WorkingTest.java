@@ -85,10 +85,6 @@ public class WorkingTest {
 				toughness+3 == unit.getToughness());
 	}
 	
-	@Test
-	public void testCaveIn(){
-		
-	}
 	
 	/**
 	 * Helper method to advance time for the given world by some time.

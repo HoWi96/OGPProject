@@ -16,7 +16,16 @@ import hillbillies.util.ConnectedToBorder;
  */
 
 /**
+ * A class representing the world of the game
+ * 
+ * involving the following properties:
+ * 		terrainTypes, nbCubesX, nbCubesY, nbCubesZ
+ * involving the following associations:
+ * 		units, factions, items
+ *  
+ * 
  * ATTRIBUTES
+ * 
  * @Invar  The TerrainTypes of each world must be a valid TerrainTypes for any
  *         world.
  *       | isValidTerrainTypes(getTerrainTypes())
@@ -26,17 +35,15 @@ import hillbillies.util.ConnectedToBorder;
  *       | canHaveAsDimension(this.getNbCubesY())
  * @Invar  Each world can have its nbCubesX as dimension.
  *       | canHaveAsDimension(this.getNbCubesZ())
- * @Invar  The cubeType of each world must be a valid cubeType for any
- *         world.
- *       | isValidcubeType(getcubeType())  
  *   
  * ASSOCIATIONS
- * @Invar Each world must have proper units.
+ * 
+ * @Invar Each world must have proper units for that world
  * 		| this.hasProperUnits()
- * @Invar Each world must have proper factions.
- * 		| this.hasProperFactions()
- * @Invar Each world must have proper items.
- * 		| this.hasProperItems
+ * @Invar Each world must have proper factions for that world
+ * 		| hasProperFactions()
+ * @Invar Each world must have proper items for that world
+ * 		| hasProperItems()
  *       
  *       
  */
@@ -771,7 +778,6 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * 
 	 * @param unit
 	 * 			the unit who is needing a faction
-	 * @post the world will have a new faction if the max number of factions is not yet reached
 	 * 
 	 * @return The new faction for the given unit
 	 * @return The smallest faction is returned
@@ -783,7 +789,6 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 		if (this.getAllFactions().size()<MAX_FACTIONS){
 			//take the faction for the unit
 			faction = unit.getFaction();
-			this.addAsFaction(faction);
 		}else{
 			//give unit a place in the smallest faction
 			faction = this.getSmallestFaction();
@@ -915,6 +920,7 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 	 * @effect The world will have this unit as member
 	 * @effect The unit will leave his old faction
 	 * @effect The unit will have a new faction assigned
+	 * @effect the world will have a new faction if it has not yet the faction assigned to this unit
 	 * 
 	 * @throws IllegalArgumentException
 	 * 			if the unit is dead or already belongs to a world
@@ -937,7 +943,10 @@ public World(int[][][] terrainTypes, TerrainChangeListener modelListener) throws
 			unit.setWorld(this);
 			
 			//ADDING UNIT TO FACTION
-			Faction faction = this.getFactionForUnit(unit);	
+			Faction faction = this.getFactionForUnit(unit);
+			if(!hasAsFaction(faction))
+				addAsFaction(faction);
+			
 			unit.getFaction().removeUnit(unit);
 			faction.addUnit(unit);
 			
