@@ -2,7 +2,7 @@ package hillbillies.statement;
 
 import hillbillies.model.TaskHandler;
 
-public interface Istatement {
+public interface IStatement {
 
 	/**
 	 * A method to execute the statement
@@ -15,11 +15,11 @@ public interface Istatement {
 	/**
 	 * @return the previous
 	 */
-	Statement getPrevious();
+	IStatement getPrevious();
 
 	/**
 	 * @return the next
 	 */
-	Statement getNext();
+	IStatement getNext();
 
 }

@@ -152,12 +152,12 @@ public class TaskFactory implements ITaskFactory<Expression, Statement, Task> {
 
 	@Override
 	public Expression<CubePosition> createLogPosition(SourceLocation sourceLocation) {
-		return new LogPosition();
+		return new ItemPosition<Log>(Log.class);
 	}
 
 	@Override
 	public Expression<CubePosition> createBoulderPosition(SourceLocation sourceLocation) {
-		return new BoulderPosition();
+		return new ItemPosition<Boulder>(Boulder.class);
 	}
 
 	@Override

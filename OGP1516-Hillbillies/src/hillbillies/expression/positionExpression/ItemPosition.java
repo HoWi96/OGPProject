@@ -1,5 +1,6 @@
 package hillbillies.expression.positionExpression;
 
+import be.kuleuven.cs.som.annotate.Model;
 import hillbillies.expression.Expression;
 import hillbillies.model.Item;
 import hillbillies.model.TaskHandler;
@@ -27,7 +28,8 @@ public class ItemPosition<T extends Item> extends Expression<CubePosition> {
 	/**
 	 * @return the type
 	 */
-	public Class<T> getType() {
+	@Model
+	private Class<T> getType() {
 		return type;
 	}
 

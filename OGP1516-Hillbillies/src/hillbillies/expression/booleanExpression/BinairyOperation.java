@@ -7,7 +7,7 @@ public abstract class BinairyOperation extends Expression<Boolean> {
 	private final Expression<Boolean> left;
 	private final Expression<Boolean> right;
 
-	public BinairyOperation(Expression<Boolean> left, Expression<Boolean> right) {
+	protected BinairyOperation(Expression<Boolean> left, Expression<Boolean> right) {
 		this.left = left;
 		this.right = right;
 	}

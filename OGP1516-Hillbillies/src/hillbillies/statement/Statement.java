@@ -4,7 +4,7 @@ import be.kuleuven.cs.som.annotate.Model;
 import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 
-public abstract class Statement implements Istatement{	
+public abstract class Statement implements IStatement{	
 	
 private final Expression<?> expression;
 private Statement next;
