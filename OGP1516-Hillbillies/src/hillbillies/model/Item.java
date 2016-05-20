@@ -294,7 +294,7 @@ public abstract class Item implements IGameObject {
 	 *       | ! canHaveAsUnit(getUnit())
 	 */
 	@Raw
-	public void setUnit(Unit unit) throws IllegalArgumentException {
+	protected void setUnit(Unit unit) throws IllegalArgumentException {
 		if (! canHaveAsUnit(unit))
 			throw new IllegalArgumentException();
 		this.unit = unit;

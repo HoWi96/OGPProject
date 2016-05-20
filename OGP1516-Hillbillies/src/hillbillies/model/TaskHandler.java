@@ -96,7 +96,7 @@ public void executeTask(){
 		
 	}	else {
 	
-		System.out.println("execute statement"+getCurrentStatement().getClass());
+		//System.out.println("execute statement"+getCurrentStatement().getClass());
 		getCurrentStatement().execute(this);
 		
 		if(getUnit().hasTask()){

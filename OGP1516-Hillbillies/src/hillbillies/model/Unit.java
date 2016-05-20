@@ -1722,14 +1722,14 @@ public void moveTo(int[] target) throws IllegalArgumentException, IllegalStateEx
 		throw new IllegalStateException();
 
 	//PATHFINDING
-	System.out.println("searching for path...");
+	//System.out.println("searching for path...");
 	this.setPathFinding(new PathFinding(this.getWorld(), Utils.getCubePosition(this.getPosition()),target));
 	
 	if(!getPathFinding().hasPathCompleted()){
-		System.out.println("path found");
+		//System.out.println("path found");
 		this.setActivity(Activity.MOVING);
 	}else{
-		System.out.println("no such path found");
+		//System.out.println("no such path found");
 	}
 }
 
