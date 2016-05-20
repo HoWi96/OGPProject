@@ -1,22 +1,30 @@
 package hillbillies.expression.positionExpression;
 
-import hillbillies.expression.Expression;
+import hillbillies.model.Item;
+import hillbillies.model.Log;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.position.CubePosition;
 
-public class LogPosition extends Expression<CubePosition> {
+@Deprecated
+public class LogPosition extends ItemPosition<Log> {
 
 	public LogPosition() {
-		super();
+		super(Log.class);
 	}
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
-		return taskHandler.getWorld().getAllLogs()
+	
+		return taskHandler.getWorld().getAllItems()
 				.stream()
+				.filter((Item item)-> item instanceof Log)
+				.map((Item item)-> (Log) item)
 				.findAny()
 				.get()
 				.getCubePosition();
+				
 	}
+	
+	
 
 }

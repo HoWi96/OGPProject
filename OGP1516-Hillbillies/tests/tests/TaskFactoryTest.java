@@ -23,6 +23,7 @@ import hillbillies.expression.booleanExpression.IsAlive;
 import hillbillies.expression.booleanExpression.IsFriend;
 import hillbillies.expression.positionExpression.BoulderPosition;
 import hillbillies.expression.positionExpression.Here;
+import hillbillies.expression.positionExpression.ItemPosition;
 import hillbillies.expression.positionExpression.LiteralPosition;
 import hillbillies.expression.positionExpression.LogPosition;
 import hillbillies.expression.positionExpression.NextToPosition;
@@ -431,13 +432,13 @@ public class TaskFactoryTest {
 
 	@Test
 	public final void testCreateLogPosition() {
-		Expression<CubePosition> e1 = new LogPosition();
+		Expression<CubePosition> e1 = new ItemPosition<>(Log.class);
 		assertEquals(log.getCubePosition(),e1.evaluate(taskHandler));
 	}
 
 	@Test
 	public final void testCreateBoulderPosition() {
-		Expression<CubePosition> e1 = new BoulderPosition();
+		Expression<CubePosition> e1 = new ItemPosition<>(Boulder.class);
 		assertEquals(boulder.getCubePosition(),e1.evaluate(taskHandler));
 	}
 

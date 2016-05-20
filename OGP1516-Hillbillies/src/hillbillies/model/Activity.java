@@ -24,5 +24,4 @@ public enum Activity {
 	ATTACKING,
 	RESTING,
 	FALLING;
-
 }

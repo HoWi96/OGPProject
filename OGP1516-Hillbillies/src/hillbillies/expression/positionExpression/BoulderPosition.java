@@ -1,20 +1,24 @@
 package hillbillies.expression.positionExpression;
 
-import hillbillies.expression.Expression;
 import hillbillies.model.TaskHandler;
 import hillbillies.model.position.CubePosition;
+import hillbillies.model.Boulder;
+import hillbillies.model.Item;
 
-public class BoulderPosition extends Expression<CubePosition> {
+@Deprecated
+public class BoulderPosition extends ItemPosition<Boulder> {
 
 	public BoulderPosition() {
-		super();
+		super(Boulder.class);
 	}
 
 	@Override
 	public CubePosition evaluate(TaskHandler taskHandler) {
 	
-		return taskHandler.getWorld().getAllBoulders()
+		return taskHandler.getWorld().getAllItems()
 				.stream()
+				.filter((Item item)-> item instanceof Boulder)
+				.map((Item item)-> (Boulder) item)
 				.findAny()
 				.get()
 				.getCubePosition();
