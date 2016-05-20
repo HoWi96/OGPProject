@@ -61,7 +61,7 @@ public World getWorld() {
 
 //ASSIGNING VARIABLES
 
-private HashMap<String,Expression<?>> assignedVariablesMap = new  HashMap<String,Expression<?>>();
+private final HashMap<String,Expression<?>> assignedVariablesMap = new  HashMap<String,Expression<?>>();
 
 /**
  * 

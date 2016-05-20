@@ -207,7 +207,7 @@ public class Unit implements IGameObject {
 	/**
 	 * indicates if the unit is operating in default behavior
 	 */
-	private boolean hasDefaultBehaviorEnabled;
+	private boolean defaultBehavior;
 	/**
 	 * Indicates if the unit is still moving to the center of the next cube
 	 */
@@ -2017,7 +2017,7 @@ public boolean isAttacking(){
  * 		| result == (this.hasDefaultBehaviorEnabled)
  */
 public boolean hasDefaultBehavior() {
-	return this.hasDefaultBehaviorEnabled;
+	return this.defaultBehavior;
 }
 
 /**
@@ -2309,7 +2309,7 @@ private void takeDamage(int damage) {
 public void startDefaultBehavior() {
 		this.setProgressTime(0);
 		this.setActivity(Activity.NOTHING);
-		this.hasDefaultBehaviorEnabled = true; 
+		this.defaultBehavior = true; 
 }
 
 //SPRINTING
@@ -2365,7 +2365,7 @@ private void fall(){
  */
 public void stopDefaultBehaviour() {
 	this.setActivity(Activity.NOTHING);
-	this.hasDefaultBehaviorEnabled = false;
+	this.defaultBehavior = false;
 }
 
 

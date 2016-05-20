@@ -109,7 +109,7 @@ public class PathFinding {
 	 * @post
 	 * 		the path will contain the fastest path or no path at all
 	 */
-	public void calculateFastestPath(int[] start, int[] target) throws IllegalArgumentException{
+	private void calculateFastestPath(int[] start, int[] target) throws IllegalArgumentException{
 		
 		if(!this.getWorld().isValidPosition(start) || !this.getWorld().isValidPosition(target))
 			throw new IllegalArgumentException();
